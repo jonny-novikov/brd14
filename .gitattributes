@@ -1,0 +1,35 @@
+# Ensure shell scripts always have LF line endings
+*.sh text eol=lf
+
+# Ensure Dockerfiles always have LF line endings
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+
+# Ensure configuration files have LF line endings
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.conf text eol=lf
+*.cnf text eol=lf
+
+# Ensure SQL files have LF line endings
+*.sql text eol=lf
+
+# Ensure markdown files have native line endings
+*.md text
+
+# Ensure Windows scripts have CRLF line endings
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
