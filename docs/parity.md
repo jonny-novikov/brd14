@@ -45,8 +45,9 @@ normative and live in [contract.md](contract.md#parity-shim-protocol).
 | ts-pure-bun | ts / pure on Bun 1.4.3 | DEFHNU | 30,651 | 0 | PASS |
 | ts-wasm-node | ts / wasm on Node 24.21.0 | DEH | 27,637 | 0 | PASS |
 | ts-wasm-bun | ts / wasm on Bun 1.4.3 | DEH | 27,637 | 0 | PASS |
+| sh-bash | sh / bash ([`scripts/brd.sh`](../scripts/brd.sh)) | DEFHNU | 30,651 | 0 | PASS |
 
-**12 of 12 shims pass with 0 mismatches** (`parity.py --require`, on `claude/hardening`).
+**13 of 13 shims pass with 0 mismatches** (`parity.py --require`, on `claude/workflow`).
 - At `--scale 10` the Go, C and Rust shims were also checked: 154k–175k requests each, 0
   mismatches.
 - Python was also checked at `--scale 4`.

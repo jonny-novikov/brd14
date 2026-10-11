@@ -1,5 +1,7 @@
 # brd14 documentation
 
+Agents: start with [AGENTS.md](../AGENTS.md) (where) and [CLAUDE.md](../CLAUDE.md) (how).
+
 | Page | What you get from it |
 |---|---|
 | [contract.md](contract.md) | **Normative.** The format, operations, error precedence, vectors schema, parity protocol, WASM ABI, and the reserved format family (brd15/brd16). |
@@ -16,5 +18,5 @@
 | [parity.md](parity.md) | How agreement across implementations is proven, and the latest matrix. |
 | [benchmarks.md](benchmarks.md) | Measured numbers, the protocol behind them, and how to reproduce them. |
 | [hardening.md](hardening.md) | Sanitizers, Miri, fuzzing, race detection, floor toolchains. |
-| [articles/namespaces-and-storage.md](articles/namespaces-and-storage.md) | System vs user namespaces, ids in databases, memory: brd14 vs brd16. |
 | [roadmap.md](roadmap.md) | What is done, what is next — implementation, measurement, CI — and the open decisions. |
+| [cli.md](cli.md) | The shell tools: `brd` and `mint`, the `.brdrc` settings file, recipes. |

@@ -2,7 +2,7 @@
 
 Where the work stands, and the plan to finish. Each item states the value it delivers.
 
-## Done (on `claude/hardening`, on top of `master`)
+## Done (on `master`, with the CLI and agent guides on `claude/workflow`)
 
 | Wave | Delivered |
 |---|---|
@@ -10,6 +10,7 @@ Where the work stands, and the plan to finish. Each item states the value it del
 | W1 | The independent [oracle](../tools/oracle.py), deterministic [vectors](../vectors/), the differential [parity](parity.md) driver and its self-test. |
 | W2 | Go reference (typed errors, zero-alloc API, fuzz). C speed and table-free memory cores (gates, sanitizers, libFuzzer). Rust workspace (`no_std` core, FFI drop-in, wasm ABI crate, Miri, cargo-fuzz). Pure Python (3.12–3.14t). Pure TypeScript (Node + Bun). The [namespaces and storage article](articles/namespaces-and-storage.md) with a reproducible [storage probe](../tools/storage_probe/). **Parity: 10 of 12 shims, 0 mismatches.** |
 | W3 | `ts/packages/brd14-wasm`: the Rust core over WebAssembly on Node and Bun, with batch APIs. The wasm shims, the bench and [wasm.md](wasm.md). **Parity: 12 of 12 shims, 0 mismatches.** |
+| CLI | `scripts/brd.sh` + `scripts/mint.sh` (pure bash, shim 13), `.brdrc`, `CLAUDE.md`, `AGENTS.md`. **Parity: 13 of 13.** |
 
 ## Next — implementation
 
@@ -21,8 +22,7 @@ Where the work stands, and the plan to finish. Each item states the value it del
    - **`MinFor` before the epoch:** Go wraps, Rust saturates, Python/TS/oracle go negative. Pick
      one behaviour and add it to the contract and to parity.
    - **brd16 metadata placement:** suffix vs namespace-adjacent, and whether the metadata is
-     fixed at mint time. The [article](articles/namespaces-and-storage.md) analyses both and
-     recommends suffix with mint-time metadata.
+     fixed at mint time.
 3. **Door-open formats.** If brd15/brd16 are approved:
    - add `vectors/brd16/*.tsv` from the oracle;
    - add a length-dispatching `ParseAny` to each tree;
@@ -60,5 +60,5 @@ Where the work stands, and the plan to finish. Each item states the value it del
 - TS on Node and Bun;
 - parity with `--require`.
 
-The parity job requires all 12 shims (`--require`, no filter). The first green run is the
+The parity job requires all 13 shims (`--require`, no filter). The first green run is the
 acceptance gate for this branch.
