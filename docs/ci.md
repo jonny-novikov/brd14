@@ -101,7 +101,7 @@ with flyctl and a deploy token can run the same deploy:
 | Limit | Consequence |
 |---|---|
 | **Root filesystem about 8 GB, slow to write.** Reported by the community ([thread](https://community.fly.io/t/is-it-possible-to-extend-the-root-volume-beyond-8gb/21055)); not in Fly's own docs. | `scripts/ci.sh` copies the tree into a RAM disk (`BRD_CI_TMPFS=20g`) before building. The release Machine therefore has 32 GB. |
-| **Image at most 8 GB uncompressed** ([thread](https://community.fly.io/t/docker-image-size-limit-raised-from-2gb-to-8gb/14749)). | The image installs nothing the suite does not run (the `ci` tier leaves out PostgreSQL). |
+| **Image at most 8 GB uncompressed** ([thread](https://community.fly.io/t/docker-image-size-limit-raised-from-2gb-to-8gb/14749)). | Measured: 6.04 GB uncompressed, 1.6 GB compressed (local `docker build`, Docker 29.8.2). That leaves about 25% headroom, so nothing goes in that the suite does not run; the `ci` tier leaves out PostgreSQL. |
 | **Jobs run in sequence on one Machine**, where Actions ran them in parallel. | Wall time is the sum of the jobs. |
 | **The integration watches one branch.** | Other branches are run with `scripts/fly-build.sh`. |
 | **The integration's maturity is not verified here.** This session has no Fly credentials. | The release-command semantics are documented; the push trigger is the Operator's step 3. |
