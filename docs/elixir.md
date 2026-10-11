@@ -42,3 +42,4 @@ The import commit is byte-for-byte; every later change is its own reviewable com
 | `hash32` | `BrandedId.hash32/1` | `H` |
 | `unix_ms`, fields | `Snowflake.unix_ms/1`, `node_id/1`, `sequence/1` | `U`, `F` |
 | node derivation | default `phash2(node())` (kept for running fleets); the contract's FNV derivation is `Snowflake.node_from/2` | `N` |
+| layout profiles (extension) | `EchoData.Layout`: `new/3`, `fields/2`, `pack/5`, `generator/3` + `next/2` | `L`, `P` |

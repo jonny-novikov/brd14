@@ -14,9 +14,9 @@
 
 defmodule EchoData.Conform do
   import Bitwise
-  alias EchoData.{BrandedId, Snowflake}
+  alias EchoData.{BrandedId, Layout, Snowflake}
 
-  @ops "EDHUFN"
+  @ops "EDHUFNLP"
 
   def main do
     variant = if EchoData.Native.loaded?(), do: "nif", else: "pure"
@@ -49,6 +49,24 @@ defmodule EchoData.Conform do
 
   defp answer(["N", host_hex, pid]),
     do: "OK #{Snowflake.node_from(unhex(host_hex), String.to_integer(pid))}"
+
+  defp answer(["L", n, s, m, snow]) do
+    with {:ok, layout} <- Layout.new(int(n), int(s), int(m)),
+         {:ok, {ts, node, seq, meta}} <- Layout.fields(layout, int(snow)) do
+      "OK #{ts} #{node} #{seq} #{meta}"
+    else
+      {:error, class} -> err(class)
+    end
+  end
+
+  defp answer(["P", n, s, m, ts, node, seq, meta]) do
+    with {:ok, layout} <- Layout.new(int(n), int(s), int(m)),
+         {:ok, snow} <- Layout.pack(layout, int(ts), int(node), int(seq), int(meta)) do
+      "OK #{snow}"
+    else
+      {:error, class} -> err(class)
+    end
+  end
 
   defp answer(other), do: complain("unsupported request #{inspect(Enum.join(other, " "))}")
 
@@ -102,6 +120,7 @@ defmodule EchoData.Conform do
     "ERR DISAGREE"
   end
 
+  defp int(s), do: String.to_integer(s)
   defp unhex("-"), do: ""
   defp unhex(hex), do: Base.decode16!(hex, case: :lower)
 end
