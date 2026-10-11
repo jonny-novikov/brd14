@@ -12,8 +12,10 @@ import {
   InvalidIdError,
   abi,
   checkMany,
+  decode,
   decodeMany,
   decodeManyInto,
+  encode,
   encodeMany,
   encodeManyInto,
   memory,
@@ -230,5 +232,21 @@ describe("programming faults and the module after batches", () => {
   test("memory never grew and the cached views are still attached", () => {
     expect(memory.buffer.byteLength).toBe(3 * 65536);
     expect(encodeMany("END", [1n])).toEqual(["END00000000001"]);
+  });
+  test("a buffer refresh (memory.grow(0) on the exported memory) detaches views; the codec re-attaches", () => {
+    const stale = new Uint8Array(memory.buffer);
+    expect(memory.grow(0)).toBe(3); // succeeds, and per the JS API refreshes memory.buffer
+    expect(memory.buffer.byteLength).toBe(3 * 65536);
+    // Every entry point must survive it, single and batch, on whichever views were cached.
+    expect(encode("USR", 274557032793636864n)).toBe("USR0KHTOWnGLuC");
+    memory.grow(0);
+    expect(decode("USR0NgWEfAEJfs")).toEqual({ ns: "USR", snow: 320636799581945856n });
+    memory.grow(0);
+    expect(decodeMany(["USR0KHTOWnGLuC", "USR0NgWEfAEJfs"])).toEqual(new BigInt64Array([274557032793636864n, 320636799581945856n]));
+    memory.grow(0);
+    expect(Array.from(checkMany(["USR0KHTOWnGLuC", "usr0KHTOWnGLuC"]))).toEqual([0, 2]);
+    memory.grow(0);
+    expect(encodeMany("END", [1n])).toEqual(["END00000000001"]);
+    expect(stale.byteLength === 0 || stale.byteLength === 3 * 65536).toBe(true); // engine-dependent: detached or not
   });
 });
