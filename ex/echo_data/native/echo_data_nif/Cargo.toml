@@ -1,0 +1,28 @@
+[package]
+name = "echo_data_nif"
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+description = "EchoData.Native: the brd14 codec and the persistent branded champ for the BEAM (Rustler)."
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[dependencies]
+rustler = "0.38"
+# In the repository these are the cores every other tree is proven against. `make package`
+# vendors them into native/vendor/ and rewrites these paths, so the Hex tarball builds alone.
+brd14 = { path = "../../../../native/rust/crates/brd14" }
+brd14-data = { path = "../../../../native/rust/crates/brd14-data" }
+
+# Its own workspace: the repository's Rust workspace aborts on panic, a NIF must unwind so a
+# panic becomes an Erlang exception instead of taking the VM down.
+[workspace]
+
+[profile.release]
+panic = "unwind"
+opt-level = 3
+lto = "thin"
+codegen-units = 1
