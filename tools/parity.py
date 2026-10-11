@@ -55,6 +55,7 @@ def registry() -> list[dict]:
         {"name": "ts-pure-bun", "tree": "ts", "argv": ["bun", "ts/conform/pure.ts"]},
         {"name": "ts-wasm-node", "tree": "ts", "argv": ["node", "ts/conform/wasm.ts"]},
         {"name": "ts-wasm-bun", "tree": "ts", "argv": ["bun", "ts/conform/wasm.ts"]},
+        {"name": "sh-bash", "tree": None, "argv": ["bash", "scripts/brd.sh", "conform"]},
     ]
 
 
