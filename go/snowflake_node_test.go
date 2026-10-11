@@ -42,8 +42,8 @@ func TestNodeFromGoldenVectors(t *testing.T) {
 		{"", 100, 156}, // == the pre-fix fallback mapping (continuity)
 		{"", 101, 559},
 	} {
-		if got := nodeFrom(c.host, c.pid); got != c.want {
-			t.Errorf("nodeFrom(%q,%d) = %d, want %d", c.host, c.pid, got, c.want)
+		if got := NodeFrom(c.host, c.pid); got != c.want {
+			t.Errorf("NodeFrom(%q,%d) = %d, want %d", c.host, c.pid, got, c.want)
 		}
 	}
 }
@@ -58,19 +58,19 @@ func TestNodeFromMixesPidUnconditionally(t *testing.T) {
 	seen := make(map[uint64]int, 1024)
 	const trials = 512
 	for pid := 1; pid <= trials; pid++ {
-		seen[nodeFrom(host, pid)]++
+		seen[NodeFrom(host, pid)]++
 	}
 	if len(seen) < 2 {
-		t.Fatalf("nodeFrom collapsed %d pids onto %d node id(s) — the pid is not mixed", trials, len(seen))
+		t.Fatalf("NodeFrom collapsed %d pids onto %d node id(s) — the pid is not mixed", trials, len(seen))
 	}
 	// 512 draws over 1024 buckets: the birthday expectation is ~394 distinct.
 	// A floor of 300 reds a derivation that mixes the pid only weakly while
 	// leaving ample slack for the design residual.
 	if len(seen) < 300 {
-		t.Errorf("nodeFrom spread: %d distinct node ids over %d pids, want >= 300", len(seen), trials)
+		t.Errorf("NodeFrom spread: %d distinct node ids over %d pids, want >= 300", len(seen), trials)
 	}
-	if nodeFrom(host, 100) == nodeFrom(host, 101) {
-		t.Errorf("nodeFrom(%q,100) == nodeFrom(%q,101) — pid does not reach the hash", host, host)
+	if NodeFrom(host, 100) == NodeFrom(host, 101) {
+		t.Errorf("NodeFrom(%q,100) == NodeFrom(%q,101) — pid does not reach the hash", host, host)
 	}
 }
 
@@ -79,7 +79,7 @@ func TestNodeFromMixesPidUnconditionally(t *testing.T) {
 // still derives different node ids (again up to the 1/1024 residual).
 func TestNodeFromHostSeparation(t *testing.T) {
 	const pid = 4242
-	a, b, c := nodeFrom("hosta", pid), nodeFrom("hostb", pid), nodeFrom("", pid)
+	a, b, c := NodeFrom("hosta", pid), NodeFrom("hostb", pid), NodeFrom("", pid)
 	if a == b && b == c {
 		t.Fatalf("hosta/hostb/empty all derive node %d at pid %d — the host bytes do not reach the hash", a, pid)
 	}

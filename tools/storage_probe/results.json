@@ -1,0 +1,2615 @@
+{
+ "schema": 1,
+ "started_at": "2026-10-11T04:07:30+00:00",
+ "command": "python3 tools/storage_probe/run.py",
+ "host": {
+  "platform": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "cpus": 4,
+  "mem_total_mb": 16093,
+  "python": "3.13.16"
+ },
+ "corpus": {
+  "n": 1000000,
+  "first_snowflake": 274557032796033024,
+  "last_snowflake": 274557098327838783,
+  "first_id14": "USR0KHTOWnQPFw",
+  "last_id14": "USR0KHTPgKLBWx",
+  "first_id15": "USER0KHTOWnQPFw",
+  "first_id16": "USERA0KHTOWnQPFw",
+  "ids_per_ms": 64,
+  "node": 585,
+  "span_ms": 15625,
+  "generation_seconds": 1.81,
+  "brd15_shape": "4-letter namespace + 11-digit payload",
+  "brd16_shape": "4-letter namespace + 1 metadata digit + 11-digit payload (namespace-adjacent placement)",
+  "uuid_packing": "ns4 index (19 bits) << 69 | meta (6 bits) << 63 | snowflake (63 bits)"
+ },
+ "postgresql": {
+  "bin": "/usr/lib/postgresql/16/bin",
+  "version": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit",
+  "settings": {
+   "autovacuum": "off",
+   "block_size": "8192",
+   "default_toast_compression": "pglz",
+   "fsync": "off",
+   "maintenance_work_mem": "262144",
+   "server_encoding": "UTF8",
+   "shared_buffers": "65536",
+   "work_mem": "131072"
+  },
+  "collations_available": {
+   "icu_count": 853,
+   "libc_en_US": null,
+   "database_collation": "C.UTF-8 / C.UTF-8"
+  },
+  "pageinspect_version": "1.12",
+  "src_rows": 1000000,
+  "column_size_literal": {
+   "bigint": 8,
+   "text14": 18,
+   "text16": 20,
+   "char14": 18,
+   "varchar14": 18,
+   "bytea14": 18,
+   "uuid": 16,
+   "char3": 7,
+   "smallint": 2
+  },
+  "column_size_literal_note": "literals carry the 4-byte varlena header; a value stored in a heap tuple shorter than 127 bytes is converted to the 1-byte short header, which is what the per-table column_size below shows",
+  "tables": {
+   "bigint": {
+    "ddl": "CREATE TABLE t_bigint (id bigint PRIMARY KEY)",
+    "insert": "INSERT INTO t_bigint SELECT snow FROM src ORDER BY snow",
+    "insert_seconds": 1.1,
+    "heap_bytes": 36249600,
+    "index_bytes": 22487040,
+    "total_bytes": 58769408,
+    "heap_bytes_per_row": 36.25,
+    "index_bytes_per_row": 22.49,
+    "total_bytes_per_row": 58.77,
+    "column_size_stored": 8,
+    "row_size_stored": 32,
+    "heap_tuple_lp_len_page0": {
+     "32": 226
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 367,
+     "avg_item_size": 16,
+     "page_size": 8192,
+     "free_size": 808
+    },
+    "index_itemlen_page1": {
+     "16": 367
+    }
+   },
+   "text14": {
+    "ddl": "CREATE TABLE t_text14 (id text COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_text14 SELECT id14 FROM src ORDER BY snow",
+    "insert_seconds": 1.52,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75890688,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.89,
+    "column_size_stored": 15,
+    "row_size_stored": 39,
+    "heap_tuple_lp_len_page0": {
+     "39": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "text15": {
+    "ddl": "CREATE TABLE t_text15 (id text COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_text15 SELECT id15 FROM src ORDER BY snow",
+    "insert_seconds": 1.47,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75890688,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.89,
+    "column_size_stored": 16,
+    "row_size_stored": 40,
+    "heap_tuple_lp_len_page0": {
+     "40": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "text16": {
+    "ddl": "CREATE TABLE t_text16 (id text COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_text16 SELECT id16 FROM src ORDER BY snow",
+    "insert_seconds": 1.46,
+    "heap_bytes": 52183040,
+    "index_bytes": 40624128,
+    "total_bytes": 92848128,
+    "heap_bytes_per_row": 52.18,
+    "index_bytes_per_row": 40.62,
+    "total_bytes_per_row": 92.85,
+    "column_size_stored": 17,
+    "row_size_stored": 41,
+    "heap_tuple_lp_len_page0": {
+     "41": 157
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 204,
+     "avg_item_size": 32,
+     "page_size": 8192,
+     "free_size": 804
+    },
+    "index_itemlen_page1": {
+     "32": 204
+    }
+   },
+   "varchar14": {
+    "ddl": "CREATE TABLE t_varchar14 (id varchar(14) COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_varchar14 SELECT id14 FROM src ORDER BY snow",
+    "insert_seconds": 1.44,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75882496,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.88,
+    "column_size_stored": 15,
+    "row_size_stored": 39,
+    "heap_tuple_lp_len_page0": {
+     "39": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "varchar16": {
+    "ddl": "CREATE TABLE t_varchar16 (id varchar(16) COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_varchar16 SELECT id16 FROM src ORDER BY snow",
+    "insert_seconds": 1.72,
+    "heap_bytes": 52183040,
+    "index_bytes": 40624128,
+    "total_bytes": 92839936,
+    "heap_bytes_per_row": 52.18,
+    "index_bytes_per_row": 40.62,
+    "total_bytes_per_row": 92.84,
+    "column_size_stored": 17,
+    "row_size_stored": 41,
+    "heap_tuple_lp_len_page0": {
+     "41": 157
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 204,
+     "avg_item_size": 32,
+     "page_size": 8192,
+     "free_size": 804
+    },
+    "index_itemlen_page1": {
+     "32": 204
+    }
+   },
+   "char14": {
+    "ddl": "CREATE TABLE t_char14 (id char(14) COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_char14 SELECT id14 FROM src ORDER BY snow",
+    "insert_seconds": 2.29,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75882496,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.88,
+    "column_size_stored": 15,
+    "row_size_stored": 39,
+    "heap_tuple_lp_len_page0": {
+     "39": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "char16": {
+    "ddl": "CREATE TABLE t_char16 (id char(16) COLLATE \"C\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_char16 SELECT id16 FROM src ORDER BY snow",
+    "insert_seconds": 2.19,
+    "heap_bytes": 52183040,
+    "index_bytes": 40624128,
+    "total_bytes": 92839936,
+    "heap_bytes_per_row": 52.18,
+    "index_bytes_per_row": 40.62,
+    "total_bytes_per_row": 92.84,
+    "column_size_stored": 17,
+    "row_size_stored": 41,
+    "heap_tuple_lp_len_page0": {
+     "41": 157
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 204,
+     "avg_item_size": 32,
+     "page_size": 8192,
+     "free_size": 804
+    },
+    "index_itemlen_page1": {
+     "32": 204
+    }
+   },
+   "bytea14": {
+    "ddl": "CREATE TABLE t_bytea14 (id bytea PRIMARY KEY)",
+    "insert": "INSERT INTO t_bytea14 SELECT convert_to(id14, 'SQL_ASCII') FROM src ORDER BY snow",
+    "insert_seconds": 2.17,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75890688,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.89,
+    "column_size_stored": 15,
+    "row_size_stored": 39,
+    "heap_tuple_lp_len_page0": {
+     "39": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "bytea16": {
+    "ddl": "CREATE TABLE t_bytea16 (id bytea PRIMARY KEY)",
+    "insert": "INSERT INTO t_bytea16 SELECT convert_to(id16, 'SQL_ASCII') FROM src ORDER BY snow",
+    "insert_seconds": 2.04,
+    "heap_bytes": 52183040,
+    "index_bytes": 40624128,
+    "total_bytes": 92848128,
+    "heap_bytes_per_row": 52.18,
+    "index_bytes_per_row": 40.62,
+    "total_bytes_per_row": 92.85,
+    "column_size_stored": 17,
+    "row_size_stored": 41,
+    "heap_tuple_lp_len_page0": {
+     "41": 157
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 204,
+     "avg_item_size": 32,
+     "page_size": 8192,
+     "free_size": 804
+    },
+    "index_itemlen_page1": {
+     "32": 204
+    }
+   },
+   "uuid": {
+    "ddl": "CREATE TABLE t_uuid (id uuid PRIMARY KEY)",
+    "insert": "INSERT INTO t_uuid SELECT u FROM src ORDER BY snow",
+    "insert_seconds": 1.75,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75882496,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.88,
+    "column_size_stored": 16,
+    "row_size_stored": 40,
+    "heap_tuple_lp_len_page0": {
+     "40": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "comp_char3": {
+    "ddl": "CREATE TABLE t_comp_char3 (ns char(3) COLLATE \"C\" NOT NULL, snow bigint NOT NULL, PRIMARY KEY (ns, snow))",
+    "insert": "INSERT INTO t_comp_char3 SELECT left(id14, 3), snow FROM src ORDER BY snow",
+    "insert_seconds": 1.82,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75882496,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.88,
+    "column_size_stored": 4,
+    "row_size_stored": 40,
+    "heap_tuple_lp_len_page0": {
+     "40": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "comp_smallint": {
+    "ddl": "CREATE TABLE t_comp_smallint (ns smallint NOT NULL, snow bigint NOT NULL, PRIMARY KEY (ns, snow))",
+    "insert": "INSERT INTO t_comp_smallint SELECT 14005::smallint, snow FROM src ORDER BY snow",
+    "insert_seconds": 1.74,
+    "heap_bytes": 44285952,
+    "index_bytes": 31563776,
+    "total_bytes": 75882496,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 31.56,
+    "total_bytes_per_row": 75.88,
+    "column_size_stored": 2,
+    "row_size_stored": 40,
+    "heap_tuple_lp_len_page0": {
+     "40": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 262,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 812
+    },
+    "index_itemlen_page1": {
+     "24": 262
+    }
+   },
+   "text14_icu": {
+    "ddl": "CREATE TABLE t_text14_icu (id text COLLATE \"und-x-icu\" PRIMARY KEY)",
+    "insert": "INSERT INTO t_text14_icu SELECT id14 FROM src ORDER BY snow",
+    "insert_seconds": 3.44,
+    "heap_bytes": 44285952,
+    "index_bytes": 39837696,
+    "total_bytes": 84164608,
+    "heap_bytes_per_row": 44.29,
+    "index_bytes_per_row": 39.84,
+    "total_bytes_per_row": 84.16,
+    "column_size_stored": 15,
+    "row_size_stored": 39,
+    "heap_tuple_lp_len_page0": {
+     "39": 185
+    },
+    "btree_level": 2,
+    "leaf_page1": {
+     "type": "l",
+     "live_items": 192,
+     "avg_item_size": 24,
+     "page_size": 8192,
+     "free_size": 2772
+    },
+    "index_itemlen_page1": {
+     "24": 192
+    }
+   }
+  },
+  "ordering_ids62": {
+   "C": {
+    "first_16": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLuA USR0KHTOWnGLuB USR0KHTOWnGLuC USR0KHTOWnGLuD USR0KHTOWnGLuE USR0KHTOWnGLuF",
+    "matches_mint_order": true
+   },
+   "und-x-icu": {
+    "first_16": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLua USR0KHTOWnGLuA USR0KHTOWnGLub USR0KHTOWnGLuB USR0KHTOWnGLuc USR0KHTOWnGLuC",
+    "matches_mint_order": false
+   },
+   "en-x-icu": {
+    "first_16": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLua USR0KHTOWnGLuA USR0KHTOWnGLub USR0KHTOWnGLuB USR0KHTOWnGLuc USR0KHTOWnGLuC",
+    "matches_mint_order": false
+   },
+   "en-US-u-va-posix-x-icu": {
+    "first_16": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLuA USR0KHTOWnGLuB USR0KHTOWnGLuC USR0KHTOWnGLuD USR0KHTOWnGLuE USR0KHTOWnGLuF",
+    "matches_mint_order": true
+   },
+   "mint_order_first_16": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLuA USR0KHTOWnGLuB USR0KHTOWnGLuC USR0KHTOWnGLuD USR0KHTOWnGLuE USR0KHTOWnGLuF"
+  },
+  "ordering_at_scale": {
+   "rows_out_of_mint_order": {
+    "C": 0,
+    "und-x-icu": 996258
+   },
+   "minfor_range_scan": {
+    "lower_bound": "USR0KHTP6Yik2C",
+    "minfor_snowflake": 274557065559539712,
+    "bigint_truth": 500032,
+    "text_C": 500032,
+    "text_und_x_icu": 494528
+   },
+   "like_prefix_plans": {
+    "t_text14": "Index Only Scan using t_text14_pkey on t_text14\n  Index Cond: ((id >= 'USR0KHTOW'::text) AND (id < 'USR0KHTOX'::text))\n  Filter: (id ~~ 'USR0KHTOW%'::text)",
+    "t_text14_icu": "Gather\n  Workers Planned: 2\n  ->  Parallel Seq Scan on t_text14_icu\n        Filter: (id ~~ 'USR0KHTOW%'::text)"
+   }
+  },
+  "nondeterministic_ci": {
+   "equal_under_ci": true,
+   "equal_under_C": false,
+   "second_insert_error": "ERROR:  duplicate key value violates unique constraint \"t_ci_pkey\"\nDETAIL:  Key (id)=(USR0KHTOWNGLUC) already exists.",
+   "distinct_ids62": {
+    "under_C": 62,
+    "under_ci": 36
+   },
+   "like_error": "ERROR:  nondeterministic collations are not supported for LIKE"
+  },
+  "brd16_placement": {
+   "snowflakes": [
+    274557032796033024,
+    274557065561935904,
+    274557098327838783
+   ],
+   "minfor_payload": "0KHTP6Yik2C",
+   "adjacent_byte_order": "INVCA0KHTOWnQPFw INVCA0KHTP6YsnOS INVCA0KHTPgKLBWx INVCB0KHTOWnQPFw INVCB0KHTP6YsnOS INVCB0KHTPgKLBWx",
+   "suffix_byte_order": "INVC0KHTOWnQPFwA INVC0KHTOWnQPFwB INVC0KHTP6YsnOSA INVC0KHTP6YsnOSB INVC0KHTPgKLBWxA INVC0KHTPgKLBWxB",
+   "since_minfor_expected": 4,
+   "suffix_one_range": 4,
+   "adjacent_naive_range": 5,
+   "adjacent_one_range_per_metadata_value": 4
+  },
+  "mutable_state_patterns": {
+   "soft_deleted_id": "USR0KHTOWnQPFw",
+   "audit_event_id": "EVT0KHTPgKLBWy",
+   "live_rows": 999999,
+   "live_range_lower_bound": "USR0KHTPfc3lEe",
+   "live_range_plan": "Index Only Scan using invoices_live on invoices\n  Index Cond: (id >= 'USR0KHTPfc3lEe'::text)",
+   "partial_index_bytes": 31563776,
+   "history_of_deleted_id": "deleted @ 2026-10-11",
+   "tombstone": "customer request"
+  },
+  "collation_audit": [
+   "t_ci.id text ci",
+   "t_text14_icu.id text und-x-icu"
+  ],
+  "sql_log": [
+   {
+    "label": "version",
+    "sql": "SELECT version()",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit",
+    "error": null
+   },
+   {
+    "label": "settings",
+    "sql": "SELECT name, setting FROM pg_settings WHERE name IN ('block_size','shared_buffers','maintenance_work_mem','work_mem','fsync','autovacuum','server_encoding','lc_collate','default_toast_compression')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "autovacuum|off\nblock_size|8192\ndefault_toast_compression|pglz\nfsync|off\nmaintenance_work_mem|262144\nserver_encoding|UTF8\nshared_buffers|65536\nwork_mem|131072",
+    "error": null
+   },
+   {
+    "label": "icu collations",
+    "sql": "SELECT count(*) FROM pg_collation WHERE collprovider = 'i'",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "853",
+    "error": null
+   },
+   {
+    "label": "libc en_US collations",
+    "sql": "SELECT string_agg(collname, ',') FROM pg_collation WHERE collprovider = 'c' AND collname LIKE 'en\\_US%'",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "",
+    "error": null
+   },
+   {
+    "label": "database collation",
+    "sql": "SELECT datcollate || ' / ' || datctype FROM pg_database WHERE datname = current_database()",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "C.UTF-8 / C.UTF-8",
+    "error": null
+   },
+   {
+    "label": "pageinspect",
+    "sql": "CREATE EXTENSION pageinspect",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "CREATE EXTENSION",
+    "error": null
+   },
+   {
+    "label": "pageinspect version",
+    "sql": "SELECT extversion FROM pg_extension WHERE extname = 'pageinspect'",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "1.12",
+    "error": null
+   },
+   {
+    "label": "src table",
+    "sql": "CREATE UNLOGGED TABLE src (snow bigint, id14 text COLLATE \"C\", id15 text COLLATE \"C\", id16 text COLLATE \"C\", u uuid)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "load corpus",
+    "sql": "COPY src FROM STDIN",
+    "ok": true,
+    "seconds": 0.853,
+    "output": "COPY 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze src",
+    "sql": "ANALYZE src",
+    "ok": true,
+    "seconds": 0.123,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "src count",
+    "sql": "SELECT count(*) FROM src",
+    "ok": true,
+    "seconds": 0.066,
+    "output": "1000000",
+    "error": null
+   },
+   {
+    "label": "pg_column_size of literals",
+    "sql": "SELECT pg_column_size(274557032793636864::bigint), pg_column_size('USR0KHTOWnGLuC'::text), pg_column_size('USERA0KHTOWnGLuC'::text), pg_column_size('USR0KHTOWnGLuC'::char(14)), pg_column_size('USR0KHTOWnGLuC'::varchar(14)), pg_column_size('\\x5553523c4b48544f576e474c7543'::bytea), pg_column_size('00000000-0000-0000-0000-000000000000'::uuid), pg_column_size('USR'::char(3)), pg_column_size(14005::smallint)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "8|18|20|18|18|18|16|7|2",
+    "error": null
+   },
+   {
+    "label": "create t_bigint",
+    "sql": "CREATE TABLE t_bigint (id bigint PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_bigint",
+    "sql": "INSERT INTO t_bigint SELECT snow FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.104,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_bigint",
+    "sql": "ANALYZE t_bigint",
+    "ok": true,
+    "seconds": 0.064,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_bigint",
+    "sql": "SELECT pg_relation_size('t_bigint'), pg_relation_size('t_bigint_pkey'), pg_total_relation_size('t_bigint')",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "36249600|22487040|58769408",
+    "error": null
+   },
+   {
+    "label": "stored column size t_bigint",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_bigint.*) FROM t_bigint LIMIT 1",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "8|32",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_bigint, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_bigint', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "32|226",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_bigint",
+    "sql": "SELECT level, root FROM bt_metap('t_bigint_pkey')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "2|412",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_bigint page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_bigint_pkey', 1)",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "l|367|16|8192|808",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_bigint page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_bigint_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "16|367",
+    "error": null
+   },
+   {
+    "label": "create t_text14",
+    "sql": "CREATE TABLE t_text14 (id text COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_text14",
+    "sql": "INSERT INTO t_text14 SELECT id14 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.516,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_text14",
+    "sql": "ANALYZE t_text14",
+    "ok": true,
+    "seconds": 0.099,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_text14",
+    "sql": "SELECT pg_relation_size('t_text14'), pg_relation_size('t_text14_pkey'), pg_total_relation_size('t_text14')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "44285952|31563776|75890688",
+    "error": null
+   },
+   {
+    "label": "stored column size t_text14",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_text14.*) FROM t_text14 LIMIT 1",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "15|39",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_text14, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_text14', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "39|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_text14",
+    "sql": "SELECT level, root FROM bt_metap('t_text14_pkey')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_text14 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_text14_pkey', 1)",
+    "ok": true,
+    "seconds": 0.007,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_text14 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_text14_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_text15",
+    "sql": "CREATE TABLE t_text15 (id text COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_text15",
+    "sql": "INSERT INTO t_text15 SELECT id15 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.473,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_text15",
+    "sql": "ANALYZE t_text15",
+    "ok": true,
+    "seconds": 0.081,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_text15",
+    "sql": "SELECT pg_relation_size('t_text15'), pg_relation_size('t_text15_pkey'), pg_total_relation_size('t_text15')",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "44285952|31563776|75890688",
+    "error": null
+   },
+   {
+    "label": "stored column size t_text15",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_text15.*) FROM t_text15 LIMIT 1",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "16|40",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_text15, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_text15', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "40|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_text15",
+    "sql": "SELECT level, root FROM bt_metap('t_text15_pkey')",
+    "ok": true,
+    "seconds": 0.015,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_text15 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_text15_pkey', 1)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_text15 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_text15_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_text16",
+    "sql": "CREATE TABLE t_text16 (id text COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_text16",
+    "sql": "INSERT INTO t_text16 SELECT id16 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.461,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_text16",
+    "sql": "ANALYZE t_text16",
+    "ok": true,
+    "seconds": 0.122,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_text16",
+    "sql": "SELECT pg_relation_size('t_text16'), pg_relation_size('t_text16_pkey'), pg_total_relation_size('t_text16')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "52183040|40624128|92848128",
+    "error": null
+   },
+   {
+    "label": "stored column size t_text16",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_text16.*) FROM t_text16 LIMIT 1",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "17|41",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_text16, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_text16', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "41|157",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_text16",
+    "sql": "SELECT level, root FROM bt_metap('t_text16_pkey')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "2|231",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_text16 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_text16_pkey', 1)",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "l|204|32|8192|804",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_text16 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_text16_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "32|204",
+    "error": null
+   },
+   {
+    "label": "create t_varchar14",
+    "sql": "CREATE TABLE t_varchar14 (id varchar(14) COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_varchar14",
+    "sql": "INSERT INTO t_varchar14 SELECT id14 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.444,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_varchar14",
+    "sql": "ANALYZE t_varchar14",
+    "ok": true,
+    "seconds": 0.089,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_varchar14",
+    "sql": "SELECT pg_relation_size('t_varchar14'), pg_relation_size('t_varchar14_pkey'), pg_total_relation_size('t_varchar14')",
+    "ok": true,
+    "seconds": 0.02,
+    "output": "44285952|31563776|75882496",
+    "error": null
+   },
+   {
+    "label": "stored column size t_varchar14",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_varchar14.*) FROM t_varchar14 LIMIT 1",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "15|39",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_varchar14, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_varchar14', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "39|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_varchar14",
+    "sql": "SELECT level, root FROM bt_metap('t_varchar14_pkey')",
+    "ok": true,
+    "seconds": 0.013,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_varchar14 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_varchar14_pkey', 1)",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_varchar14 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_varchar14_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_varchar16",
+    "sql": "CREATE TABLE t_varchar16 (id varchar(16) COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_varchar16",
+    "sql": "INSERT INTO t_varchar16 SELECT id16 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.721,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_varchar16",
+    "sql": "ANALYZE t_varchar16",
+    "ok": true,
+    "seconds": 0.08,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_varchar16",
+    "sql": "SELECT pg_relation_size('t_varchar16'), pg_relation_size('t_varchar16_pkey'), pg_total_relation_size('t_varchar16')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "52183040|40624128|92839936",
+    "error": null
+   },
+   {
+    "label": "stored column size t_varchar16",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_varchar16.*) FROM t_varchar16 LIMIT 1",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "17|41",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_varchar16, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_varchar16', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.013,
+    "output": "41|157",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_varchar16",
+    "sql": "SELECT level, root FROM bt_metap('t_varchar16_pkey')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "2|231",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_varchar16 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_varchar16_pkey', 1)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "l|204|32|8192|804",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_varchar16 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_varchar16_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "32|204",
+    "error": null
+   },
+   {
+    "label": "create t_char14",
+    "sql": "CREATE TABLE t_char14 (id char(14) COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_char14",
+    "sql": "INSERT INTO t_char14 SELECT id14 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 2.292,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_char14",
+    "sql": "ANALYZE t_char14",
+    "ok": true,
+    "seconds": 0.076,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_char14",
+    "sql": "SELECT pg_relation_size('t_char14'), pg_relation_size('t_char14_pkey'), pg_total_relation_size('t_char14')",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "44285952|31563776|75882496",
+    "error": null
+   },
+   {
+    "label": "stored column size t_char14",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_char14.*) FROM t_char14 LIMIT 1",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "15|39",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_char14, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_char14', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.013,
+    "output": "39|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_char14",
+    "sql": "SELECT level, root FROM bt_metap('t_char14_pkey')",
+    "ok": true,
+    "seconds": 0.015,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_char14 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_char14_pkey', 1)",
+    "ok": true,
+    "seconds": 0.013,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_char14 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_char14_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.014,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_char16",
+    "sql": "CREATE TABLE t_char16 (id char(16) COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_char16",
+    "sql": "INSERT INTO t_char16 SELECT id16 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 2.193,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_char16",
+    "sql": "ANALYZE t_char16",
+    "ok": true,
+    "seconds": 0.12,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_char16",
+    "sql": "SELECT pg_relation_size('t_char16'), pg_relation_size('t_char16_pkey'), pg_total_relation_size('t_char16')",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "52183040|40624128|92839936",
+    "error": null
+   },
+   {
+    "label": "stored column size t_char16",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_char16.*) FROM t_char16 LIMIT 1",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "17|41",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_char16, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_char16', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "41|157",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_char16",
+    "sql": "SELECT level, root FROM bt_metap('t_char16_pkey')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "2|231",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_char16 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_char16_pkey', 1)",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "l|204|32|8192|804",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_char16 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_char16_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "32|204",
+    "error": null
+   },
+   {
+    "label": "create t_bytea14",
+    "sql": "CREATE TABLE t_bytea14 (id bytea PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_bytea14",
+    "sql": "INSERT INTO t_bytea14 SELECT convert_to(id14, 'SQL_ASCII') FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 2.174,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_bytea14",
+    "sql": "ANALYZE t_bytea14",
+    "ok": true,
+    "seconds": 0.072,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_bytea14",
+    "sql": "SELECT pg_relation_size('t_bytea14'), pg_relation_size('t_bytea14_pkey'), pg_total_relation_size('t_bytea14')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "44285952|31563776|75890688",
+    "error": null
+   },
+   {
+    "label": "stored column size t_bytea14",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_bytea14.*) FROM t_bytea14 LIMIT 1",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "15|39",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_bytea14, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_bytea14', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "39|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_bytea14",
+    "sql": "SELECT level, root FROM bt_metap('t_bytea14_pkey')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_bytea14 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_bytea14_pkey', 1)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_bytea14 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_bytea14_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_bytea16",
+    "sql": "CREATE TABLE t_bytea16 (id bytea PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_bytea16",
+    "sql": "INSERT INTO t_bytea16 SELECT convert_to(id16, 'SQL_ASCII') FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 2.039,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_bytea16",
+    "sql": "ANALYZE t_bytea16",
+    "ok": true,
+    "seconds": 0.089,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_bytea16",
+    "sql": "SELECT pg_relation_size('t_bytea16'), pg_relation_size('t_bytea16_pkey'), pg_total_relation_size('t_bytea16')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "52183040|40624128|92848128",
+    "error": null
+   },
+   {
+    "label": "stored column size t_bytea16",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_bytea16.*) FROM t_bytea16 LIMIT 1",
+    "ok": true,
+    "seconds": 0.013,
+    "output": "17|41",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_bytea16, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_bytea16', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "41|157",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_bytea16",
+    "sql": "SELECT level, root FROM bt_metap('t_bytea16_pkey')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "2|231",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_bytea16 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_bytea16_pkey', 1)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "l|204|32|8192|804",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_bytea16 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_bytea16_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.015,
+    "output": "32|204",
+    "error": null
+   },
+   {
+    "label": "create t_uuid",
+    "sql": "CREATE TABLE t_uuid (id uuid PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_uuid",
+    "sql": "INSERT INTO t_uuid SELECT u FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.75,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_uuid",
+    "sql": "ANALYZE t_uuid",
+    "ok": true,
+    "seconds": 0.07,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_uuid",
+    "sql": "SELECT pg_relation_size('t_uuid'), pg_relation_size('t_uuid_pkey'), pg_total_relation_size('t_uuid')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "44285952|31563776|75882496",
+    "error": null
+   },
+   {
+    "label": "stored column size t_uuid",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_uuid.*) FROM t_uuid LIMIT 1",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "16|40",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_uuid, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_uuid', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "40|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_uuid",
+    "sql": "SELECT level, root FROM bt_metap('t_uuid_pkey')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_uuid page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_uuid_pkey', 1)",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_uuid page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_uuid_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_comp_char3",
+    "sql": "CREATE TABLE t_comp_char3 (ns char(3) COLLATE \"C\" NOT NULL, snow bigint NOT NULL, PRIMARY KEY (ns, snow))",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_comp_char3",
+    "sql": "INSERT INTO t_comp_char3 SELECT left(id14, 3), snow FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.819,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_comp_char3",
+    "sql": "ANALYZE t_comp_char3",
+    "ok": true,
+    "seconds": 0.101,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_comp_char3",
+    "sql": "SELECT pg_relation_size('t_comp_char3'), pg_relation_size('t_comp_char3_pkey'), pg_total_relation_size('t_comp_char3')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "44285952|31563776|75882496",
+    "error": null
+   },
+   {
+    "label": "stored column size t_comp_char3",
+    "sql": "SELECT pg_column_size(ns), pg_column_size(t_comp_char3.*) FROM t_comp_char3 LIMIT 1",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "4|40",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_comp_char3, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_comp_char3', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "40|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_comp_char3",
+    "sql": "SELECT level, root FROM bt_metap('t_comp_char3_pkey')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_comp_char3 page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_comp_char3_pkey', 1)",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_comp_char3 page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_comp_char3_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_comp_smallint",
+    "sql": "CREATE TABLE t_comp_smallint (ns smallint NOT NULL, snow bigint NOT NULL, PRIMARY KEY (ns, snow))",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_comp_smallint",
+    "sql": "INSERT INTO t_comp_smallint SELECT 14005::smallint, snow FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.745,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_comp_smallint",
+    "sql": "ANALYZE t_comp_smallint",
+    "ok": true,
+    "seconds": 0.069,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_comp_smallint",
+    "sql": "SELECT pg_relation_size('t_comp_smallint'), pg_relation_size('t_comp_smallint_pkey'), pg_total_relation_size('t_comp_smallint')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "44285952|31563776|75882496",
+    "error": null
+   },
+   {
+    "label": "stored column size t_comp_smallint",
+    "sql": "SELECT pg_column_size(ns), pg_column_size(t_comp_smallint.*) FROM t_comp_smallint LIMIT 1",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "2|40",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_comp_smallint, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_comp_smallint', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "40|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_comp_smallint",
+    "sql": "SELECT level, root FROM bt_metap('t_comp_smallint_pkey')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_comp_smallint page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_comp_smallint_pkey', 1)",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "l|262|24|8192|812",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_comp_smallint page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_comp_smallint_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "24|262",
+    "error": null
+   },
+   {
+    "label": "create t_text14_icu",
+    "sql": "CREATE TABLE t_text14_icu (id text COLLATE \"und-x-icu\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.013,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "insert t_text14_icu",
+    "sql": "INSERT INTO t_text14_icu SELECT id14 FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 3.443,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "analyze t_text14_icu",
+    "sql": "ANALYZE t_text14_icu",
+    "ok": true,
+    "seconds": 0.108,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "sizes t_text14_icu",
+    "sql": "SELECT pg_relation_size('t_text14_icu'), pg_relation_size('t_text14_icu_pkey'), pg_total_relation_size('t_text14_icu')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "44285952|39837696|84164608",
+    "error": null
+   },
+   {
+    "label": "stored column size t_text14_icu",
+    "sql": "SELECT pg_column_size(id), pg_column_size(t_text14_icu.*) FROM t_text14_icu LIMIT 1",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "15|39",
+    "error": null
+   },
+   {
+    "label": "heap tuple lengths t_text14_icu, page 0",
+    "sql": "SELECT lp_len, count(*) FROM heap_page_items(get_raw_page('t_text14_icu', 0)) GROUP BY lp_len ORDER BY lp_len",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "39|185",
+    "error": null
+   },
+   {
+    "label": "bt_metap t_text14_icu",
+    "sql": "SELECT level, root FROM bt_metap('t_text14_icu_pkey')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "2|295",
+    "error": null
+   },
+   {
+    "label": "bt_page_stats t_text14_icu page 1",
+    "sql": "SELECT type, live_items, avg_item_size, page_size, free_size FROM bt_page_stats('t_text14_icu_pkey', 1)",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "l|192|24|8192|2772",
+    "error": null
+   },
+   {
+    "label": "bt_page_items lengths t_text14_icu page 1",
+    "sql": "SELECT itemlen, count(*) FROM bt_page_items('t_text14_icu_pkey', 1) GROUP BY itemlen ORDER BY itemlen",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "24|192",
+    "error": null
+   },
+   {
+    "label": "ids62 table",
+    "sql": "CREATE TABLE ids62 (snow bigint PRIMARY KEY, id text COLLATE \"C\" NOT NULL)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "ids62 rows",
+    "sql": "INSERT INTO ids62 VALUES (274557032793636852, 'USR0KHTOWnGLu0'), (274557032793636853, 'USR0KHTOWnGLu1'), (274557032793636854, 'USR0KHTOWnGLu2'), (274557032793636855, 'USR0KHTOWnGLu3'), (274557032793636856, 'USR0KHTOWnGLu4'), (274557032793636857, 'USR0KHTOWnGLu5'), (274557032793636858, 'USR0KHTOWnGLu6'), (274557032793636859, 'USR0KHTOWnGLu7'), (274557032793636860, 'USR0KHTOWnGLu8'), (274557032793636861, 'USR0KHTOWnGLu9'), (274557032793636862, 'USR0KHTOWnGLuA'), (274557032793636863, 'USR0KHTOWnGLuB'), (274557032793636864, 'USR0KHTOWnGLuC'), (274557032793636865, 'USR0KHTOWnGLuD'), (274557032793636866, 'USR0KHTOWnGLuE'), (274557032793636867, 'USR0KHTOWnGLuF'), (274557032793636868, 'USR0KHTOWnGLuG'), (274557032793636869, 'USR0KHTOWnGLuH'), (274557032793636870, 'USR0KHTOWnGLuI'), (274557032793636871, 'USR0KHTOWnGLuJ'), (274557032793636872, 'USR0KHTOWnGLuK'), (274557032793636873, 'USR0KHTOWnGLuL'), (274557032793636874, 'USR0KHTOWnGLuM'), (274557032793636875, 'USR0KHTOWnGLuN'), (274557032793636876, 'USR0KHTOWnGLuO'), (274557032793636877, 'USR0KHTOWnGLuP'), (274557032793636878, 'USR0KHTOWnGLuQ'), (274557032793636879, 'USR0KHTOWnGLuR'), (274557032793636880, 'USR0KHTOWnGLuS'), (274557032793636881, 'USR0KHTOWnGLuT'), (274557032793636882, 'USR0KHTOWnGLuU'), (274557032793636883, 'USR0KHTOWnGLuV'), (274557032793636884, 'USR0KHTOWnGLuW'), (274557032793636885, 'USR0KHTOWnGLuX'), (274557032793636886, 'USR0KHTOWnGLuY'), (274557032793636887, 'USR0KHTOWnGLuZ'), (274557032793636888, 'USR0KHTOWnGLua'), (274557032793636889, 'USR0KHTOWnGLub'), (274557032793636890, 'USR0KHTOWnGLuc'), (274557032793636891, 'USR0KHTOWnGLud'), (274557032793636892, 'USR0KHTOWnGLue'), (274557032793636893, 'USR0KHTOWnGLuf'), (274557032793636894, 'USR0KHTOWnGLug'), (274557032793636895, 'USR0KHTOWnGLuh'), (274557032793636896, 'USR0KHTOWnGLui'), (274557032793636897, 'USR0KHTOWnGLuj'), (274557032793636898, 'USR0KHTOWnGLuk'), (274557032793636899, 'USR0KHTOWnGLul'), (274557032793636900, 'USR0KHTOWnGLum'), (274557032793636901, 'USR0KHTOWnGLun'), (274557032793636902, 'USR0KHTOWnGLuo'), (274557032793636903, 'USR0KHTOWnGLup'), (274557032793636904, 'USR0KHTOWnGLuq'), (274557032793636905, 'USR0KHTOWnGLur'), (274557032793636906, 'USR0KHTOWnGLus'), (274557032793636907, 'USR0KHTOWnGLut'), (274557032793636908, 'USR0KHTOWnGLuu'), (274557032793636909, 'USR0KHTOWnGLuv'), (274557032793636910, 'USR0KHTOWnGLuw'), (274557032793636911, 'USR0KHTOWnGLux'), (274557032793636912, 'USR0KHTOWnGLuy'), (274557032793636913, 'USR0KHTOWnGLuz')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "INSERT 0 62",
+    "error": null
+   },
+   {
+    "label": "ids62 first 16 under C",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY id COLLATE \"C\") FROM (SELECT id FROM ids62 ORDER BY id COLLATE \"C\" LIMIT 16) x",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLuA USR0KHTOWnGLuB USR0KHTOWnGLuC USR0KHTOWnGLuD USR0KHTOWnGLuE USR0KHTOWnGLuF",
+    "error": null
+   },
+   {
+    "label": "ids62 order under C == mint order",
+    "sql": "SELECT array_agg(id ORDER BY id COLLATE \"C\") = array_agg(id ORDER BY snow) FROM ids62",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "t",
+    "error": null
+   },
+   {
+    "label": "ids62 first 16 under und-x-icu",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY id COLLATE \"und-x-icu\") FROM (SELECT id FROM ids62 ORDER BY id COLLATE \"und-x-icu\" LIMIT 16) x",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLua USR0KHTOWnGLuA USR0KHTOWnGLub USR0KHTOWnGLuB USR0KHTOWnGLuc USR0KHTOWnGLuC",
+    "error": null
+   },
+   {
+    "label": "ids62 order under und-x-icu == mint order",
+    "sql": "SELECT array_agg(id ORDER BY id COLLATE \"und-x-icu\") = array_agg(id ORDER BY snow) FROM ids62",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "f",
+    "error": null
+   },
+   {
+    "label": "ids62 first 16 under en-x-icu",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY id COLLATE \"en-x-icu\") FROM (SELECT id FROM ids62 ORDER BY id COLLATE \"en-x-icu\" LIMIT 16) x",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLua USR0KHTOWnGLuA USR0KHTOWnGLub USR0KHTOWnGLuB USR0KHTOWnGLuc USR0KHTOWnGLuC",
+    "error": null
+   },
+   {
+    "label": "ids62 order under en-x-icu == mint order",
+    "sql": "SELECT array_agg(id ORDER BY id COLLATE \"en-x-icu\") = array_agg(id ORDER BY snow) FROM ids62",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "f",
+    "error": null
+   },
+   {
+    "label": "ids62 first 16 under en-US-u-va-posix-x-icu",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY id COLLATE \"en-US-u-va-posix-x-icu\") FROM (SELECT id FROM ids62 ORDER BY id COLLATE \"en-US-u-va-posix-x-icu\" LIMIT 16) x",
+    "ok": true,
+    "seconds": 0.016,
+    "output": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLuA USR0KHTOWnGLuB USR0KHTOWnGLuC USR0KHTOWnGLuD USR0KHTOWnGLuE USR0KHTOWnGLuF",
+    "error": null
+   },
+   {
+    "label": "ids62 order under en-US-u-va-posix-x-icu == mint order",
+    "sql": "SELECT array_agg(id ORDER BY id COLLATE \"en-US-u-va-posix-x-icu\") = array_agg(id ORDER BY snow) FROM ids62",
+    "ok": true,
+    "seconds": 0.016,
+    "output": "t",
+    "error": null
+   },
+   {
+    "label": "ids62 mint order",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY snow) FROM (SELECT id, snow FROM ids62 ORDER BY snow LIMIT 16) x",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "USR0KHTOWnGLu0 USR0KHTOWnGLu1 USR0KHTOWnGLu2 USR0KHTOWnGLu3 USR0KHTOWnGLu4 USR0KHTOWnGLu5 USR0KHTOWnGLu6 USR0KHTOWnGLu7 USR0KHTOWnGLu8 USR0KHTOWnGLu9 USR0KHTOWnGLuA USR0KHTOWnGLuB USR0KHTOWnGLuC USR0KHTOWnGLuD USR0KHTOWnGLuE USR0KHTOWnGLuF",
+    "error": null
+   },
+   {
+    "label": "rows whose text-order position differs from mint order, C",
+    "sql": "SELECT count(*) FROM (SELECT row_number() OVER (ORDER BY id14 COLLATE \"C\") AS by_text, row_number() OVER (ORDER BY snow) AS by_mint FROM src) x WHERE by_text <> by_mint",
+    "ok": true,
+    "seconds": 0.694,
+    "output": "0",
+    "error": null
+   },
+   {
+    "label": "rows whose text-order position differs from mint order, und-x-icu",
+    "sql": "SELECT count(*) FROM (SELECT row_number() OVER (ORDER BY id14 COLLATE \"und-x-icu\") AS by_text, row_number() OVER (ORDER BY snow) AS by_mint FROM src) x WHERE by_text <> by_mint",
+    "ok": true,
+    "seconds": 2.376,
+    "output": "996258",
+    "error": null
+   },
+   {
+    "label": "range scan truth (bigint)",
+    "sql": "SELECT count(*) FROM t_bigint WHERE id >= 274557065559539712",
+    "ok": true,
+    "seconds": 0.055,
+    "output": "500032",
+    "error": null
+   },
+   {
+    "label": "range scan, text COLLATE \"C\"",
+    "sql": "SELECT count(*) FROM t_text14 WHERE id >= 'USR0KHTP6Yik2C'",
+    "ok": true,
+    "seconds": 0.083,
+    "output": "500032",
+    "error": null
+   },
+   {
+    "label": "range scan, text COLLATE \"und-x-icu\"",
+    "sql": "SELECT count(*) FROM t_text14_icu WHERE id >= 'USR0KHTP6Yik2C'",
+    "ok": true,
+    "seconds": 0.07,
+    "output": "494528",
+    "error": null
+   },
+   {
+    "label": "EXPLAIN LIKE prefix on t_text14",
+    "sql": "EXPLAIN (COSTS OFF) SELECT id FROM t_text14 WHERE id LIKE 'USR0KHTOW%'",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "Index Only Scan using t_text14_pkey on t_text14\n  Index Cond: ((id >= 'USR0KHTOW'::text) AND (id < 'USR0KHTOX'::text))\n  Filter: (id ~~ 'USR0KHTOW%'::text)",
+    "error": null
+   },
+   {
+    "label": "EXPLAIN LIKE prefix on t_text14_icu",
+    "sql": "EXPLAIN (COSTS OFF) SELECT id FROM t_text14_icu WHERE id LIKE 'USR0KHTOW%'",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "Gather\n  Workers Planned: 2\n  ->  Parallel Seq Scan on t_text14_icu\n        Filter: (id ~~ 'USR0KHTOW%'::text)",
+    "error": null
+   },
+   {
+    "label": "create collation ci",
+    "sql": "CREATE COLLATION ci (provider = icu, locale = 'und-u-ks-level2', deterministic = false)",
+    "ok": true,
+    "seconds": 0.016,
+    "output": "CREATE COLLATION",
+    "error": null
+   },
+   {
+    "label": "case-folded ids equal under ci",
+    "sql": "SELECT 'USR0KHTOWnGLuC' COLLATE ci = 'USR0KHTOWNGLUC'",
+    "ok": true,
+    "seconds": 0.015,
+    "output": "t",
+    "error": null
+   },
+   {
+    "label": "case-folded ids equal under \"C\"",
+    "sql": "SELECT 'USR0KHTOWnGLuC' COLLATE \"C\" = 'USR0KHTOWNGLUC'",
+    "ok": true,
+    "seconds": 0.007,
+    "output": "f",
+    "error": null
+   },
+   {
+    "label": "t_ci table",
+    "sql": "CREATE TABLE t_ci (id text COLLATE ci PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.015,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "t_ci first insert",
+    "sql": "INSERT INTO t_ci VALUES ('USR0KHTOWnGLuC')",
+    "ok": true,
+    "seconds": 0.007,
+    "output": "INSERT 0 1",
+    "error": null
+   },
+   {
+    "label": "t_ci second insert (case-folded)",
+    "sql": "INSERT INTO t_ci VALUES ('USR0KHTOWNGLUC')",
+    "ok": false,
+    "seconds": 0.013,
+    "output": "",
+    "error": "ERROR:  duplicate key value violates unique constraint \"t_ci_pkey\"\nDETAIL:  Key (id)=(USR0KHTOWNGLUC) already exists."
+   },
+   {
+    "label": "distinct ids62 under C vs ci",
+    "sql": "SELECT count(DISTINCT id COLLATE \"C\"), count(DISTINCT id COLLATE ci) FROM ids62",
+    "ok": true,
+    "seconds": 0.014,
+    "output": "62|36",
+    "error": null
+   },
+   {
+    "label": "LIKE under ci",
+    "sql": "SELECT id FROM t_ci WHERE id LIKE 'USR%'",
+    "ok": false,
+    "seconds": 0.013,
+    "output": "",
+    "error": "ERROR:  nondeterministic collations are not supported for LIKE"
+   },
+   {
+    "label": "demo16_adjacent",
+    "sql": "CREATE TABLE demo16_adjacent (id text COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "demo16_suffix",
+    "sql": "CREATE TABLE demo16_suffix (id text COLLATE \"C\" PRIMARY KEY)",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "demo16_adjacent rows",
+    "sql": "INSERT INTO demo16_adjacent VALUES ('INVCA0KHTOWnQPFw'), ('INVCB0KHTOWnQPFw'), ('INVCA0KHTP6YsnOS'), ('INVCB0KHTP6YsnOS'), ('INVCA0KHTPgKLBWx'), ('INVCB0KHTPgKLBWx')",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "INSERT 0 6",
+    "error": null
+   },
+   {
+    "label": "demo16_suffix rows",
+    "sql": "INSERT INTO demo16_suffix VALUES ('INVC0KHTOWnQPFwA'), ('INVC0KHTOWnQPFwB'), ('INVC0KHTP6YsnOSA'), ('INVC0KHTP6YsnOSB'), ('INVC0KHTPgKLBWxA'), ('INVC0KHTPgKLBWxB')",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "INSERT 0 6",
+    "error": null
+   },
+   {
+    "label": "demo16_adjacent byte order",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY id) FROM demo16_adjacent",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "INVCA0KHTOWnQPFw INVCA0KHTP6YsnOS INVCA0KHTPgKLBWx INVCB0KHTOWnQPFw INVCB0KHTP6YsnOS INVCB0KHTPgKLBWx",
+    "error": null
+   },
+   {
+    "label": "demo16_suffix byte order",
+    "sql": "SELECT string_agg(id, ' ' ORDER BY id) FROM demo16_suffix",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "INVC0KHTOWnQPFwA INVC0KHTOWnQPFwB INVC0KHTP6YsnOSA INVC0KHTP6YsnOSB INVC0KHTPgKLBWxA INVC0KHTPgKLBWxB",
+    "error": null
+   },
+   {
+    "label": "suffix: one MinFor range",
+    "sql": "SELECT count(*) FROM demo16_suffix WHERE id >= 'INVC0KHTP6Yik2C'",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "4",
+    "error": null
+   },
+   {
+    "label": "adjacent: a naive single range",
+    "sql": "SELECT count(*) FROM demo16_adjacent WHERE id >= 'INVCA0KHTP6Yik2C'",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "5",
+    "error": null
+   },
+   {
+    "label": "adjacent: one range per metadata value",
+    "sql": "SELECT count(*) FROM demo16_adjacent WHERE (id >= 'INVCA0KHTP6Yik2C' AND id < 'INVCB') OR id >= 'INVCB0KHTP6Yik2C'",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "4",
+    "error": null
+   },
+   {
+    "label": "invoices",
+    "sql": "CREATE TABLE invoices (id text COLLATE \"C\" PRIMARY KEY CHECK (length(id) = 14), deleted_at timestamptz)",
+    "ok": true,
+    "seconds": 0.012,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "invoices rows",
+    "sql": "INSERT INTO invoices SELECT id14, NULL FROM src ORDER BY snow",
+    "ok": true,
+    "seconds": 1.693,
+    "output": "INSERT 0 1000000",
+    "error": null
+   },
+   {
+    "label": "invoices_live",
+    "sql": "CREATE INDEX invoices_live ON invoices (id) WHERE deleted_at IS NULL",
+    "ok": true,
+    "seconds": 0.398,
+    "output": "CREATE INDEX",
+    "error": null
+   },
+   {
+    "label": "soft delete",
+    "sql": "UPDATE invoices SET deleted_at = now() WHERE id = 'USR0KHTOWnQPFw'",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "UPDATE 1",
+    "error": null
+   },
+   {
+    "label": "tombstones",
+    "sql": "CREATE TABLE tombstones (id text COLLATE \"C\" PRIMARY KEY, reason text NOT NULL, at timestamptz NOT NULL DEFAULT now())",
+    "ok": true,
+    "seconds": 0.011,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "tombstone row",
+    "sql": "INSERT INTO tombstones (id, reason) VALUES ('USR0KHTOWnQPFw', 'customer request')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "INSERT 0 1",
+    "error": null
+   },
+   {
+    "label": "audit_events",
+    "sql": "CREATE TABLE audit_events (event_id text COLLATE \"C\" PRIMARY KEY, subject text COLLATE \"C\" NOT NULL, kind text NOT NULL, at timestamptz NOT NULL DEFAULT now())",
+    "ok": true,
+    "seconds": 0.01,
+    "output": "CREATE TABLE",
+    "error": null
+   },
+   {
+    "label": "audit_events_subject",
+    "sql": "CREATE INDEX audit_events_subject ON audit_events (subject, event_id)",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "CREATE INDEX",
+    "error": null
+   },
+   {
+    "label": "audit event",
+    "sql": "INSERT INTO audit_events (event_id, subject, kind) VALUES ('EVT0KHTPgKLBWy', 'USR0KHTOWnQPFw', 'deleted')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "INSERT 0 1",
+    "error": null
+   },
+   {
+    "label": "analyze invoices",
+    "sql": "ANALYZE invoices",
+    "ok": true,
+    "seconds": 0.06,
+    "output": "ANALYZE",
+    "error": null
+   },
+   {
+    "label": "live rows",
+    "sql": "SELECT count(*) FROM invoices WHERE deleted_at IS NULL",
+    "ok": true,
+    "seconds": 0.036,
+    "output": "999999",
+    "error": null
+   },
+   {
+    "label": "EXPLAIN live range (partial index)",
+    "sql": "EXPLAIN (COSTS OFF) SELECT id FROM invoices WHERE deleted_at IS NULL AND id >= 'USR0KHTPfc3lEe'",
+    "ok": true,
+    "seconds": 0.009,
+    "output": "Index Only Scan using invoices_live on invoices\n  Index Cond: (id >= 'USR0KHTPfc3lEe'::text)",
+    "error": null
+   },
+   {
+    "label": "partial index size",
+    "sql": "SELECT pg_relation_size('invoices_live')",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "31563776",
+    "error": null
+   },
+   {
+    "label": "history of the soft-deleted id",
+    "sql": "SELECT kind || ' @ ' || at::date FROM audit_events WHERE subject = 'USR0KHTOWnQPFw' ORDER BY event_id",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "deleted @ 2026-10-11",
+    "error": null
+   },
+   {
+    "label": "tombstone lookup",
+    "sql": "SELECT reason FROM tombstones WHERE id = 'USR0KHTOWnQPFw'",
+    "ok": true,
+    "seconds": 0.008,
+    "output": "customer request",
+    "error": null
+   },
+   {
+    "label": "collation audit of id columns",
+    "sql": "SELECT table_name || '.' || column_name || ' ' || data_type || ' ' || coalesce(collation_name, '(default)') FROM information_schema.columns WHERE table_schema = 'public' AND data_type IN ('text', 'character varying', 'character') AND (column_name = 'id' OR column_name LIKE '%\\_id') AND collation_name IS DISTINCT FROM 'C' ORDER BY table_name, column_name",
+    "ok": true,
+    "seconds": 0.016,
+    "output": "t_ci.id text ci\nt_text14_icu.id text und-x-icu",
+    "error": null
+   }
+  ],
+  "seconds": 37.9
+ },
+ "redis": {
+  "command": "redis-server --port 56151 --save '' --appendonly no",
+  "version": "7.0.15",
+  "arch_bits": "64",
+  "mem_allocator": "jemalloc-5.3.0",
+  "single_key": {
+   "value '1' (shared integer object)": {
+    "key14": {
+     "key": "USR0KHTOWnQPFw",
+     "memory_usage": 56,
+     "value_encoding": "int"
+    },
+    "key15": {
+     "key": "USER0KHTOWnQPFw",
+     "memory_usage": 72,
+     "value_encoding": "int"
+    },
+    "key16": {
+     "key": "USERA0KHTOWnQPFw",
+     "memory_usage": 72,
+     "value_encoding": "int"
+    }
+   },
+   "value 'v' (1-byte string)": {
+    "key14": {
+     "key": "USR0KHTOWnQPFw",
+     "memory_usage": 72,
+     "value_encoding": "embstr"
+    },
+    "key15": {
+     "key": "USER0KHTOWnQPFw",
+     "memory_usage": 88,
+     "value_encoding": "embstr"
+    },
+    "key16": {
+     "key": "USERA0KHTOWnQPFw",
+     "memory_usage": 88,
+     "value_encoding": "embstr"
+    }
+   },
+   "value 'payload!' (8-byte string)": {
+    "key14": {
+     "key": "USR0KHTOWnQPFw",
+     "memory_usage": 72,
+     "value_encoding": "embstr"
+    },
+    "key15": {
+     "key": "USER0KHTOWnQPFw",
+     "memory_usage": 88,
+     "value_encoding": "embstr"
+    },
+    "key16": {
+     "key": "USERA0KHTOWnQPFw",
+     "memory_usage": 88,
+     "value_encoding": "embstr"
+    }
+   }
+  },
+  "memory_usage_by_key_length": {
+   "1": 48,
+   "2": 48,
+   "3": 48,
+   "4": 48,
+   "5": 48,
+   "6": 48,
+   "7": 56,
+   "8": 56,
+   "9": 56,
+   "10": 56,
+   "11": 56,
+   "12": 56,
+   "13": 56,
+   "14": 56,
+   "15": 72,
+   "16": 72,
+   "17": 72,
+   "18": 72,
+   "19": 72,
+   "20": 72,
+   "21": 72,
+   "22": 72,
+   "23": 72,
+   "24": 72,
+   "25": 72,
+   "26": 72,
+   "27": 72,
+   "28": 72,
+   "29": 72,
+   "30": 72,
+   "31": 88,
+   "32": 88,
+   "33": 88,
+   "34": 88,
+   "35": 88,
+   "36": 88,
+   "37": 88,
+   "38": 88,
+   "39": 88,
+   "40": 88,
+   "41": 88,
+   "42": 88,
+   "43": 88,
+   "44": 88,
+   "45": 104,
+   "46": 104,
+   "47": 104,
+   "48": 104
+  },
+  "bulk": {
+   "width14": {
+    "keys": 1000000,
+    "load_seconds": 2.4,
+    "used_memory_before": 1062496,
+    "used_memory_after": 57437280,
+    "used_memory_delta_per_key": 56.37,
+    "memory_stats_keys_bytes_per_key": 56,
+    "memory_stats_dataset_bytes_per_key": 8.15,
+    "memory_stats_overhead_hashtable_main": null,
+    "memory_usage_first_key": 56,
+    "allocator_allocated": "55929080",
+    "allocator_frag_ratio": "1.01",
+    "used_memory_peak": "57437280"
+   },
+   "width15": {
+    "keys": 1000000,
+    "load_seconds": 2.5,
+    "used_memory_before": 1098256,
+    "used_memory_after": 73487112,
+    "used_memory_delta_per_key": 72.39,
+    "memory_stats_keys_bytes_per_key": 72,
+    "memory_stats_dataset_bytes_per_key": 24.2,
+    "memory_stats_overhead_hashtable_main": null,
+    "memory_usage_first_key": 72,
+    "allocator_allocated": "71706848",
+    "allocator_frag_ratio": "1.00",
+    "used_memory_peak": "73487112"
+   },
+   "width16": {
+    "keys": 1000000,
+    "load_seconds": 2.3,
+    "used_memory_before": 1098680,
+    "used_memory_after": 73487288,
+    "used_memory_delta_per_key": 72.39,
+    "memory_stats_keys_bytes_per_key": 72,
+    "memory_stats_dataset_bytes_per_key": 24.2,
+    "memory_stats_overhead_hashtable_main": null,
+    "memory_usage_first_key": 72,
+    "allocator_allocated": "72492208",
+    "allocator_frag_ratio": "1.00",
+    "used_memory_peak": "73487288"
+   }
+  },
+  "seconds": 7.8
+ },
+ "sqlite": {
+  "sqlite_version": "3.45.1",
+  "variants": {
+   "int_pk": {
+    "ddl": "CREATE TABLE t (id INTEGER PRIMARY KEY)",
+    "rows": 1000000,
+    "insert_seconds": 0.65,
+    "file_bytes": 14094336,
+    "page_size": 4096,
+    "page_count": 3441,
+    "bytes_per_row": 14.09,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 53,
+      "unused_bytes": 3931
+     },
+     "t": {
+      "pages": 3440,
+      "payload_bytes": 2000000,
+      "unused_bytes": 11300
+     }
+    }
+   },
+   "text14_rowid": {
+    "ddl": "CREATE TABLE t (id TEXT PRIMARY KEY)",
+    "rows": 1000000,
+    "insert_seconds": 1.02,
+    "file_bytes": 48611328,
+    "page_size": 4096,
+    "page_count": 11868,
+    "bytes_per_row": 48.61,
+    "btrees": {
+     "sqlite_autoindex_t_1": {
+      "pages": 6450,
+      "payload_bytes": 19967105,
+      "unused_bytes": 3374699
+     },
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 83,
+      "unused_bytes": 3897
+     },
+     "t": {
+      "pages": 5417,
+      "payload_bytes": 16000000,
+      "unused_bytes": 112621
+     }
+    }
+   },
+   "text16_rowid": {
+    "ddl": "CREATE TABLE t (id TEXT PRIMARY KEY)",
+    "rows": 1000000,
+    "insert_seconds": 0.98,
+    "file_bytes": 52789248,
+    "page_size": 4096,
+    "page_count": 12888,
+    "bytes_per_row": 52.79,
+    "btrees": {
+     "sqlite_autoindex_t_1": {
+      "pages": 6992,
+      "payload_bytes": 21967105,
+      "unused_bytes": 3588227
+     },
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 83,
+      "unused_bytes": 3897
+     },
+     "t": {
+      "pages": 5895,
+      "payload_bytes": 18000000,
+      "unused_bytes": 62396
+     }
+    }
+   },
+   "text14_worowid": {
+    "ddl": "CREATE TABLE t (id TEXT PRIMARY KEY) WITHOUT ROWID",
+    "rows": 1000000,
+    "insert_seconds": 0.73,
+    "file_bytes": 21704704,
+    "page_size": 4096,
+    "page_count": 5299,
+    "bytes_per_row": 21.7,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 64,
+      "unused_bytes": 3920
+     },
+     "t": {
+      "pages": 5298,
+      "payload_bytes": 16000000,
+      "unused_bytes": 2637036
+     }
+    }
+   },
+   "text15_worowid": {
+    "ddl": "CREATE TABLE t (id TEXT PRIMARY KEY) WITHOUT ROWID",
+    "rows": 1000000,
+    "insert_seconds": 0.82,
+    "file_bytes": 22917120,
+    "page_size": 4096,
+    "page_count": 5595,
+    "bytes_per_row": 22.92,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 64,
+      "unused_bytes": 3920
+     },
+     "t": {
+      "pages": 5594,
+      "payload_bytes": 17000000,
+      "unused_bytes": 2845900
+     }
+    }
+   },
+   "text16_worowid": {
+    "ddl": "CREATE TABLE t (id TEXT PRIMARY KEY) WITHOUT ROWID",
+    "rows": 1000000,
+    "insert_seconds": 0.68,
+    "file_bytes": 24129536,
+    "page_size": 4096,
+    "page_count": 5891,
+    "bytes_per_row": 24.13,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 64,
+      "unused_bytes": 3920
+     },
+     "t": {
+      "pages": 5890,
+      "payload_bytes": 18000000,
+      "unused_bytes": 3054764
+     }
+    }
+   },
+   "blob14_worowid": {
+    "ddl": "CREATE TABLE t (id BLOB PRIMARY KEY) WITHOUT ROWID",
+    "rows": 1000000,
+    "insert_seconds": 0.94,
+    "file_bytes": 21704704,
+    "page_size": 4096,
+    "page_count": 5299,
+    "bytes_per_row": 21.7,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 64,
+      "unused_bytes": 3920
+     },
+     "t": {
+      "pages": 5298,
+      "payload_bytes": 16000000,
+      "unused_bytes": 2637036
+     }
+    }
+   },
+   "blob16_worowid": {
+    "ddl": "CREATE TABLE t (id BLOB PRIMARY KEY) WITHOUT ROWID",
+    "rows": 1000000,
+    "insert_seconds": 1.03,
+    "file_bytes": 24129536,
+    "page_size": 4096,
+    "page_count": 5891,
+    "bytes_per_row": 24.13,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 64,
+      "unused_bytes": 3920
+     },
+     "t": {
+      "pages": 5890,
+      "payload_bytes": 18000000,
+      "unused_bytes": 3054764
+     }
+    }
+   },
+   "comp_worowid": {
+    "ddl": "CREATE TABLE t (ns TEXT NOT NULL, snow INTEGER NOT NULL, PRIMARY KEY (ns, snow)) WITHOUT ROWID",
+    "rows": 1000000,
+    "insert_seconds": 0.91,
+    "file_bytes": 19533824,
+    "page_size": 4096,
+    "page_count": 4769,
+    "bytes_per_row": 19.53,
+    "btrees": {
+     "sqlite_schema": {
+      "pages": 1,
+      "payload_bytes": 109,
+      "unused_bytes": 3875
+     },
+     "t": {
+      "pages": 4768,
+      "payload_bytes": 14000000,
+      "unused_bytes": 2472516
+     }
+    }
+   }
+  },
+  "seconds": 7.9
+ },
+ "memory": {
+  "cleared_env": {
+   "BUN_OPTIONS": "--smol",
+   "NODE_OPTIONS": "--max-old-space-size=8192"
+  },
+  "go": {
+   "goarch": "amd64",
+   "goos": "linux",
+   "measurements": [
+    {
+     "width": 14,
+     "n": 1000000,
+     "heap_alloc_delta": 16000000,
+     "bytes_per_string": 16,
+     "mallocs_delta": 1000000,
+     "size_class_mallocs": [
+      {
+       "size": 8,
+       "mallocs": 0
+      },
+      {
+       "size": 16,
+       "mallocs": 1000000
+      },
+      {
+       "size": 24,
+       "mallocs": 0
+      },
+      {
+       "size": 32,
+       "mallocs": 0
+      },
+      {
+       "size": 48,
+       "mallocs": 0
+      }
+     ],
+     "note": "HeapAlloc delta over n strings; the []string holding them is allocated before the baseline"
+    },
+    {
+     "width": 16,
+     "n": 1000000,
+     "heap_alloc_delta": 16005320,
+     "bytes_per_string": 16.00532,
+     "mallocs_delta": 1000006,
+     "size_class_mallocs": [
+      {
+       "size": 8,
+       "mallocs": 1
+      },
+      {
+       "size": 16,
+       "mallocs": 1000000
+      },
+      {
+       "size": 24,
+       "mallocs": 0
+      },
+      {
+       "size": 32,
+       "mallocs": 0
+      },
+      {
+       "size": 48,
+       "mallocs": 0
+      }
+     ],
+     "note": "HeapAlloc delta over n strings; the []string holding them is allocated before the baseline"
+    },
+    {
+     "width": 17,
+     "n": 1000000,
+     "heap_alloc_delta": 24000016,
+     "bytes_per_string": 24.000016,
+     "mallocs_delta": 1000001,
+     "size_class_mallocs": [
+      {
+       "size": 8,
+       "mallocs": 0
+      },
+      {
+       "size": 16,
+       "mallocs": 1
+      },
+      {
+       "size": 24,
+       "mallocs": 1000000
+      },
+      {
+       "size": 32,
+       "mallocs": 0
+      },
+      {
+       "size": 48,
+       "mallocs": 0
+      }
+     ],
+     "note": "HeapAlloc delta over n strings; the []string holding them is allocated before the baseline"
+    }
+   ],
+   "runtime": "go1.26.9",
+   "string_header_bytes": 16
+  },
+  "cpython": {
+   "python3.14": {
+    "version": "3.14.8",
+    "free_threaded": false,
+    "width14": {
+     "width": 14,
+     "n": 1000000,
+     "getsizeof_str": 55,
+     "getsizeof_bytes": 47,
+     "rss_delta": 64258048,
+     "rss_per_string": 64.258048,
+     "pymalloc_blocks_in_use_delta_by_class": {
+      "64": 1000004
+     },
+     "sample": "00000000004C91"
+    },
+    "width16": {
+     "width": 16,
+     "n": 1000000,
+     "getsizeof_str": 57,
+     "getsizeof_bytes": 49,
+     "rss_delta": 64258048,
+     "rss_per_string": 64.258048,
+     "pymalloc_blocks_in_use_delta_by_class": {
+      "64": 1000004
+     },
+     "sample": "0000000000004C91"
+    }
+   },
+   "python3.14t": {
+    "version": "3.14.8",
+    "free_threaded": true,
+    "width14": {
+     "width": 14,
+     "n": 1000000,
+     "getsizeof_str": 71,
+     "getsizeof_bytes": 63,
+     "rss_delta": 79511552,
+     "rss_per_string": 79.511552,
+     "pymalloc_blocks_in_use_delta_by_class": {},
+     "sample": "00000000004C91"
+    },
+    "width16": {
+     "width": 16,
+     "n": 1000000,
+     "getsizeof_str": 73,
+     "getsizeof_bytes": 65,
+     "rss_delta": 79511552,
+     "rss_per_string": 79.511552,
+     "pymalloc_blocks_in_use_delta_by_class": {},
+     "sample": "0000000000004C91"
+    }
+   }
+  },
+  "node": {
+   "version": "v24.21.0",
+   "v8": "13.6.233.17-node.53",
+   "engine": "V8",
+   "pointer_compression": false,
+   "width14": {
+    "width": 14,
+    "n": 1000000,
+    "heap_used_delta": 31999232,
+    "heap_used_per_string": 31.999232,
+    "rss_delta": 89034752,
+    "rss_per_string": 89.034752,
+    "sample": "00000000004C91",
+    "sample_length": 14
+   },
+   "width16": {
+    "width": 16,
+    "n": 1000000,
+    "heap_used_delta": 31999232,
+    "heap_used_per_string": 31.999232,
+    "rss_delta": 86167552,
+    "rss_per_string": 86.167552,
+    "sample": "0000000000004C91",
+    "sample_length": 16
+   }
+  },
+  "bun": {
+   "version": "1.4.3",
+   "revision": "c6da4a4d3010e5553438c60f6bd76d981976867c",
+   "engine": "JavaScriptCore",
+   "width14": {
+    "width": 14,
+    "n": 1000000,
+    "heap_used_delta": 30024093,
+    "heap_used_per_string": 30.024093,
+    "rss_delta": 100790272,
+    "rss_per_string": 100.790272,
+    "sample": "00000000004C91",
+    "sample_length": 14,
+    "jsc_heap_size_delta": 30024093,
+    "jsc_heap_size_per_string": 30.024093,
+    "jsc_extra_memory_delta": 14011085,
+    "jsc_extra_memory_per_string": 14.011085,
+    "jsc_object_count_delta": 1000157
+   },
+   "width16": {
+    "width": 16,
+    "n": 1000000,
+    "heap_used_delta": 32013761,
+    "heap_used_per_string": 32.013761,
+    "rss_delta": 100327424,
+    "rss_per_string": 100.327424,
+    "sample": "0000000000004C91",
+    "sample_length": 16,
+    "jsc_heap_size_delta": 32013761,
+    "jsc_heap_size_per_string": 32.013761,
+    "jsc_extra_memory_delta": 16001201,
+    "jsc_extra_memory_per_string": 16.001201,
+    "jsc_object_count_delta": 1000155
+   }
+  },
+  "not_measured_here": {
+   "beam": "no Erlang in this environment; the article cites the OTP efficiency guide",
+   "valkey9": "not installed here; the article cites the Valkey blog, no numbers are invented",
+   "mysql": "not installed here; the article cites the MySQL 8.0 reference manual"
+  },
+  "seconds": 8.9
+ },
+ "seconds_total": 66.7
+}

@@ -1,0 +1,22 @@
+[package]
+name = "brd14-ffi"
+description = "C ABI drop-in for native/include/branded_id.h over the brd14 Rust cores."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "brd14_ffi" # -> libbrd14_ffi.so / libbrd14_ffi.a (native/beam links the .so)
+path = "src/lib.rs"
+crate-type = ["cdylib", "staticlib"]
+
+[features]
+default = []
+# Select the table-free memory core instead of the speed core.
+memory = []
+
+[dependencies]
+brd14 = { path = "../brd14" }

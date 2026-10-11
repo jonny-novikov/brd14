@@ -5,3 +5,24 @@ version = 4
 [[package]]
 name = "brd14"
 version = "0.2.0"
+
+[[package]]
+name = "brd14-conform"
+version = "0.2.0"
+dependencies = [
+ "brd14",
+]
+
+[[package]]
+name = "brd14-ffi"
+version = "0.2.0"
+dependencies = [
+ "brd14",
+]
+
+[[package]]
+name = "brd14-wasm"
+version = "0.2.0"
+dependencies = [
+ "brd14",
+]

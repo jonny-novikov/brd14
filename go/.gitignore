@@ -1,0 +1,2 @@
+# raw `make bench` output (the JSON lands in ../bench/results/, also uncommitted)
+/bench.out

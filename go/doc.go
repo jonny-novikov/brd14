@@ -50,6 +50,25 @@
 // ids must stay attributable to it should pin its node explicitly with
 // NewGenerator or NewMinter rather than derive one.
 //
+// # Refusals name their cause
+//
+// Every refusal satisfies errors.Is(err, ErrInvalid), and is exactly one of
+// ErrLength, ErrNamespace, ErrCharset or ErrRange — the contract's error
+// classes, shared with every other implementation. When an input breaks several
+// rules the cause follows the contract's namespace-first precedence: encode
+// reports a namespace fault before a range fault, and decode reports length,
+// then namespace, then charset, then range. Compare with errors.Is, never ==.
+//
+// # Allocation
+//
+// The hot path allocates nothing: AppendEncode (given Len bytes of spare
+// capacity), Parse, ParseBytes, Decode, DecodeBytes, Valid, ValidBytes,
+// Hash32, the field readers, NodeFrom, Generator.Next and
+// Generator.AppendNextBranded — on success and on every refusal, since the
+// causes are preallocated. Encode and NextBranded allocate exactly one thing,
+// the string they return. alloc_test.go asserts each of those counts with
+// testing.AllocsPerRun, so they are contract, not observation.
+//
 // # Namespaces are yours
 //
 // This package ships no namespaces and no census. Which three-letter brands

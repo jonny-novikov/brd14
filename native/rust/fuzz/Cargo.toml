@@ -1,0 +1,39 @@
+# The cargo-fuzz project (nightly + libFuzzer). Deliberately outside the workspace
+# (native/rust/Cargo.toml excludes it): libfuzzer-sys is the one third-party crate in the
+# tree, and it never reaches a library build.
+#
+#   make -C native/rust fuzz FUZZ_SECONDS=30
+#   cargo +nightly fuzz run --fuzz-dir fuzz decode_differential   (from native/rust)
+[package]
+name = "brd14-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+brd14 = { path = "../crates/brd14" }
+
+[[bin]]
+name = "decode_differential"
+path = "fuzz_targets/decode_differential.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "encode_differential"
+path = "fuzz_targets/encode_differential.rs"
+test = false
+doc = false
+bench = false
+
+# A standalone workspace root: never a member of native/rust's workspace.
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1

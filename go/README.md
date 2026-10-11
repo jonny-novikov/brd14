@@ -17,10 +17,11 @@ go get github.com/jonny-novikov/brd14/go
 import brd14 "github.com/jonny-novikov/brd14/go"
 ```
 
-No dependencies. Standard library only. The module lives in the `go/` folder of a
-polyglot repository, so its import path ends in `/go` and its release tags are `go/vX.Y.Z`.
-v0.1.0 was published at the repository root (`github.com/jonny-novikov/brd14`) and stays
-resolvable there; new work lands here.
+No dependencies. Standard library only. Go ≥ 1.22 (developed on 1.26; the floor is proven by
+running the suite on go1.22.12). The module lives in the `go/` folder of a polyglot repository, so
+its import path ends in `/go` and its release tags are `go/vX.Y.Z`. v0.1.0 was published at the
+repository root (`github.com/jonny-novikov/brd14`) and stays resolvable there; new work lands here
+— [migrating](../docs/go.md#migrating-from-v010) is an import-path change plus `errors.Is`.
 
 ## Use
 
@@ -36,6 +37,43 @@ brd14.Valid(id)                        // shape + range, total, never panics
 
 Sorting a slice of ids as plain strings puts them in mint order — see
 [Ordering](#ordering-stated-honestly) for the exact guarantee.
+
+### Zero allocation
+
+Every hot-path call has a form over caller-owned memory that allocates **nothing** — on success
+and on every refusal:
+
+```go
+buf := make([]byte, 0, 64)
+
+buf, err = brd14.AppendEncode(buf[:0], "USR", snow) // Encode into buf; buf unchanged on refusal
+buf, err = g.AppendNextBranded(buf[:0], "USR")      // mint into buf: clock, CAS and encode, no heap
+ns, snow, err := brd14.ParseBytes(buf)              // ns is a [3]byte; nothing aliases buf
+snow, err = brd14.DecodeBytes(buf)
+ok := brd14.ValidBytes(buf)
+```
+
+`Parse`, `Decode`, `Valid`, `Hash32`, `Next`, `NodeFrom` and the field readers allocate nothing
+either; `Encode` and `NextBranded` allocate exactly the string they return. These counts are
+asserted by `alloc_test.go` with `testing.AllocsPerRun`, not merely observed — see
+[docs/go.md](../docs/go.md#zero-allocation-and-how-it-is-proven) for the tests, the `-benchmem`
+lines and the escape analysis behind them.
+
+### Errors name their cause
+
+Every refusal satisfies `errors.Is(err, brd14.ErrInvalid)` and is exactly one of `ErrLength`,
+`ErrNamespace`, `ErrCharset` or `ErrRange` — the contract's error classes. When an input breaks
+several rules, the contract's namespace-first precedence decides which is reported: encode checks
+the namespace before the range; decode checks length, namespace, charset, then range.
+
+```go
+_, _, err := brd14.Parse("USR{0000000000")
+errors.Is(err, brd14.ErrInvalid) // true
+errors.Is(err, brd14.ErrCharset) // true: '{' is off-alphabet (it also sorts above the max)
+```
+
+Compare with `errors.Is`, never `==`: the sentinel is the parent of the causes, not the value
+returned.
 
 ## Namespaces are yours
 
@@ -82,7 +120,7 @@ fields without parsing back an id they just minted.
 | Layout | `ts(41) << 22 \| node(10) << 12 \| seq(12)` |
 | Epoch | `1704067200000` — 2024-01-01T00:00:00Z |
 | Domain | `[0, 2^63)`. The payload never exceeds `AzL8n0Y58m7`; `USRzzzzzzzzzzz` is **refused, not wrapped** |
-| Errors | one sentinel, `ErrInvalid`. Compare with `errors.Is` |
+| Errors | `ErrInvalid`, refined by the causes `ErrLength`, `ErrNamespace`, `ErrCharset`, `ErrRange`. Compare with `errors.Is` |
 
 **Fourteen bytes is permanent.** It is a public contract, not a current implementation. brd14's
 width never changes; a wider namespace is a different format with its own name and length
@@ -120,6 +158,18 @@ the hostname followed by the ASCII-decimal pid, masked to 10 bits, so two proces
 almost always differ — with a **residual collision of about 1 in 1024 per same-host process pair**.
 That residual is load-independent and never zero: budgetable, not absent. A service whose ids must
 stay attributable to it should pin its node explicitly rather than derive one.
+
+## Development
+
+```bash
+make test      # vet + the suite; reads ../vectors (BRD14_REQUIRE_VECTORS=1 makes it mandatory)
+make conform   # the parity shim -> ../build/shims/go-conform (python3 tools/parity.py --only go)
+make bench     # pinned benches -> ../bench/results/go-reference-<go version>.json
+make harden    # vet, -race, the go1.22.12 floor, native fuzzing
+```
+
+The full reference — API table, allocation proofs, the two range guards, benchmarks, runtime
+notes — is [docs/go.md](../docs/go.md).
 
 ## License
 

@@ -1,0 +1,23 @@
+[package]
+name = "brd14-wasm"
+description = "The brd14 WebAssembly ABI (docs/contract.md): raw exports, fixed memory, no imports, no allocator."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+build = "build.rs"
+
+[lib]
+name = "brd14_wasm" # -> target/wasm32-unknown-unknown/release/brd14_wasm.wasm
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[features]
+default = []
+# Select the table-free memory core instead of the speed core.
+memory = []
+
+[dependencies]
+brd14 = { path = "../brd14" }

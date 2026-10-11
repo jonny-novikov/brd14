@@ -9,9 +9,12 @@
  * and (b) emits two digits per divmod through a 62x62 pair table, so the two
  * chains run 2 + 2 divmods instead of 5 + 6. All divisors are compile-time
  * constants and are strength-reduced to multiply+shift (Granlund & Montgomery,
- * PLDI 1994); the bench proves it by counting div instructions in the object
- * code. The pair-table step is the base-100 itoa technique (Alexandrescu)
- * carried to base 62^2.
+ * PLDI 1994); `make gates` proves it by counting div instructions in the
+ * object code (zero). That holds at -O2, which this core is built with: at -Os
+ * gcc 13 emits five real `div`s here, and the gate fails — see ../memory for
+ * the core that must survive -Os and so writes its reciprocals out by hand.
+ * The pair-table step is the base-100 itoa technique (Alexandrescu) carried
+ * to base 62^2.
  *
  * decode: one 256-byte table maps bytes to digit+1 (0 = invalid), so charset
  * validation and digit extraction share a load. The range check exploits the
@@ -93,7 +96,9 @@ static const char PAIRS[62 * 62 * 2 + 1] =
     "y0y1y2y3y4y5y6y7y8y9yAyByCyDyEyFyGyHyIyJyKyLyMyNyOyPyQyRySyTyUyVyWyXyYyZyaybycydyeyfygyhyiyjykylymynyoypyqyrysytyuyvywyxyyyz"
     "z0z1z2z3z4z5z6z7z8z9zAzBzCzDzEzFzGzHzIzJzKzLzMzNzOzPzQzRzSzTzUzVzWzXzYzZzazbzczdzezfzgzhzizjzkzlzmznzozpzqzrzsztzuzvzwzxzyzz";
 
-/* base62(2^63 - 1): the largest valid payload. Verified in the test suite. */
+/* base62(2^63 - 1): the largest valid payload. Verified by test/test_props.c
+ * (V-4, and every position of it bumped up / stepped down) against a
+ * reference model that does not use the lexicographic guard. */
 static const char MAX_PAYLOAD[BRANDED_PAYLOAD_LEN] =
     {'A','z','L','8','n','0','Y','5','8','m','7'};
 
@@ -124,8 +129,12 @@ static inline void put_pair(char *dst, uint32_t k) {
 
 branded_status branded_encode(const char ns[BRANDED_NS_LEN], uint64_t snowflake,
                               char out[BRANDED_LEN]) {
-  if (snowflake > (uint64_t)INT64_MAX) return BRANDED_ERR_RANGE;
+  /* Namespace-first (docs/contract.md, "Errors and precedence"): a caller
+   * that is wrong in both ways gets the brand diagnostic, the actionable one,
+   * the same way decode reports NAMESPACE before CHARSET/RANGE. Both checks
+   * are a handful of ALU ops, so the order costs nothing on the hot path. */
   if (!ns_valid(ns)) return BRANDED_ERR_NAMESPACE;
+  if (snowflake > (uint64_t)INT64_MAX) return BRANDED_ERR_RANGE;
 
   out[0] = ns[0]; out[1] = ns[1]; out[2] = ns[2];
   char *p = out + BRANDED_NS_LEN; /* p[0..10] = the 11 payload digits */

@@ -34,8 +34,9 @@ The implementations share **no code**. They agree because three things hold:
 | **memory** | Smallest footprint: no lookup tables | C `memory`, Rust `memory` | The same split. One digit per constant divmod. Digit↔char done arithmetically, the charset check by three disjoint range masks, and the range guard arithmetic: `(hi, lo)` vs `(QA, RB)` |
 | **wasm** | Native speed inside JS runtimes | `ts/packages/brd14-wasm` | The Rust core compiled to wasm32 with raw exports, fixed memory, and batch entry points |
 
-**Speed vs memory trade-off.** The speed tier carries about 8 KB of read-only tables (a 7,688-byte
-pair table plus a 256-byte decode table). That is cheap for a server, but it costs L1 lines in hot
+**Speed vs memory trade-off.** The speed tier carries 8,063 bytes of read-only data (measured by
+`size -A`: the 62×62 pair table, the 256-byte decode table, the alphabet and the max payload); the
+memory tier carries **0** — its `.rodata` is empty and it calls no libc function at all. That is cheap for a server, but it costs L1 lines in hot
 loops shared with other work, and it is real weight for wasm or embedded targets. The memory tier
 carries none of it.
 

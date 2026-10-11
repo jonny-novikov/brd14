@@ -1,0 +1,28 @@
+{
+  "name": "brd14",
+  "version": "0.1.0",
+  "description": "A 14-byte branded identity: time-ordered, coordination-free, carrying its own type. Pure TypeScript, exact 64-bit arithmetic without BigInt on the hot path.",
+  "keywords": ["id", "snowflake", "base62", "branded", "identifier", "ulid", "uuid"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonny-novikov/brd14.git",
+    "directory": "ts/packages/brd14"
+  },
+  "homepage": "https://github.com/jonny-novikov/brd14/tree/main/ts/packages/brd14",
+  "bugs": "https://github.com/jonny-novikov/brd14/issues",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24",
+    "bun": ">=1.4"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../../scripts/publish-manifest.ts .",
+    "test": "vitest run --root ../.."
+  }
+}

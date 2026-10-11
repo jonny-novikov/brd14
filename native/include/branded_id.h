@@ -3,6 +3,28 @@
  * Format:  3 x [A-Z] namespace ++ 11 x [0-9A-Za-z] base62(snowflake), 14 bytes fixed.
  * Range:   snowflake in [0, 2^63), layout ts(41) << 22 | node(10) << 12 | seq(12),
  *          epoch 2024-01-01T00:00:00Z (BRANDED_EPOCH_MS).
+ * Normative spec: docs/contract.md; executable spec: tools/oracle.py.
+ *
+ * Two cores implement this header with identical observable behaviour, and the
+ * parity run (tools/parity.py) holds both to the oracle byte for byte:
+ *   native/c/speed/   pair table + 256-byte decode table + lexicographic guard
+ *   native/c/memory/  no lookup tables at all: arithmetic digit mapping, range
+ *                     masks, and the arithmetic (hi, lo) vs (QA, RB) guard
+ * A consumer switches cores by linking a different object; nothing else moves.
+ *
+ * Error precedence — namespace-first, in both directions (the most specific,
+ * most actionable diagnostic wins; the same rule as the minter's gate-first):
+ *   encode:  NAMESPACE -> RANGE
+ *   decode:  LENGTH -> NAMESPACE -> CHARSET -> RANGE
+ * The encode ABI is fixed-width (ns is exactly 3 bytes), so it cannot see a
+ * namespace of the wrong LENGTH. Callers holding a variable-length namespace
+ * must refuse len != 3 as BRANDED_ERR_NAMESPACE themselves, before calling
+ * branded_encode (reading 3 bytes from a shorter buffer is out of bounds, and
+ * passing the prefix of a longer one would accept "USRR" as "USR").
+ *
+ * Outputs are written only on BRANDED_OK: a refused call leaves out, ns_out
+ * and *snowflake_out untouched. No function allocates, locks, or reads global
+ * mutable state, so every entry point is reentrant and thread-safe.
  *
  * Contract vectors (every implementation must pass):
  *   encode("USR", 274557032793636864)  -> "USR0KHTOWnGLuC"
@@ -33,13 +55,17 @@ typedef enum {
   BRANDED_ERR_RANGE     = 4   /* value outside [0, 2^63)                     */
 } branded_status;
 
-/* Writes exactly BRANDED_LEN bytes to out; no NUL terminator is appended. */
+/* Writes exactly BRANDED_LEN bytes to out; no NUL terminator is appended.
+ * Validation order: namespace (3 bytes of [A-Z]), then range (< 2^63), so a
+ * call that is wrong in both ways reports BRANDED_ERR_NAMESPACE. */
 branded_status branded_encode(const char ns[BRANDED_NS_LEN], uint64_t snowflake,
                               char out[BRANDED_LEN]);
 
 /* Parses exactly len == BRANDED_LEN bytes; on success fills ns_out (3 bytes,
  * no NUL) and *snowflake_out (< 2^63). Validation order: length, namespace,
- * charset, range. */
+ * charset, range — a payload both off-alphabet and above the maximum is
+ * BRANDED_ERR_CHARSET. Total: any len and any byte values are accepted and
+ * classified; id is read only when len == BRANDED_LEN. */
 branded_status branded_decode(const char *id, size_t len,
                               char ns_out[BRANDED_NS_LEN], uint64_t *snowflake_out);
 

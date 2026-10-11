@@ -35,7 +35,8 @@ numeric order* (vector T-4). So "value < 2^63" can be checked either way:
   With `QA = 162382637` and `RB = 503620799` (since `2^63 − 1 = QA·62^6 + RB`), the value is in range iff
   `hi < QA || (hi == QA && lo <= RB)`. Used by the memory cores, Go `ParseBytes`, and TypeScript.
 
-Both are exact; the vectors pin the boundary from both sides (`AzL8n0Y58m7` accepted, `AzL8n0Y58m8` refused).
+Both are exact and either is conforming (the "used by" lists above are informative, not
+normative); the vectors pin the boundary from both sides (`AzL8n0Y58m7` accepted, `AzL8n0Y58m8` refused).
 
 ## Operations
 
@@ -45,7 +46,7 @@ Both are exact; the vectors pin the boundary from both sides (`AzL8n0Y58m7` acce
 | `decode(id) → (ns, snow)` | inverse of encode; total over every byte string (never panics/throws anything but the contract error). |
 | `hash32(k) → u32` | first half of MurmurHash3 `fmix64`, truncated: `k ^= k >> 33; k *= 0xFF51AFD7ED558CCD (mod 2^64); k ^= k >> 33; return k mod 2^32`. Defined on the full u64. |
 | `unix_ms(snow)` | `(snow >> 22) + 1704067200000` |
-| `min_for(t_ms)` | `(t_ms − 1704067200000) << 22` — the half-open lower bound for time-range scans |
+| `min_for(t_ms)` | `(t_ms − 1704067200000) << 22` — the half-open lower bound for time-range scans. Defined for `t_ms` in `[epoch, epoch + 2^41)`; outside it the result is implementation-defined (Rust saturates, Go wraps) and is not parity-tested. |
 | `node_of(snow)`, `seq_of(snow)` | `(snow >> 12) & 1023`, `snow & 4095` |
 | `node_from(host, pid)` | FNV-32a over `host bytes ++ ASCII-decimal(pid)`, `& 1023`. Empty host hashes the pid alone. |
 
@@ -88,9 +89,9 @@ diagnostic wins, the same rule as the minter's gate-first:
 - **decode:** `LENGTH` → `NAMESPACE` → `CHARSET` → `RANGE`. A payload that is both off-alphabet
   and lexicographically above the max is `CHARSET`.
 
-Go keeps one sentinel, `ErrInvalid`, and exposes the classes as wrapped causes
-(`ErrLength`, `ErrNamespace`, `ErrCharset`, `ErrRange`) so `errors.Is(err, ErrInvalid)` keeps
-holding. Python raises `InvalidIdError(ValueError)` with `.code`; TypeScript throws
+Go keeps one sentinel, `ErrInvalid`, and exposes the classes as preallocated causes
+(`ErrLength`, `ErrNamespace`, `ErrCharset`, `ErrRange`) whose `Is` method matches `ErrInvalid`,
+so `errors.Is(err, ErrInvalid)` keeps holding and a refusal allocates nothing. Python raises `InvalidIdError(ValueError)` with `.code`; TypeScript throws
 `InvalidIdError` with `.code`. The Elixir NIF maps every class to `:error`.
 
 String-typed APIs (Python `str`, JS `string`) classify on the **UTF-8 bytes** of the input, so a
@@ -158,11 +159,14 @@ IO region is exposed by `io_ptr()`.
 | Export | Semantics |
 |---|---|
 | `io_ptr() → i32` | address of the IO region |
-| `encode(ns: i32, snow: i64) → i32` | `ns` = the 3 namespace bytes packed little-endian (`b0 \| b1<<8 \| b2<<16`), `0` bytes for non-ASCII/short; `snow` = the value as i64, `-1` for anything outside `[0, 2^63)`. Writes 14 bytes at `io[0..14]`; returns the status code (0 = OK). |
+| `encode(ns: i32, snow: i64) → i32` | `ns` = the 3 namespace bytes packed little-endian (`b0 \| b1<<8 \| b2<<16`), `0` bytes for non-ASCII/short; a non-zero fourth byte is `NAMESPACE`. `snow` = the value as i64, `-1` for anything outside `[0, 2^63)`. Writes 14 bytes at `io[0..14]`; returns the status code (0 = OK). |
 | `decode(len: i32) → i64` | reads `len` bytes at `io[0..]`; returns the snowflake (≥ 0), or `−code` (−1..−4). The namespace is `io[0..3]` on success. |
 | `hash32(k: i64) → i32` | as defined above (reinterpret the result as u32) |
 | `encode_many(ns: i32, n: i32) → i32` | input `n` i64 at `io[0..8n]`, output `14n` bytes at `io[8n..]`; returns the count encoded before the first error |
-| `decode_many(n: i32) → i32` | input `n × 14` bytes at `io[0..14n]`, output `n` i64 (same sign convention) at the next 8-aligned offset; returns `n` |
+| `decode_many(n: i32) → i32` | input `n × 14` bytes at `io[0..14n]`, output `n` i64 (same sign convention) at offset `(14n + 7) & ~7`; returns `n` |
+
+Batch calls clamp `n` to `[0, 2978]` — the most that fits the 64 KiB IO region (`22n ≤ 65536`
+plus alignment) — so a loader chunks larger batches.
 
 ## The format family
 

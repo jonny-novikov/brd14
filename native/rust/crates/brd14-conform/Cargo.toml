@@ -1,0 +1,16 @@
+[package]
+name = "brd14-conform"
+description = "The brd14 parity shim (docs/contract.md, Parity shim protocol) over the Rust cores."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "brd14-conform"
+path = "src/main.rs"
+
+[dependencies]
+brd14 = { path = "../brd14" }

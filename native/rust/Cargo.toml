@@ -1,6 +1,9 @@
 [workspace]
 resolver = "3"
-members = ["crates/brd14"]
+members = ["crates/brd14", "crates/brd14-conform", "crates/brd14-ffi", "crates/brd14-wasm"]
+# The cargo-fuzz project has its own manifest and lockfile (it needs libfuzzer-sys and a
+# nightly toolchain); it is never part of a workspace build.
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.2.0"

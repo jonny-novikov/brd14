@@ -1,11 +1,25 @@
 [package]
 name = "brd14"
-description = "The brd14 branded snowflake contract: no_std, allocation-free codec."
+description = "The brd14 branded snowflake contract: a no_std, allocation-free codec (speed and memory cores)."
 version.workspace = true
-edition = "2021"   # W0: source moved verbatim; W2c moves to 2024 with the ffi split
+edition.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
+keywords = ["snowflake", "base62", "id", "no_std"]
+categories = ["encoding", "no-std", "no-std::no-alloc"]
 
 [lib]
 path = "src/lib.rs"
+
+[[bench]]
+name = "codec"
+harness = false
+required-features = ["std"] # the mint op needs the Generator
+
+[features]
+default = []
+# The lock-free Generator (wall clock, default_node) and the Minter seam. The codec never
+# needs it; do not enable it on a crate that defines its own #[panic_handler] (brd14-ffi,
+# brd14-wasm), or the two panic handlers collide.
+std = []

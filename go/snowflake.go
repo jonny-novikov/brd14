@@ -1,7 +1,6 @@
 package brd14
 
 import (
-	"hash/fnv"
 	"os"
 	"strconv"
 	"sync/atomic"
@@ -33,31 +32,46 @@ func NewGenerator(node uint64) *Generator {
 	return g
 }
 
-// nodeFrom derives the 10-bit node id: FNV-32a over host-bytes (possibly
-// empty) followed by the ASCII-decimal pid, masked to nodeMask. The pid is
-// mixed UNCONDITIONALLY, so two processes on one host derive DIFFERENT node
-// ids except when the masked hash collides — a residual of ~1/1024 per
-// same-host process pair, load-independent and never zero. Collision is made
-// improbable and budgetable, not impossible. An empty host reproduces the
-// pre-fix fallback bytes exactly (the ASCII-decimal pid alone).
-func nodeFrom(host string, pid int) uint64 {
-	h := fnv.New32a()
-	if host != "" {
-		_, _ = h.Write([]byte(host))
+// NodeFrom derives a 10-bit node id: FNV-32a over the host bytes (possibly
+// empty) followed by the ASCII-decimal pid, masked to 10 bits — the contract's
+// node_from, which every implementation reproduces and vectors/node.tsv pins.
+// The pid is mixed UNCONDITIONALLY, so two processes on one host derive
+// DIFFERENT node ids except when the masked hash collides — a residual of
+// ~1/1024 per same-host process pair, load-independent and never zero.
+// Collision is made improbable and budgetable, not impossible. An empty host
+// hashes the ASCII-decimal pid alone, which reproduces the pre-fix fallback
+// bytes exactly.
+//
+// The hash is written out rather than taken from hash/fnv: that package hands
+// back its state behind an interface and wants the host as a []byte, which is
+// two allocations for a dozen lines of arithmetic. This form allocates nothing
+// and is the contract's definition verbatim; TestNodeFromMatchesHashFNV holds
+// it to the standard library's implementation.
+func NodeFrom(host string, pid int) uint64 {
+	const offset32, prime32 = 2166136261, 16777619 // the FNV-1a 32-bit parameters
+	h := uint32(offset32)
+	for i := 0; i < len(host); i++ {
+		h ^= uint32(host[i])
+		h *= prime32
 	}
-	_, _ = h.Write([]byte(strconv.Itoa(pid)))
-	return uint64(h.Sum32()) & nodeMask
+	var dec [20]byte // len("-9223372036854775808"): any int's decimal fits
+	for _, c := range strconv.AppendInt(dec[:0], int64(pid), 10) {
+		h ^= uint32(c)
+		h *= prime32
+	}
+	return uint64(h) & nodeMask
 }
 
 // DefaultNode derives a coordination-free node id (0..1023) from the hostname
 // AND the pid — no registry, mint on any host. Distinct per process on one
-// host up to the residual nodeFrom documents.
+// host up to the residual NodeFrom documents. A hostname error falls back to
+// the empty host, which NodeFrom hashes as the pid alone.
 func DefaultNode() uint64 {
 	name, err := os.Hostname()
 	if err != nil {
 		name = ""
 	}
-	return nodeFrom(name, os.Getpid())
+	return NodeFrom(name, os.Getpid())
 }
 
 // Next mints the next monotonic snowflake.
@@ -69,8 +83,20 @@ func (g *Generator) Next() uint64 {
 }
 
 // NextBranded mints the next snowflake and brands it under ns in one call.
+// The returned string is its only allocation. Like every refusal here, a
+// malformed ns yields ErrNamespace; the snowflake drawn for it is simply
+// skipped, which a generator's contract allows (strictly increasing, not
+// gap-free).
 func (g *Generator) NextBranded(ns string) (string, error) {
 	return Encode(ns, g.Next())
+}
+
+// AppendNextBranded is NextBranded appending to a caller-owned buffer, under
+// AppendEncode's rules: a refusal returns dst unchanged, and with Len bytes of
+// spare capacity nothing is allocated — the whole mint, clock read and CAS
+// included, runs without touching the heap.
+func (g *Generator) AppendNextBranded(dst []byte, ns string) ([]byte, error) {
+	return AppendEncode(dst, ns, g.Next())
 }
 
 func (g *Generator) advance(cand int64) int64 {
@@ -90,6 +116,8 @@ func nowPart() int64 {
 	return (time.Now().UnixMilli() - EpochMs) << seqBits
 }
 
-// NodeOf and SeqOf decode the node and sequence fields of a snowflake.
+// NodeOf decodes the node field of a snowflake: (snow >> 12) & 1023.
 func NodeOf(snow uint64) uint64 { return (snow >> seqBits) & nodeMask }
-func SeqOf(snow uint64) uint64  { return snow & seqMask }
+
+// SeqOf decodes the sequence field of a snowflake: snow & 4095.
+func SeqOf(snow uint64) uint64 { return snow & seqMask }
