@@ -1,4 +1,4 @@
-module github.com/jonny-novikov/brd14
+module github.com/jonny-novikov/brd14/go
 
 // The floor is real, not aspirational: the production files need only 1.19
 // (sync/atomic.Int64), but the contract vectors use math/rand/v2, which is

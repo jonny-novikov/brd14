@@ -1,0 +1,11 @@
+[package]
+name = "brd14"
+description = "The brd14 branded snowflake contract: no_std, allocation-free codec."
+version.workspace = true
+edition = "2021"   # W0: source moved verbatim; W2c moves to 2024 with the ffi split
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+path = "src/lib.rs"

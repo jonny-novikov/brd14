@@ -1,0 +1,7 @@
+# Pinned with scripts/versions.env (RUST_VERSION). wasm32 is needed by
+# crates/brd14-wasm; rustup installs both on first use.
+[toolchain]
+channel = "1.99.0"
+profile = "minimal"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]

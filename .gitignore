@@ -1,29 +1,47 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Test binary, built with `go test -c`
-*.test
-
-# Code coverage profiles and other test artifacts
+# --- generic
+.env
+.idea/
+.vscode/
+.DS_Store
 *.out
 coverage.*
 *.coverprofile
 profile.cov
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
+# --- go
+*.test
 go.work
 go.work.sum
 
-# env file
-.env
+# --- c / native
+build/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.exe~
+priv/
+native/c/fuzz/corpus/
+native/c/fuzz/crash-*
 
-# Editor/IDE
-.idea/
-.vscode/
+# --- rust
+native/rust/target/
+native/rust/fuzz/target/
+native/rust/fuzz/corpus/
+native/rust/fuzz/artifacts/
+
+# --- python
+__pycache__/
+*.py[cod]
+.venv*/
+*.egg-info/
+.pytest_cache/
+dist/
+
+# --- typescript / js
+node_modules/
+ts/**/dist/
+ts/packages/brd14-wasm/src/wasm-bytes.ts
+*.tsbuildinfo

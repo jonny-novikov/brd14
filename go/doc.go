@@ -12,7 +12,9 @@
 // # The shape is frozen
 //
 // Fourteen bytes is a permanent public contract, not a current implementation.
-// Namespace pressure resolves in data (a registered census) and never in width.
+// brd14's width never changes: a wider namespace is a different format with its
+// own name and length (brd15 and brd16 are reserved by the contract document in
+// the repository's docs/contract.md), never a wider brd14.
 // Every value in this package that the wire can observe — the epoch, the
 // alphabet's ASCII ordering, the field widths, the fixed 11-char payload — is
 // pinned by a frozen vector in contract_test.go that the Elixir, Rust, C and
