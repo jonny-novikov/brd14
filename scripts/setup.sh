@@ -3,8 +3,8 @@
 #
 #   scripts/setup.sh [core|full]
 #
-# core: Go, Python 3.14 + 3.14t, Node LTS, Bun, Rust (+wasm32), then per-directory
-#       dependencies for whichever manifests exist.
+# core: Go, Python 3.14 + 3.14t, Node LTS, Bun, Rust (+wasm32), Erlang/OTP + Elixir,
+#       then per-directory dependencies for whichever manifests exist.
 # full: core + Go floor toolchain, Rust nightly (Miri), libFuzzer runtime,
 #       PostgreSQL 16 server (storage probe for docs/articles).
 #
@@ -84,6 +84,16 @@ ensure_rust() {
   fi
 }
 
+ensure_beam() {
+  # Ubuntu's own packages: OTP 25.3 + Elixir 1.14, the floor ex/echo_data is held to.
+  if command -v elixir >/dev/null 2>&1 && elixir --version 2>/dev/null | grep -q "Elixir ${ELIXIR_VERSION} " \
+     && erl -noshell -eval 'io:format("~s",[erlang:system_info(otp_release)]),halt().' 2>/dev/null | grep -q "^${OTP_VERSION%%.*}$"; then
+    log "beam: OTP ${OTP_VERSION%%.*} + Elixir ${ELIXIR_VERSION} ok"; return 0
+  fi
+  log "apt: erlang-nox erlang-dev erlang-src elixir"
+  apt_install erlang-nox erlang-dev erlang-src elixir
+}
+
 ensure_full_extras() {
   [ "$TIER" = full ] || return 0
   local pkgs=()
@@ -98,6 +108,11 @@ ensure_deps() {
   if [ -f "$ROOT/python/Makefile" ]; then log "python: venvs"; make -s -C "$ROOT/python" venv; fi
   if [ -f "$ROOT/native/rust/Cargo.toml" ]; then log "rust: cargo fetch"; (cd "$ROOT/native/rust" && cargo fetch -q); fi
   if [ -f "$ROOT/go/go.mod" ]; then (cd "$ROOT/go" && go mod download); fi
+  if [ -f "$ROOT/ex/echo_data/mix.exs" ] && command -v mix >/dev/null 2>&1; then
+    log "ex: hex + deps"
+    mix local.hex --force --if-missing >/dev/null
+    (cd "$ROOT/ex/echo_data" && TMPDIR=/tmp mix deps.get >/dev/null)
+  fi
 }
 
 ensure_go
@@ -105,6 +120,7 @@ ensure_python
 ensure_node
 ensure_bun
 ensure_rust
+ensure_beam
 ensure_full_extras
 ensure_deps
 log "done (${TIER})"
