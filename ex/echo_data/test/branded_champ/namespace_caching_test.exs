@@ -108,8 +108,7 @@ defmodule EchoData.BrandedChamp.NamespaceCachingTest do
         end)
 
       # Cached version (O(1))
-      {cached_time, cached_count} =
-        :timer.tc(fn -> BrandedChamp.namespace_size(champ, "JOB") end)
+      {cached_time, cached_count} = :timer.tc(fn -> BrandedChamp.namespace_size(champ, "JOB") end)
 
       # Computed version (O(n) - actually counting)
       {computed_time, computed_count} =

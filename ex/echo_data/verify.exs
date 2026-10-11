@@ -1,6 +1,6 @@
-# verify.exs — production package verification, adapted to the echo umbrella.
-# The modules are already compiled by the umbrella (no Code.require_file); run via
-#   ASDF_ERLANG_VERSION=28.1 ASDF_ELIXIR_VERSION=1.18.4 mix run apps/echo_data/verify.exs
+# verify.exs — package verification for the standalone echo_data (brd14 ex/).
+# The modules are compiled by Mix (no Code.require_file); run from ex/echo_data:
+#   TMPDIR=/tmp mix run verify.exs
 # Exercises both codec paths (native when the .so is present, pure otherwise).
 
 alias EchoData.{BrandedChamp, BrandedId, BrandedMap, Snowflake}
@@ -38,7 +38,7 @@ IO.puts(
 )
 
 IO.puts("\n== 2. snowflake generator ==")
-# The umbrella's EchoData.Application already called Snowflake.start/0 at boot;
+# EchoData.Application already called Snowflake.start/0 at boot;
 # start/1 is idempotent (a no-op once started), so this keeps the boot node.
 :ok = Snowflake.start(7)
 s1 = Snowflake.next()

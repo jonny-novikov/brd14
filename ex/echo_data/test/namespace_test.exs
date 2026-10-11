@@ -14,7 +14,7 @@ defmodule EchoData.NamespaceTest do
   # -- R3 (a): totality -------------------------------------------------------
 
   property "classify/1 is total: an arbitrary binary never raises and always answers one of the four shapes" do
-    check all bin <- StreamData.binary() do
+    check all(bin <- StreamData.binary()) do
       result = Namespace.classify(bin)
 
       assert result in [:reserved, :developer, :invalid] or
@@ -23,7 +23,7 @@ defmodule EchoData.NamespaceTest do
   end
 
   property "classify/1 answers well-formed uppercase codes by width: 3 → platform-or-reserved, 4 → developer" do
-    check all code <- StreamData.string(?A..?Z, min_length: 3, max_length: 4) do
+    check all(code <- StreamData.string(?A..?Z, min_length: 3, max_length: 4)) do
       case byte_size(code) do
         3 ->
           assert Namespace.classify(code) == :reserved or
@@ -71,6 +71,7 @@ defmodule EchoData.NamespaceTest do
 
     for {code, space, _program, _semantics, status} = row <- rows do
       assert space == :platform, "row #{code} is outside the platform space: #{inspect(row)}"
+
       assert status in [:active, :reserved, :parked, :retired],
              "row #{code} carries an invalid status: #{inspect(status)}"
     end
