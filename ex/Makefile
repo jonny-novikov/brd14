@@ -45,7 +45,11 @@ package: deps
 
 # The falsifying check for "redistributable": the unpacked tarball must build alone, with the
 # repository's crates out of reach (unpacked outside the tree, so no ../../.. path resolves).
-package-check: package
+package-check:
+	@if [[ $(ECHO_DATA_NIF) == 0 ]]; then echo "package-check: skipped — the NIF's crates (native/rust/crates/brd14-data) are not in this tree yet"; \
+	 else $(MAKE) --no-print-directory package-check-run; fi
+
+package-check-run: package
 	rm -rf $(CHECK) && mkdir -p $(CHECK)
 	tar -xOf $(BUILD)/echo_data.tar contents.tar.gz | tar -xzf - -C $(CHECK)
 	cd $(CHECK) && TMPDIR=/tmp mix deps.get >/dev/null
@@ -62,4 +66,4 @@ package-check: package
 clean:
 	rm -rf $(APP)/_build $(APP)/deps $(APP)/native/echo_data_nif/target $(APP)/priv/*.so $(BUILD)
 
-.PHONY: deps test bench harden conform package package-check clean
+.PHONY: deps test bench harden conform package package-check package-check-run clean

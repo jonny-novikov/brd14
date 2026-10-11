@@ -21,5 +21,6 @@ Agents: start with [AGENTS.md](../AGENTS.md) (where) and [CLAUDE.md](../CLAUDE.m
 | [elixir.md](elixir.md) | `ex/echo_data`: the BEAM implementation, standalone on Elixir ≥ 1.14, and how it is proven. |
 | [structures.md](structures.md) | **Normative** for the structures extension: the champ's exact shape and digest, Tree and Buckets behaviour, the vectors. |
 | [kan/brd14-pragmatic-guide.md](kan/brd14-pragmatic-guide.md) | The pragmatic programmer's guide as one KAN story: layout profiles, branded structures, the NIF, decisions and rungs. |
+| [ci.md](ci.md) | CI on Fly.io: the `brd-build` app runs `scripts/ci.sh` once per deploy; setup, results, limits. |
 | [roadmap.md](roadmap.md) | What is done, what is next — implementation, measurement, CI — and the open decisions. |
 | [cli.md](cli.md) | The shell tools: `brd` and `mint`, the `.brdrc` settings file, recipes. |

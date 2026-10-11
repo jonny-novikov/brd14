@@ -159,7 +159,10 @@ rungs. The current story is [docs/kan/brd14-pragmatic-guide.md](docs/kan/brd14-p
 - **Cloud sessions:** the SessionStart hook provisions the toolchains (`scripts/setup.sh core`)
   and puts them on PATH via `scripts/env.sh`. Elsewhere, run `scripts/setup.sh` once, then
   `. scripts/env.sh`.
-- **Pins:** the pinned versions live only in `scripts/versions.env`. Bump them there; the CI job
-  fails when its `PIN_*` values drift.
+- **Pins:** the pinned versions live only in `scripts/versions.env`. Bump them there; the CI image
+  (`fly/Dockerfile`) installs from that file, so nothing else needs to change.
+- **CI** runs on Fly.io, not GitHub Actions: the app `brd-build` runs `scripts/ci.sh` once per
+  deploy as its release command ([docs/ci.md](docs/ci.md)). Run the same jobs locally with
+  `scripts/ci.sh <job>` before you push.
 - **Container quirk:** this container exports `BUN_OPTIONS=--smol` and `NODE_OPTIONS=…`. Clear
   them for benchmarks (`env -u BUN_OPTIONS -u NODE_OPTIONS`); `make -C ts bench` already does.

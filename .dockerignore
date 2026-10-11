@@ -1,0 +1,18 @@
+# The build context for fly/Dockerfile: the tree as a fresh clone has it. Build outputs and
+# local caches stay out — the image fetches its own dependencies.
+.git
+.claude
+.env
+build/
+**/target/
+**/node_modules/
+**/dist/
+**/_build/
+**/deps/
+**/.venv*/
+**/__pycache__/
+**/*.pyc
+native/c/build/
+native/c/fuzz/corpus/
+ts/packages/brd14-wasm/src/wasm-bytes.ts
+ex/echo_data/priv/*.so

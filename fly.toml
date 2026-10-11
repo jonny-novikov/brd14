@@ -1,0 +1,37 @@
+# fly.toml — brd-build: the brd14 CI suite on Fly.io. It replaces GitHub Actions (docs/ci.md).
+#
+# Every deploy builds fly/Dockerfile (every pinned toolchain), then runs scripts/ci.sh ONCE as the
+# release command, on a temporary Machine from the new image; a non-zero exit stops the deploy.
+# Deploys come from Fly's GitHub integration on push (app → Deployments → auto-deploy), or by
+# hand: scripts/fly-build.sh.
+app = "brd-build"
+primary_region = "iad"
+
+[build]
+  dockerfile = "fly/Dockerfile"
+
+[deploy]
+  release_command = "scripts/ci.sh"
+  release_command_timeout = "60m"
+
+  # The run-once Machine: 8 dedicated CPUs, and memory enough for the 20 GB RAM disk the suite
+  # works in (BRD_CI_TMPFS) on top of the compilers.
+  [deploy.release_command_vm]
+    size = "performance-8x"
+    memory = "32gb"
+
+[env]
+  BRD_CI_TMPFS = "20g"
+  BRD14_REQUIRE_VECTORS = "1"
+
+# The app Machine Fly keeps per deploy: the status page (fly/status.sh), stopped when idle.
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

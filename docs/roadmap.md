@@ -49,16 +49,12 @@ Where the work stands, and the plan to finish. Each item states the value it del
 
 ## Next — CI
 
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs these jobs:
+CI runs on Fly.io: the app `brd-build` runs [`scripts/ci.sh`](../scripts/ci.sh) once per deploy,
+as the release command on a temporary Machine ([ci.md](ci.md)); GitHub Actions is retired (it
+never assigned a runner on this account). The jobs: oracle (with the champ oracle, vectors
+reproducibility and the shell CLI), Go 1.26.9 and the 1.22.12 floor (race, fuzz), native (C, Rust,
+NIF), harden (Miri, libFuzzer), Python 3.12–3.14t, TS on Node and Bun, ex (echo_data with and
+without the NIF, the Hex package built alone), and parity with `--require`.
 
-- oracle self-test, vectors reproducibility, and a check that the CI pins match
-  `scripts/versions.env`;
-- Go 1.26.9 and the 1.22.12 floor (race, fuzz);
-- native: C, Rust and NIF;
-- harden: Miri and libFuzzer;
-- Python 3.12, 3.13, 3.14 and 3.14t;
-- TS on Node and Bun;
-- parity with `--require`.
-
-The parity job requires all 13 shims (`--require`, no filter). The first green run is the
-acceptance gate for this branch.
+Open: the Operator's one-time setup (create the app, connect the GitHub integration); the first
+green deploy is the acceptance gate for the branch.
