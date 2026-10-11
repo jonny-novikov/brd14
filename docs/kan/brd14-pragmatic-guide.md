@@ -312,6 +312,39 @@ contract's derivation is opt-in. Confidence 85%.
 
 **Falsifying check:** `node_from("hosta", 100)` ≠ 585 (vector N-1).
 
+### 7. Where CI runs
+
+- **Question:** GitHub Actions never assigns a runner on this account. Where does the suite run on
+  every push?
+- **Ruling** (Operator, 2026-10-11): "Replace GitHub Actions with fly configuration for once
+  running ephemeral machine as a brd-build and fly auto configure github to run it over".
+- **Steelman:** a Fly deploy's `release_command` runs once on a temporary Machine from the new
+  image, and its exit status decides the deploy. That is a run-once CI machine with documented
+  semantics, on infrastructure this account can use. One script (`scripts/ci.sh`) runs the suite
+  wherever it is invoked.
+- **Steward:** Actions gave parallel jobs, per-PR check marks and no image to maintain. On Fly:
+  - jobs run in sequence on one Machine;
+  - the root filesystem is about 8 GB;
+  - one app Machine always exists;
+  - the push trigger (Fly's GitHub integration) is newer than Actions.
+
+| Option | Weakest point |
+|---|---|
+| Fly app `brd-build`: the release command runs `scripts/ci.sh` on performance-8x, in a RAM disk | sequential wall time; the push trigger's maturity is unverified here (no Fly credentials in the session) |
+| `fly machine run --rm` per push from a webhook relay | needs a relay outside Fly and GitHub; the exit status is not first-class |
+| keep Actions and wait for the account fix | nothing runs until then |
+
+**Decision:**
+- the Fly app `brd-build` ([docs/ci.md](../ci.md)), with the push trigger set up once by the
+  Operator in the dashboard and `scripts/fly-build.sh` for manual runs and other branches;
+- the Actions workflow is removed;
+- confidence 75%.
+
+**Falsifying check:**
+- the image builds from bare `ubuntu:24.04`, and `scripts/ci.sh` runs green inside it (local
+  Docker);
+- a failing job makes `scripts/ci.sh` exit non-zero — the exit status that stops a Fly deploy.
+
 <a id="rungs"></a>
 
 ## Rungs: how it is delivered
@@ -324,7 +357,8 @@ contract's derivation is opt-in. Confidence 85%.
 | R3 | 5 | 45 min | Layout profiles: contract, oracle, `vectors/layout.tsv`, Go/Rust/Elixir, ops `L`/`P` | a backwards pair under a profile with varying meta |
 | R4 | 8 | 2 h | `docs/structures.md`, `tools/champ_oracle.py`, `vectors/champ.tsv`, `go/brdata`, `brd14-data`, Elixir proofs | append-instead-of-prepend collision mutant |
 | R5 | 5 | 90 min | Rustler NIF (codec + champ), `NativeChamp`, shim `ex-nif`, `make package` | unpacked tarball fails to build alone |
-| R6 | 3 | 60 min | Benchmarks vs baselines, docs, CI `elixir` job, acceptance package | any number without a results file |
+| R6 | 3 | 60 min | Benchmarks vs baselines, docs, acceptance package | any number without a results file |
+| R6a | 5 | 90 min | CI on Fly: app `brd-build` replaces GitHub Actions (SDMR card 7) | the image fails to build from bare Ubuntu, or a failing job exits 0 |
 
 **Ownership:**
 - the coordinating agent owns the contract, the oracles, the vectors, `ex/` and the shared files;
@@ -347,7 +381,7 @@ The Operator receives:
 - the limits:
   - deferred runtimes;
   - unmeasured claims;
-  - the CI account block that keeps hosted runs from starting.
+  - CI's first hosted run, which waits on the Operator's one-time Fly setup ([docs/ci.md](../ci.md)).
 
 Evidence is recorded in the implementing commits and in [docs/parity.md](../parity.md),
 [docs/benchmarks.md](../benchmarks.md) and [docs/structures.md](../structures.md). This story is

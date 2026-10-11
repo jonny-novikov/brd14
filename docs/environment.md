@@ -3,12 +3,12 @@
 ## The pinned set
 
 One file, [`scripts/versions.env`](../scripts/versions.env), names every toolchain version. The
-setup script, the env file, the Rust toolchain pin and CI all read from it, or mirror it.
+setup script, the env file, the Rust toolchain pin and the CI image (`fly/Dockerfile`) all read from it.
 
 | Tool | Version | Why this one |
 |---|---|---|
 | Go | 1.26.9 | Development and CI toolchain. The module's `go` line stays at **1.22.0**, the honest minimum for consumers. The full tier fetches 1.22.12 to prove that floor. |
-| Python | 3.14 and 3.14t | 3.14 is the target. 3.14t is the free-threaded build, which proves the generator is correct without a GIL. 3.12 and 3.13 are tested in CI. |
+| Python | 3.14 and 3.14t | 3.14 is the target. 3.14t is the free-threaded build, which proves the generator is correct without a GIL. 3.12 and 3.13 are tested in CI (`scripts/ci.sh python`). |
 | Node | 24.21.0 "Krypton" | The latest LTS line. It runs `.ts` sources directly through built-in type stripping. |
 | Bun | 1.4.3 | The second JS runtime. It runs `.ts` natively and has its own test runner. |
 | Rust | 1.99.0 + `wasm32-unknown-unknown` | Pinned again in [`native/rust/rust-toolchain.toml`](../native/rust/rust-toolchain.toml). Nightly is used only for Miri and cargo-fuzz (full tier). |

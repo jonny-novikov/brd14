@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # setup.sh — idempotent provisioning of the brd14 toolchains.
 #
-#   scripts/setup.sh [core|full]
+#   scripts/setup.sh [core|ci|full]
 #
 # core: Go, Python 3.14 + 3.14t, Node LTS, Bun, Rust (+wasm32), Erlang/OTP + Elixir,
 #       then per-directory dependencies for whichever manifests exist.
-# full: core + Go floor toolchain, Rust nightly (Miri), libFuzzer runtime,
-#       PostgreSQL 16 server (storage probe for docs/articles).
+# ci:   core + Go floor toolchain, Rust nightly (Miri), libFuzzer runtime — everything
+#       scripts/ci.sh runs (the fly/Dockerfile image).
+# full: ci + PostgreSQL 16 server (the storage probe, tools/storage_probe/).
 #
 # Every step checks the pinned version first and skips when it is present, so a
 # warm container finishes in seconds. Sources are the ones the cloud egress
@@ -32,7 +33,7 @@ ensure_go() {
   else
     log "go: fetching go${GO_VERSION} via GOTOOLCHAIN"; GOTOOLCHAIN="go${GO_VERSION}" go version >/dev/null
   fi
-  if [ "$TIER" = full ]; then GOTOOLCHAIN="go${GO_FLOOR_VERSION}" go version >/dev/null && log "go floor ${GO_FLOOR_VERSION} ok"; fi
+  if [ "$TIER" != core ]; then GOTOOLCHAIN="go${GO_FLOOR_VERSION}" go version >/dev/null && log "go floor ${GO_FLOOR_VERSION} ok"; fi
 }
 
 ensure_python() {
@@ -79,7 +80,7 @@ ensure_rust() {
     log "rust: installing ${RUST_VERSION} + wasm32-unknown-unknown"
     rustup toolchain install "${RUST_VERSION}" --profile minimal -c rustfmt -c clippy -t wasm32-unknown-unknown >/dev/null
   fi
-  if [ "$TIER" = full ]; then
+  if [ "$TIER" != core ]; then
     rustup toolchain install nightly --profile minimal -c miri -c rust-src >/dev/null && log "rust nightly + miri ok"
   fi
 }
@@ -95,11 +96,11 @@ ensure_beam() {
 }
 
 ensure_full_extras() {
-  [ "$TIER" = full ] || return 0
+  [ "$TIER" != core ] || return 0
   local pkgs=()
   dpkg -s libclang-rt-18-dev >/dev/null 2>&1 || pkgs+=(libclang-rt-18-dev)
-  dpkg -s postgresql-16 >/dev/null 2>&1 || pkgs+=(postgresql-16)
-  if [ "${#pkgs[@]}" -gt 0 ]; then log "apt: ${pkgs[*]}"; apt_install "${pkgs[@]}"; else log "libFuzzer runtime + postgresql-16 ok"; fi
+  if [ "$TIER" = full ]; then dpkg -s postgresql-16 >/dev/null 2>&1 || pkgs+=(postgresql-16); fi
+  if [ "${#pkgs[@]}" -gt 0 ]; then log "apt: ${pkgs[*]}"; apt_install "${pkgs[@]}"; else log "libFuzzer runtime ok (tier ${TIER})"; fi
 }
 
 ensure_deps() {
