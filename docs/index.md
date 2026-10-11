@@ -17,3 +17,4 @@
 | [benchmarks.md](benchmarks.md) | Measured numbers, the protocol behind them, and how to reproduce them. |
 | [hardening.md](hardening.md) | Sanitizers, Miri, fuzzing, race detection, floor toolchains. |
 | [articles/namespaces-and-storage.md](articles/namespaces-and-storage.md) | System vs user namespaces, ids in databases, memory: brd14 vs brd16. |
+| [roadmap.md](roadmap.md) | What is done, what is next — implementation, measurement, CI — and the open decisions. |
