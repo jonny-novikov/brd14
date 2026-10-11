@@ -1,0 +1,31 @@
+{
+  "name": "brd14-wasm",
+  "version": "0.1.0",
+  "description": "A 14-byte branded identity: time-ordered, coordination-free, carrying its own type. The Rust core compiled to WebAssembly, embedded and instantiated synchronously, with batch entry points.",
+  "keywords": ["id", "snowflake", "base62", "branded", "identifier", "wasm", "webassembly"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonny-novikov/brd14.git",
+    "directory": "ts/packages/brd14-wasm"
+  },
+  "homepage": "https://github.com/jonny-novikov/brd14/tree/main/ts/packages/brd14-wasm",
+  "bugs": "https://github.com/jonny-novikov/brd14/issues",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24",
+    "bun": ">=1.4"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "brd14": "0.1.0"
+  },
+  "scripts": {
+    "build-wasm": "node scripts/build-wasm.ts",
+    "build": "node scripts/build-wasm.ts && tsc -p tsconfig.json && node ../../scripts/publish-manifest.ts . && node scripts/publish-deps.ts .",
+    "test": "vitest run --root ../.."
+  }
+}

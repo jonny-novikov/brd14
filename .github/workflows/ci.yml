@@ -1,0 +1,188 @@
+# brd14 CI — every implementation against the same corpus, then against each
+# other through the oracle. The pinned toolchain set lives in
+# scripts/versions.env; the PIN_* values below mirror it and the oracle job
+# fails if they drift apart.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BRD14_REQUIRE_VECTORS: "1"
+  PIN_GO: "1.26.9"
+  PIN_GO_FLOOR: "1.22.12"
+  PIN_NODE: "24.21.0"
+  PIN_BUN: "1.4.3"
+  PIN_RUST: "1.99.0"
+
+jobs:
+  oracle:
+    name: oracle · vectors · harness self-test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - name: pins match scripts/versions.env
+        run: |
+          . scripts/versions.env
+          test "$GO_VERSION" = "$PIN_GO" && test "$GO_FLOOR_VERSION" = "$PIN_GO_FLOOR" \
+            && test "$NODE_VERSION" = "$PIN_NODE" && test "$BUN_VERSION" = "$PIN_BUN" \
+            && test "$RUST_VERSION" = "$PIN_RUST" \
+            || { echo "::error::ci.yml PIN_* values drifted from scripts/versions.env"; exit 1; }
+      - run: python tools/oracle.py
+      - name: the parity harness passes the oracle and catches a mutant
+        run: python tools/parity.py --self-test
+      - name: vectors are reproducible from the oracle
+        run: python tools/vectorgen.py && git diff --exit-code -- vectors/
+
+  go:
+    name: go ${{ matrix.go }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.26.9", "1.22.12"]
+    env:
+      GOTOOLCHAIN: local
+    defaults:
+      run:
+        working-directory: go
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false
+      - run: go vet ./...
+      - run: go test -count=1 ./...
+      - name: race detector
+        if: matrix.go == env.PIN_GO
+        run: go test -race -count=1 ./...
+      - name: fuzz smoke
+        if: matrix.go == env.PIN_GO
+        run: |
+          go test -run '^$' -fuzz '^FuzzParse$' -fuzztime 10s .
+          go test -run '^$' -fuzz '^FuzzAppendEncode$' -fuzztime 10s .
+
+  native:
+    name: native · C cores, Rust workspace, NIF
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.PIN_NODE }}
+      - name: clang + libFuzzer runtime
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends clang-18 libclang-rt-18-dev
+      - name: Rust (pinned by native/rust/rust-toolchain.toml)
+        run: rustup toolchain install "$PIN_RUST" --profile minimal -c rustfmt -c clippy -t wasm32-unknown-unknown
+      - name: C — vectors, cross-core properties
+        run: make -C native/c test
+      - name: C — gates (no div, no allocator, footprint)
+        run: make -C native/c gates
+      - name: C — sanitizers, fortify, pedantic, clang build
+        run: make -C native/c harden
+      - name: Rust — workspace tests, C drop-in, wasm module check
+        run: make -C native/rust test
+      - name: Rust — fmt, clippy, allocation check
+        run: make -C native/rust clippy alloc-check
+      - name: NIF — compiles and links against every core
+        run: make -C native/beam check
+
+  harden:
+    name: harden · Miri · libFuzzer
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: clang + libFuzzer runtime
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends clang-18 libclang-rt-18-dev
+      - name: Rust nightly + Miri
+        run: |
+          rustup toolchain install "$PIN_RUST" --profile minimal -t wasm32-unknown-unknown
+          rustup toolchain install nightly --profile minimal -c miri -c rust-src
+      - name: Miri (core, ffi, wasm ABI)
+        run: make -C native/rust miri
+      - name: libFuzzer — differential speed vs memory, 20 s per target
+        run: make -C native/c fuzz FUZZ_SECONDS=20
+
+  python:
+    name: python ${{ matrix.python }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13", "3.14", "3.14t"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: make -C python test VERSIONS=${{ matrix.python }}
+
+  ts:
+    name: ts · Node 24 + Bun
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.PIN_NODE }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.PIN_BUN }}
+      - name: Rust + wasm32 (the wasm package builds its module)
+        run: rustup toolchain install "$PIN_RUST" --profile minimal -t wasm32-unknown-unknown
+      - run: npm ci
+        working-directory: ts
+      - name: typecheck, vitest on Node, bun test on Bun
+        run: make -C ts test
+      - name: frozen-intrinsics smoke
+        run: make -C ts harden
+
+  parity:
+    name: parity · every shim vs the oracle
+    runs-on: ubuntu-24.04
+    needs: [oracle]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.PIN_GO }}
+          cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: |
+            3.12
+            3.14t
+            3.14
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.PIN_NODE }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.PIN_BUN }}
+      - name: Rust + wasm32
+        run: rustup toolchain install "$PIN_RUST" --profile minimal -t wasm32-unknown-unknown
+      - run: npm ci
+        working-directory: ts
+      # The ts-wasm shims join this list when ts/packages/brd14-wasm lands (docs/roadmap.md W3);
+      # then drop --only so every registered shim is required.
+      - name: differential parity (a missing shim fails)
+        env:
+          GOTOOLCHAIN: local
+        run: python3 tools/parity.py --only go,c-,rust-,python,ts-pure --require --json build/parity.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: parity
+          path: build/parity.json
