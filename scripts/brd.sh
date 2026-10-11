@@ -263,6 +263,9 @@ load_settings() {
 # now_ms -> R_NOW: wall-clock Unix milliseconds. EPOCHREALTIME (bash 5) costs no
 # fork; older shells fall back to GNU date, python3, then perl.
 now_ms() {
+  # BRD_FAKE_NOW_MS pins the clock (tests: burst borrowing is only observable
+  # when the clock cannot advance). Never set it outside a test.
+  if [[ -n ${BRD_FAKE_NOW_MS:-} ]]; then R_NOW=$((10#$BRD_FAKE_NOW_MS)); return; fi
   local t=${EPOCHREALTIME:-}
   if [[ -n $t ]]; then
     local s=${t%[.,]*} f=${t#*[.,]}000
