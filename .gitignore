@@ -45,3 +45,6 @@ node_modules/
 ts/**/dist/
 ts/packages/brd14-wasm/src/wasm-bytes.ts
 *.tsbuildinfo
+
+# --- agent worktrees (isolated parallel builds; never committed)
+.claude/worktrees/
