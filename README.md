@@ -61,8 +61,9 @@ Pure bash, no dependencies, proven byte-identical to the oracle by the parity ru
 
 Start at [`docs/index.md`](docs/index.md): the contract, the architecture and variant taxonomy,
 one page per language, runtime specifics (Node vs Bun, CPython 3.14 vs 3.14t, Go), parity,
-benchmarks, hardening, and the article on
-[namespaces, storage and memory](docs/articles/namespaces-and-storage.md) (brd14 vs brd16).
+benchmarks, hardening, the [branded structures](docs/structures.md), the
+[Elixir home](docs/elixir.md), and the pragmatic programmer's guide written as a
+[KAN story](docs/kan/brd14-pragmatic-guide.md).
 
 ## License
 

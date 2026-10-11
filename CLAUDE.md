@@ -89,8 +89,11 @@ different task rather than a bigger one:
    - Policy gates (Go `Gate`, the CLI `census`) run *before* the shape check, and their refusal
      reaches the caller unchanged.
 4. **Behaviour changes land in every implementation or in none.** A change to the contract is one
-   branch that touches the oracle, the vectors, every tree and the docs, and ends with parity
-   13/13.
+   branch that touches the oracle, the vectors, every tree and the docs, and ends with every shim
+   passing parity. **Extensions are additive** (the contract's Extensions section: layout
+   profiles; [docs/structures.md](docs/structures.md)): they change no existing behaviour, land in
+   the runtimes the Operator names, are advertised per shim (`HELLO … <ops>`), and the runtimes
+   that lack them are listed as deferred in `docs/roadmap.md`, never as passing.
 5. **Proof before push.** For the trees you changed, run `make -C <tree> test`, then
    `python3 tools/parity.py --only <shims>` (or the full matrix). If a gate fails, you fix it; you
    never skip, disable or quarantine a test. Report failing output verbatim.
@@ -102,6 +105,28 @@ different task rather than a bigger one:
    Noisy smoke runs are never committed as results.
 8. **Never source untrusted config.** `.brdrc` is parsed against a key whitelist. Keep it that
    way.
+
+## Delivery: KAN
+
+Work is delivered as **KAN**: one Agentic User Story (AUS) per program, in `docs/kan/`, delivered in
+rungs. The current story is [docs/kan/brd14-pragmatic-guide.md](docs/kan/brd14-pragmatic-guide.md).
+
+- **The story is the contract.** It holds the 6W, the Rumsfeld lens, the SDMR decisions, a user
+  story and an agent story (each at most three criteria plus a bad-input line), and the rungs.
+  Read it before touching the paths it names; do not re-ask decisions it records.
+- **Document identity.** A KAN document carries frontmatter in this order: `id`, `slug`, `type`,
+  `version`, `path`, `title`, `summary`, `tags`, `group`, `language`, `audience`. The `id` is a
+  brd14 id in the `KAN` namespace, minted **once** (`scripts/mint.sh KAN`), validated, never
+  regenerated on an edit or a move.
+- **A rung ends with evidence**, not with activity: the falsifying check from the story ran and
+  the observed result is recorded in the implementing commit.
+- **Blue refinement.** After a rung is green, spend what is left of its timebox on remediation,
+  simplification and hardening, then re-check what that touched.
+- **Delivery commits** name the rung. Where a decision was made, the body carries: Question,
+  Steelman, Steward, Decision, Falsifying check, Observed verification. Quote the Operator's
+  ruling exactly when one decided it. Keep intended and observed verification apart.
+- **A commit is not acceptance.** Present the value, the evidence and the limits; the Operator
+  accepts.
 
 ## How changes are made
 

@@ -21,6 +21,8 @@ the vectors, and a differential parity run that proves them byte-identical.
 | Measured storage and memory | [`tools/storage_probe/results.json`](tools/storage_probe/) |
 | What's done, what's next, open decisions | [`docs/roadmap.md`](docs/roadmap.md) |
 | Every documentation page | [`docs/index.md`](docs/index.md) |
+| The current delivery story (scope, decisions, rungs) | [`docs/kan/brd14-pragmatic-guide.md`](docs/kan/brd14-pragmatic-guide.md) |
+| What the branded structures must do, and the champ's exact shape | [`docs/structures.md`](docs/structures.md) (normative) |
 
 ## The map
 
@@ -40,11 +42,13 @@ python/src/brd14/           pure-Python package (3.12–3.14t)   tests/ bench/ c
 ts/packages/brd14/          pure TypeScript (Node 24 + Bun)    test/ (vitest + bun test)
 ts/packages/brd14-wasm/     TypeScript over the Rust wasm core
 ts/conform/                 protocol.ts · pure.ts · wasm.ts (parity shims)
+ex/echo_data/                Elixir: echo_data (codec, BrandedChamp/Map/Tree, Buckets, BCS), conform.exs shim
 scripts/                    brd.sh · mint.sh (the shell CLI) · setup.sh · env.sh · versions.env · test_brd.sh
 .brdrc                      CLI defaults for this repo (ns = KAN)
 .claude/                    settings.json + hooks/session-start.sh (toolchains for cloud sessions)
 .github/workflows/ci.yml    oracle · go · native · harden · python · ts · parity
-docs/                       per-language pages, runtimes, parity, benchmarks, hardening, articles/
+docs/                       per-language pages, runtimes, parity, benchmarks, hardening, structures.md
+docs/kan/                   KAN stories (AUS): the delivery contract for the current program
 ```
 
 ## Start here, by task
@@ -61,6 +65,8 @@ docs/                       per-language pages, runtimes, parity, benchmarks, ha
 | Python | `docs/python.md` | `python/` | `make -C python test` (includes 3.14t, GIL off) |
 | TypeScript | `docs/typescript.md`, `docs/wasm.md` | `ts/` | `make -C ts test` (vitest on Node + bun test) |
 | the shell CLI | `scripts/brd.sh --help`, `.brdrc` | `scripts/` | `make -C scripts test`, `--only sh-` |
+| Elixir / echo_data | `docs/elixir.md` | `ex/echo_data/` | `make -C ex test harden`, `--only ex-` |
+| structures (champ, tree, buckets) | `docs/structures.md`, the KAN story | `go/brdata`, `native/rust/crates/brd14-data`, `ex/echo_data` | `make vectors`, each tree's tests replay `vectors/champ.tsv` |
 | docs or an article | `docs/index.md`, the sibling article's style | `docs/` | every number traces to a results file or is labelled cited |
 | toolchains / setup | `docs/environment.md` | `scripts/versions.env`, `scripts/setup.sh` | `scripts/setup.sh`, CI pin check |
 | CI | `.github/workflows/ci.yml` | the workflow | `build/bin/actionlint .github/workflows/ci.yml` |
@@ -75,7 +81,7 @@ make parity                    # every shim vs the oracle
 make vectors                   # regenerate vectors/ and fail on drift
 make bench                     # every bench → bench/results/ (slow; pin with taskset)
 make harden                    # sanitizers, Miri, fuzz, race, floor toolchains (slow)
-python3 tools/parity.py --only go,c-,rust-,python,ts-,sh-   # by shim-name prefix
+python3 tools/parity.py --only go,c-,rust-,python,ts-,sh-,ex-   # by shim-name prefix
 scripts/brd.sh help            # mint / encode / decode / date / at / valid / hash / node / config
 ```
 
