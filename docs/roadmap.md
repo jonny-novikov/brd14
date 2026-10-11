@@ -8,7 +8,7 @@ Where the work stands, and the plan to finish. Each item states the value it del
 |---|---|
 | W0 | Go moved to `go/` (`github.com/jonny-novikov/brd14/go`, go 1.22 floor). `native/` split by language and variant. Pinned toolchains via `scripts/setup.sh` and a SessionStart hook: Go 1.26.9, Python 3.14/3.14t, Node 24.21.0 LTS, Bun 1.4.3, Rust 1.99.0. The normative [contract](contract.md). |
 | W1 | The independent [oracle](../tools/oracle.py), deterministic [vectors](../vectors/), the differential [parity](parity.md) driver and its self-test. |
-| W2 | Go reference (typed errors, zero-alloc API, fuzz). C speed and table-free memory cores (gates, sanitizers, libFuzzer). Rust workspace (`no_std` core, FFI drop-in, wasm ABI crate, Miri, cargo-fuzz). Pure Python (3.12–3.14t). Pure TypeScript (Node + Bun). The [namespaces and storage article](articles/namespaces-and-storage.md) with a reproducible [storage probe](../tools/storage_probe/). **Parity: 10 of 12 shims, 0 mismatches.** |
+| W2 | Go reference (typed errors, zero-alloc API, fuzz). C speed and table-free memory cores (gates, sanitizers, libFuzzer). Rust workspace (`no_std` core, FFI drop-in, wasm ABI crate, Miri, cargo-fuzz). Pure Python (3.12–3.14t). Pure TypeScript (Node + Bun). A reproducible [storage probe](../tools/storage_probe/). **Parity: 10 of 12 shims, 0 mismatches.** |
 | W3 | `ts/packages/brd14-wasm`: the Rust core over WebAssembly on Node and Bun, with batch APIs. The wasm shims, the bench and [wasm.md](wasm.md). **Parity: 12 of 12 shims, 0 mismatches.** |
 | CLI | `scripts/brd.sh` + `scripts/mint.sh` (pure bash, shim 13), `.brdrc`, `CLAUDE.md`, `AGENTS.md`. **Parity: 13 of 13.** |
 
