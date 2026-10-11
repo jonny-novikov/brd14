@@ -42,6 +42,7 @@ SEED = 0x0B4D14_00FF
 # command on PATH) after the build step.
 def registry() -> list[dict]:
     py_env = {"PYTHONPATH": str(ROOT / "python" / "src")}
+    ex_ebin = "ex/echo_data/_build/prod/lib/echo_data/ebin"
     return [
         {"name": "go", "tree": "go", "argv": ["build/shims/go-conform"]},
         {"name": "c-speed", "tree": "native/c", "argv": ["native/c/build/conform-speed"]},
@@ -56,6 +57,8 @@ def registry() -> list[dict]:
         {"name": "ts-wasm-node", "tree": "ts", "argv": ["node", "ts/conform/wasm.ts"]},
         {"name": "ts-wasm-bun", "tree": "ts", "argv": ["bun", "ts/conform/wasm.ts"]},
         {"name": "sh-bash", "tree": None, "argv": ["bash", "scripts/brd.sh", "conform"]},
+        {"name": "ex-pure", "tree": "ex", "argv": ["elixir", "-pa", ex_ebin, "ex/echo_data/conform.exs"],
+         "env": {"ECHO_DATA_NATIVE": "0"}},
     ]
 
 
@@ -67,7 +70,7 @@ def available(shim: dict) -> bool:
     elif shutil.which(exe) is None:
         return False
     # interpreter shims: the script must exist too
-    script = next((a for a in shim["argv"][1:] if a.endswith((".py", ".ts"))), None)
+    script = next((a for a in shim["argv"][1:] if a.endswith((".py", ".ts", ".exs"))), None)
     return script is None or (ROOT / script).exists()
 
 

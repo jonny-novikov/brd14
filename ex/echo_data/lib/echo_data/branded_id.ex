@@ -94,6 +94,48 @@ defmodule EchoData.BrandedId do
 
   def valid?(id), do: parse(id) != :error
 
+  @doc """
+  Classifies an id by the contract's precedence: length, then namespace, then
+  charset, then range. `:ok` exactly when `parse/1` succeeds; the class names
+  why it does not (`parse/1` answers a bare `:error`).
+
+      iex> EchoData.BrandedId.validate("USR0KHTOWnGLuC")
+      :ok
+      iex> EchoData.BrandedId.validate("usr0KHTOWnGLu!")
+      {:error, :namespace}
+      iex> EchoData.BrandedId.validate("USRzzzzzzzzzzz")
+      {:error, :range}
+  """
+  @spec validate(term()) :: :ok | {:error, :length | :namespace | :charset | :range}
+  def validate(<<ns::binary-size(3), payload::binary-size(11)>>) do
+    cond do
+      not valid_ns?(ns) -> {:error, :namespace}
+      not base62?(payload) -> {:error, :charset}
+      Base62.decode(payload) == :error -> {:error, :range}
+      true -> :ok
+    end
+  end
+
+  def validate(_), do: {:error, :length}
+
+  @doc """
+  Classifies an encode request by the contract's precedence: namespace, then
+  range. `:ok` exactly when `encode/2` succeeds.
+  """
+  @spec validate_encode(term(), term()) :: :ok | {:error, :namespace | :range}
+  def validate_encode(ns, snow) do
+    cond do
+      not (is_binary(ns) and byte_size(ns) == 3 and valid_ns?(ns)) ->
+        {:error, :namespace}
+
+      not (is_integer(snow) and snow >= 0 and snow <= 9_223_372_036_854_775_807) ->
+        {:error, :range}
+
+      true ->
+        :ok
+    end
+  end
+
   def namespace(id) when is_branded(id), do: binary_part(id, 0, 3)
 
   def unix_ms(id) do
@@ -141,6 +183,14 @@ defmodule EchoData.BrandedId do
   end
 
   defp valid_ns?(<<a, b, c>>), do: a in ?A..?Z and b in ?A..?Z and c in ?A..?Z
+
+  defp base62?(<<>>), do: true
+
+  defp base62?(<<c, rest::binary>>)
+       when c in ?0..?9 or c in ?A..?Z or c in ?a..?z,
+       do: base62?(rest)
+
+  defp base62?(_), do: false
 
   defp pure_parse(<<ns::binary-size(3), payload::binary-size(11)>>) do
     with true <- valid_ns?(ns),

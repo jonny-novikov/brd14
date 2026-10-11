@@ -110,6 +110,23 @@ defmodule EchoData.Snowflake do
   def to_datetime(snowflake), do: DateTime.from_unix!(unix_ms(snowflake), :millisecond)
 
   def node_id(snowflake), do: snowflake >>> @seq_bits &&& 0x3FF
+
+  @doc """
+  The contract's node derivation: FNV-32a over `host <> decimal(pid)`, masked
+  to 10 bits. Use it as `start(node_from(host, pid))` to number a fleet the way
+  every other brd14 runtime does; `start/1`'s default (`phash2(node())`) is
+  kept for running echo fleets.
+
+      iex> EchoData.Snowflake.node_from("hosta", 100)
+      585
+  """
+  @spec node_from(binary(), non_neg_integer()) :: non_neg_integer()
+  def node_from(host, pid) when is_binary(host) and is_integer(pid) and pid >= 0 do
+    fnv32a(host <> Integer.to_string(pid), 0x811C9DC5) &&& @worker_mask
+  end
+
+  defp fnv32a(<<>>, h), do: h
+  defp fnv32a(<<b, rest::binary>>, h), do: fnv32a(rest, bxor(h, b) * 0x01000193 &&& 0xFFFFFFFF)
   def sequence(snowflake), do: snowflake &&& 0xFFF
 
   @doc "Smallest snowflake mintable at or after the instant; for half-open time-range scans."
