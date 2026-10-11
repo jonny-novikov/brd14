@@ -24,7 +24,7 @@
 //   hash32     a bigint → ToBigInt64 wraps it modulo 2^64: the contract's "full u64".
 
 import { ErrorCode, InvalidIdError, MAX_SNOW, type ErrorCode as Code, type RefusalCode } from "brd14";
-import { BATCH_MAX, IO_LENGTH, abi, io8, io64 } from "./module.ts";
+import { BATCH_MAX, IO_LENGTH, abi, attach, io8, io64 } from "./module.ts";
 
 const ID_LENGTH = 14;
 /** The packed namespace of anything that is not three bytes: the fourth-byte rule. */
@@ -114,6 +114,7 @@ export interface Decoded {
  * Precedence NAMESPACE, then RANGE, applied by the module. Allocates the result only.
  */
 export function encode(ns: string, snow: bigint): string {
+  attach();
   const status = abi.encode(packNs(ns), toI64(snow));
   if (status !== 0) throw new InvalidIdError(status as RefusalCode);
   return idAt(0);
@@ -125,6 +126,7 @@ export function encode(ns: string, snow: bigint): string {
  * allocated is the result, which is the module's return value itself.
  */
 export function decode(id: string | Uint8Array): Decoded {
+  attach();
   const r = decodeAny(id);
   if (r < 0n) throw new InvalidIdError(Number(-r) as RefusalCode);
   return { ns: String.fromCharCode(io8[0]!, io8[1]!, io8[2]!), snow: r };
@@ -132,11 +134,13 @@ export function decode(id: string | Uint8Array): Decoded {
 
 /** The contract class of `id`: 0 (OK) or the refusal code. Never throws. */
 export function check(id: string | Uint8Array): Code {
+  attach();
   const r = decodeAny(id);
   return r < 0n ? (Number(-r) as Code) : ErrorCode.OK;
 }
 
 export function isValid(id: string | Uint8Array): boolean {
+  attach();
   return decodeAny(id) >= 0n;
 }
 
@@ -195,6 +199,7 @@ function loadSnows(snows: Snowflakes, base: number, k: number): void {
  * its index. Internally chunked at BATCH_MAX (2,978).
  */
 export function encodeMany(ns: string, snows: Snowflakes): string[] {
+  attach();
   const packed = requireNs(ns);
   const n = snows.length;
   const out = new Array<string>(n);
@@ -215,6 +220,7 @@ export function encodeMany(ns: string, snows: Snowflakes): string[] {
  * refused index has already been written.
  */
 export function encodeManyInto(ns: string, snows: Snowflakes, out: Uint8Array, offset = 0): number {
+  attach();
   const n = snows.length;
   if (!(offset >= 0 && offset + ID_LENGTH * n <= out.length)) {
     throw new RangeError("brd14-wasm: encodeManyInto needs 14 × n bytes at offset");
@@ -301,6 +307,7 @@ function decodeChunk(ids: Ids, base: number, k: number, out: BigInt64Array, at: 
  * decoded. Internally chunked at BATCH_MAX (2,978).
  */
 export function decodeMany(ids: Ids): BigInt64Array {
+  attach();
   const n = countIds(ids);
   const out = new BigInt64Array(n);
   const faults: number[] = [];
@@ -319,6 +326,7 @@ export function decodeMany(ids: Ids): BigInt64Array {
  * −1 when all are valid. Throws a `RangeError` when `out` is too short.
  */
 export function decodeManyInto(ids: Ids, out: BigInt64Array, offset = 0): number {
+  attach();
   const n = countIds(ids);
   if (!(offset >= 0 && offset + n <= out.length)) {
     throw new RangeError("brd14-wasm: decodeManyInto needs n slots at offset");
@@ -338,6 +346,7 @@ export function decodeManyInto(ids: Ids, out: BigInt64Array, offset = 0): number
  * the refusal code per input. Never throws for invalid ids.
  */
 export function checkMany(ids: Ids): Uint8Array {
+  attach();
   const n = countIds(ids);
   const codes = new Uint8Array(n);
   const faults: number[] = [];

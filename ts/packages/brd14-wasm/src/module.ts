@@ -6,7 +6,8 @@
 // network access, the same code path on Node and Bun. The module imports nothing.
 //
 // Its memory is fixed (initial == max, set by the crate's build.rs), so `memory.grow`
-// always fails and a view of `memory.buffer` never detaches. The loader proves that
+// with a positive delta always fails. `grow(0)` succeeds and refreshes the buffer, which
+// detaches old views; `attach()` re-derives them. The loader proves that
 // once, here, and then caches two views of the 64 KiB IO region for the lifetime of
 // the module: `io8` (bytes) and `io64` (i64 slots, for the batch entry points).
 
@@ -86,8 +87,22 @@ if (IO_PTR % 8 !== 0 || IO_PTR + IO_LENGTH > MEMORY_BYTES) {
   throw new Error(`brd14-wasm: IO region [${IO_PTR}, ${IO_PTR + IO_LENGTH}) is not an aligned region inside ${MEMORY_BYTES} bytes`);
 }
 
-/** The IO region as bytes. */
-export const io8 = new Uint8Array(memory.buffer, IO_PTR, IO_LENGTH);
+/** The IO region as bytes. Live binding: `attach()` replaces it if the buffer was refreshed. */
+export let io8 = new Uint8Array(memory.buffer, IO_PTR, IO_LENGTH);
 
-/** The IO region as i64 slots (the batch exports' input and output). */
-export const io64 = new BigInt64Array(memory.buffer, IO_PTR, IO_LENGTH / 8);
+/** The IO region as i64 slots (the batch exports' input and output). Live binding, as `io8`. */
+export let io64 = new BigInt64Array(memory.buffer, IO_PTR, IO_LENGTH / 8);
+
+/**
+ * Re-derives the views if the memory's buffer was replaced. The memory never changes size,
+ * but the WebAssembly JS API refreshes `memory.buffer` on every successful `grow` — including
+ * `grow(0)`, a common way to read the page count, on the exported `memory` — and a refresh
+ * detaches every view of the old buffer (its `byteLength` becomes 0). One property read per
+ * call; every codec entry point calls it before touching `io8` or `io64`.
+ */
+export function attach(): void {
+  if (io8.byteLength === 0) {
+    io8 = new Uint8Array(memory.buffer, IO_PTR, IO_LENGTH);
+    io64 = new BigInt64Array(memory.buffer, IO_PTR, IO_LENGTH / 8);
+  }
+}
