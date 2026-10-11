@@ -1,6 +1,6 @@
 defmodule EchoData.StructuresPropertyTest do
   @moduledoc """
-  The branded structures against plain models (docs/structures.md): BrandedTree vs a sorted
+  The branded structures against plain models (docs/structures/spec.md): BrandedTree vs a sorted
   list, Buckets vs filtering by bucket, BrandedChamp vs a map — plus persistence (an old version
   never changes) and loud writes / quiet reads for invalid ids.
   """

@@ -262,7 +262,7 @@ def main() -> None:
           "encode refusals; snow may be >= 2^63")
     write(out / "node.tsv", "host_hex\tpid\tnode", node_rows(), "FNV-32a(host ++ decimal pid) & 1023")
     write(out / "champ.tsv", "kind\tcase\tseed\tops\tkeys\tprogram\tsize\tdigest", champ_rows(),
-          "extension: champ shape (docs/structures.md); step i puts value i; digest = FNV-1a-64 of the preorder")
+          "extension: champ shape (docs/structures/spec.md); step i puts value i; digest = FNV-1a-64 of the preorder")
     write(out / "layout.tsv", "n\ts\tm\tsnow\tts\tnode\tseq\tmeta", layout_rows(),
           "extension: layout profiles; every valid n+s+m=22; fields(snow) and pack(fields) == snow")
     write(out / "layout_invalid.tsv", "op\tn\ts\tm\targs\tclass", layout_invalid_rows(),

@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSzqzAm"
+slug: "DOCS-RUST"
+type: "guide"
+version: "1.3"
+path: "docs/rust.md"
+title: "Rust"
+summary: "The Rust workspace: the no_std core, the C ABI drop-in, the wasm crate, and their gates."
+tags: ["rust", "no_std", "ffi", "wasm"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Rust
 
 The Rust tree, [`native/rust/`](../native/rust/), is a Cargo workspace on edition 2024, pinned to
@@ -6,13 +20,32 @@ Rust 1.99.0 by [`rust-toolchain.toml`](../native/rust/rust-toolchain.toml). It i
 WebAssembly module, and the parity shim. The library crates use no third-party crates, including
 dev-dependencies.
 
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Crate map](#crate-map)
+- [Building and testing](#building-testing)
+- [Guarantees and how they are enforced](#guarantees-they-are-enforced)
+- [The two cores](#two-cores)
+- [The C ABI drop-in](#c-abi-drop)
+- [The WebAssembly module](#webassembly-module)
+- [The generator and the minter (std feature)](#generator-minter-std-feature)
+- [Tests](#tests)
+- [Hardening](#hardening)
+- [Benchmarks](#benchmarks)
+
+<a id="crate-map"></a>
+
 ## Crate map
 
 | Crate | Kind | What it is |
 |---|---|---|
 | [`crates/brd14`](../native/rust/crates/brd14/) | `#![no_std]` lib, `#![forbid(unsafe_code)]` | The codec. `brd14::speed` and `brd14::memory` have the same API. The crate root re-exports `speed`, plus the table-free helpers. The `std` feature adds `Generator` and `Minter`. |
 | [`crates/brd14-ffi`](../native/rust/crates/brd14-ffi/) | `cdylib` + `staticlib`, `no_std` | A drop-in for [`branded_id.h`](../native/include/branded_id.h). Builds `libbrd14_ffi.so` and `libbrd14_ffi.a`. The core is speed by default; the `memory` feature selects memory. |
-| [`crates/brd14-wasm`](../native/rust/crates/brd14-wasm/) | `cdylib`, `no_std` | The [WebAssembly ABI](contract.md#the-webassembly-abi-nativerustcratesbrd14-wasm). Builds `brd14_wasm.wasm`. Same core switch as the ffi crate. |
+| [`crates/brd14-wasm`](../native/rust/crates/brd14-wasm/) | `cdylib`, `no_std` | The [WebAssembly ABI](contract.md#webassembly-abi-native-rust). Builds `brd14_wasm.wasm`. Same core switch as the ffi crate. |
 | [`crates/brd14-conform`](../native/rust/crates/brd14-conform/) | std bin | The parity shim: `brd14-conform speed\|memory`. |
 | [`fuzz/`](../native/rust/fuzz/) | cargo-fuzz project | Two libFuzzer differential targets. It is excluded from the workspace and has its own lockfile. |
 
@@ -32,6 +65,8 @@ dev-dependencies.
 instant past the 41-bit timestamp horizon gives `2^63`, so none does. `node_from(host, pid: u32)`
 writes the decimal pid into a 10-byte stack buffer, so it allocates nothing.
 
+<a id="building-testing"></a>
+
 ## Building and testing
 
 ```bash
@@ -48,6 +83,8 @@ make -C native/rust harden     # fmt + clippy, alloc check, Miri, fuzz (nightly)
 When `cargo` is not on `PATH`, the Makefile adds `~/.cargo/bin` itself. This lets
 `tools/parity.py`, which calls `make conform`, work without `scripts/env.sh`.
 
+<a id="guarantees-they-are-enforced"></a>
+
 ## Guarantees and how they are enforced
 
 | Guarantee | Enforcement |
@@ -62,6 +99,8 @@ The `std` feature, and the `Generator` behind it, is compiled under
 `cargo test --workspace`, while no workspace member enables `std` on `brd14`. Enabling it on a crate
 with its own panic handler (ffi, wasm) would collide, so the bench enables it only through
 `cargo bench -p brd14 --features std`.
+
+<a id="two-cores"></a>
 
 ## The two cores
 
@@ -79,6 +118,8 @@ constant, which LLVM strength-reduces to a multiply and a shift.
 Precedence is namespace-first in both directions, as the contract requires. Encode checks
 `NAMESPACE`, then `RANGE`. Decode checks `LENGTH`, then `NAMESPACE`, `CHARSET` and `RANGE`. A
 payload that is both off-alphabet and above the maximum is `CHARSET`.
+
+<a id="c-abi-drop"></a>
 
 ## The C ABI drop-in
 
@@ -107,6 +148,8 @@ unaligned.
 
 ¹ Almost all of the archive is `compiler_builtins` (274 of its members). A static link pulls in
 only the one member holding the four symbols, and that member needs nothing external.
+
+<a id="webassembly-module"></a>
 
 ## The WebAssembly module
 
@@ -177,6 +220,8 @@ the data segment, and at about 10 KB the module is still tiny. For a bundle wher
 more than throughput, `make wasm WASM_FEATURES=--features=memory` builds the 2.6 KB module. Its
 ABI is identical.
 
+<a id="generator-minter-std-feature"></a>
+
 ## The generator and the minter (`std` feature)
 
 `Generator<C: Clock = SystemClock>` mirrors the Go reference. One `AtomicU64` cell holds
@@ -203,6 +248,8 @@ namespace bytes first, and its error comes back unchanged as `MintError::Refused
 namespace still faces the codec's shape check, which reports `MintError::Invalid(Error)`.
 `allow_all` is the explicit open gate.
 
+<a id="tests"></a>
+
 ## Tests
 
 | Suite | What it proves |
@@ -222,6 +269,8 @@ rust-memory      rust/memory          DEFHNU      30651         0  PASS
 ```
 
 With `--scale 10`, 174,651 requests per shim pass with 0 mismatches.
+
+<a id="hardening"></a>
 
 ## Hardening
 
@@ -250,6 +299,8 @@ With `--scale 10`, 174,651 requests per shim pass with 0 mismatches.
 
   In one run of 36 s per target, `decode_differential` executed 23.1M inputs (cov 165) and
   `encode_differential` 22.4M (cov 78), with no findings.
+
+<a id="benchmarks"></a>
 
 ## Benchmarks
 

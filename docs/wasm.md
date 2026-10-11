@@ -1,15 +1,48 @@
+---
+id: "KAN0R9YJSzqzAo"
+slug: "DOCS-WASM"
+type: "guide"
+version: "1.3"
+path: "docs/wasm.md"
+title: "TypeScript over WebAssembly — brd14-wasm"
+summary: "brd14-wasm: TypeScript over the Rust core compiled to WebAssembly — ABI, loader, batching."
+tags: ["typescript", "wasm"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # TypeScript over WebAssembly — `brd14-wasm`
 
 The Rust `no_std` core ([`native/rust/crates/brd14-wasm`](../native/rust/crates/brd14-wasm/))
 compiled to wasm32, embedded in a TypeScript package that runs the same code path on Node 24 and
 Bun 1.4. The ABI is normative and lives in
-[contract.md](contract.md#the-webassembly-abi-nativerustcratesbrd14-wasm).
+[contract.md](contract.md#webassembly-abi-native-rust).
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Status](#status)
+- [The module](#module)
+- [Why no wasm-bindgen](#no-wasm-bindgen)
+- [The loader](#loader)
+- [Mapping JS values onto the ABI](#mapping-js-values-onto)
+- [API](#api)
+- [When wasm wins, and when it doesn't](#when-wasm-wins-when)
+- [Build, test, bench](#build-test-bench)
+
+<a id="status"></a>
 
 ## Status
 
 **Complete.** The parity shims `ts-wasm-node` and `ts-wasm-bun` each pass 27,637 requests with 0
 mismatches. `make -C ts test` passes 154/154 tests on vitest (Node) and on `bun test` (Bun); that
 total covers both packages.
+
+<a id="module"></a>
 
 ## The module
 
@@ -25,11 +58,15 @@ total covers both packages.
 id and `decode_many` 8.9 ns per id. The memory core takes 19.6 and 25.1 ns. That is about 3× the
 speed for 7.4 KB more module.
 
+<a id="no-wasm-bindgen"></a>
+
 ## Why no wasm-bindgen
 
 The ABI is five integer functions and one byte region, so there is nothing to bind. Raw exports
 keep the module import-free and 10 KB. They also keep the JS side to one synchronous
 instantiation, and they need no `wasm-bindgen-cli` matched to a crate version in the build.
+
+<a id="loader"></a>
 
 ## The loader
 
@@ -50,6 +87,8 @@ instantiation, and they need no `wasm-bindgen-cli` matched to a crate version in
 - It caches typed-array views of the IO region once. Memory cannot grow, so the views stay valid
   for the life of the process.
 
+<a id="mapping-js-values-onto"></a>
+
 ## Mapping JS values onto the ABI
 
 | JS input | What crosses the boundary |
@@ -64,6 +103,8 @@ instantiation, and they need no `wasm-bindgen-cli` matched to a crate version in
 package, not duplicated. A test checks that every result and error matches the pure package for
 every input.
 
+<a id="api"></a>
+
 ## API
 
 ```ts
@@ -77,6 +118,8 @@ encodeManyInto("USR", snows, out);           // writes 14·n bytes into `out`; c
 decodeMany(idBytes);                         // BigInt64Array; a refused id throws BatchInvalidIdError (index + code)
 checkMany(idBytes);                          // Uint8Array of codes; never throws
 ```
+
+<a id="when-wasm-wins-when"></a>
 
 ## When wasm wins, and when it doesn't
 
@@ -102,6 +145,8 @@ pure package in the same process.
 - **Use** the pure package for single ids.
 
 A pinned, quiet run on both runtimes is planned in [roadmap.md](roadmap.md).
+
+<a id="build-test-bench"></a>
 
 ## Build, test, bench
 

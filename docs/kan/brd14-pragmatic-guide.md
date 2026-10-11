@@ -19,8 +19,9 @@ which structure turns that knowledge into speed. An agent reads it as the delive
 boundaries, the distinguishing examples, and the checks that must pass before the Operator is asked
 to accept.
 
-[Contract](../contract.md) · [Structures](../structures.md) · [Elixir](../elixir.md) ·
-[Parity](../parity.md) · [How agents work here](../../CLAUDE.md) · [Where things are](../../AGENTS.md)
+[Index](../index.md#toc) · [Contract](../contract.md#toc) · [Structures](../structures/README.md#toc) ·
+[Elixir](../elixir.md#toc) · [Parity](../parity.md#toc) · [How agents work here](../../CLAUDE.md#toc) ·
+[Where things are](../../AGENTS.md#toc) · [CI](../ci.md#toc)
 
 <a id="toc"></a>
 
@@ -43,7 +44,7 @@ to accept.
 | **What** | Four additions to brd14:<br>1. **In-band layout profiles.** Custom metadata in the 22 low bits, chosen per namespace; ids stay valid 14-byte brd14.<br>2. **Branded structures** that use what the id already carries — `BrandedChamp`, `BrandedTree`, time `Buckets` — in **Go, Rust and Elixir**.<br>3. **A Rustler NIF** that puts the Rust champ and codec under Elixir.<br>4. **`echo_data` at home in `ex/`.** Isolated from the umbrella, hardened, redistributable, and proven by the parity run like every other implementation. |
 | **Why** | **A brd14 id is not an opaque key.** Its namespace is a partition, its byte order is mint order, its high bits are a timestamp, and `hash32` is a contract function. Generic maps and sorted lists throw all four away and pay to rebuild them.<br>**The ex-umbrella code had no outside proof.** `echo_data` (fiberfx `kan`, `24a4083`) already had these structures in Elixir, but in an umbrella pinned to Elixir 1.18 and with no parity proof against the oracle.<br>**The id had no room for metadata.** An audit flag or a tenant shard had nowhere to go without a format change; layout profiles give it room inside the existing format.<br>**The earlier article was withdrawn.** This story replaces it with something that ships code. |
 | **Who** | **Requester and acceptance owner:** the Operator. **Users:**<br>- programmers on the BCS stack: Elixir/Phoenix with EchoMQ and EchoCache, Go runtimes, Rust NIFs;<br>- agents that extend brd14.<br>**Executor:** the coordinating agent, with sub-agents owning disjoint directories. |
-| **Where** | **Normative:**<br>- [docs/contract.md](../contract.md) § Extensions;<br>- [docs/structures.md](../structures.md).<br>**Oracles:** `tools/oracle.py`, `tools/champ_oracle.py`. **Vectors:** `vectors/layout.tsv`, `vectors/champ.tsv`. **Code:**<br>- `go/` (`layout.go`, `brdata/`);<br>- `native/rust/crates/{brd14,brd14-data}`;<br>- `ex/echo_data` (including `native/echo_data_nif`).<br>**Branch:** `claude/data-structures`. |
+| **Where** | **Normative:**<br>- [docs/contract.md](../contract.md) § Extensions;<br>- [docs/structures/spec.md](../structures/spec.md).<br>**Oracles:** `tools/oracle.py`, `tools/champ_oracle.py`. **Vectors:** `vectors/layout.tsv`, `vectors/champ.tsv`. **Code:**<br>- `go/` (`layout.go`, `brdata/`);<br>- `native/rust/crates/{brd14,brd14-data}`;<br>- `ex/echo_data` (including `native/echo_data_nif`).<br>**Branch:** `claude/data-structures`. |
 | **When** | Rungs R0–R6 in the order [below](#rungs). Each rung is pushed when its checks pass, so a ready increment never waits for the next. Each rung is a checkpoint: what was done, what is next, the value served. |
 | **Value** | **A programmer gets:**<br>- a map that keeps snapshots cheap and namespaces apart;<br>- a feed ordered by creation time without a sort;<br>- expiry that never touches an entry;<br>- a few bits of metadata that ride inside the id — same API shape in three runtimes, proven equivalent rather than assumed.<br>**An agent gets** one contract, oracles and vectors that settle every disagreement. |
 
@@ -202,7 +203,7 @@ implementation.
   - a champ whose collision list is appended instead of prepended fails the collision vectors.
 
 **Route:** [CLAUDE.md](../../CLAUDE.md) → this story → [contract](../contract.md) §
-Extensions → [structures](../structures.md) → the tree's `Makefile`.
+Extensions → [structures](../structures/spec.md) → the tree's `Makefile`.
 **Command:** `make test && python3 tools/parity.py --require`.
 
 <a id="sdmr"></a>
@@ -247,7 +248,7 @@ pair refutes it. This is a test in Go, Rust and Elixir.
 | Python `tools/champ_oracle.py` mirrors `ChampNode` by its specification; vectors carry shape digests | one more oracle to maintain |
 | Elixir as the reference, others compared against it | a shared bug is invisible |
 
-**Decision:** an independent Python oracle written from `docs/structures.md`, confidence 85%.
+**Decision:** an independent Python oracle written from `docs/structures/spec.md`, confidence 85%.
 `ChampNode` must pass the same vectors, which tests it too.
 
 **Falsifying check:** an oracle that appends collision pairs instead of prepending them must fail
@@ -355,7 +356,7 @@ contract's derivation is opt-in. Confidence 85%.
 | R1 | 3 | 30 min | This story; `CLAUDE.md`/`AGENTS.md` adopt KAN | a link or anchor that does not resolve |
 | R2 | 5 | 60 min | `ex/echo_data`: verbatim import, isolation on 1.14, hardening, shim `ex-pure` | a fresh checkout without `priv/census.vectors` fails |
 | R3 | 5 | 45 min | Layout profiles: contract, oracle, `vectors/layout.tsv`, Go/Rust/Elixir, ops `L`/`P` | a backwards pair under a profile with varying meta |
-| R4 | 8 | 2 h | `docs/structures.md`, `tools/champ_oracle.py`, `vectors/champ.tsv`, `go/brdata`, `brd14-data`, Elixir proofs | append-instead-of-prepend collision mutant |
+| R4 | 8 | 2 h | `docs/structures/spec.md`, `tools/champ_oracle.py`, `vectors/champ.tsv`, `go/brdata`, `brd14-data`, Elixir proofs | append-instead-of-prepend collision mutant |
 | R5 | 5 | 90 min | Rustler NIF (codec + champ), `NativeChamp`, shim `ex-nif`, `make package` | unpacked tarball fails to build alone |
 | R6 | 3 | 60 min | Benchmarks vs baselines, docs, acceptance package | any number without a results file |
 | R6a | 5 | 90 min | CI on Fly: app `brd-build` replaces GitHub Actions (SDMR card 7) | the image fails to build from bare Ubuntu, or a failing job exits 0 |
@@ -384,5 +385,5 @@ The Operator receives:
   - CI's first hosted run, which waits on the Operator's one-time Fly setup ([docs/ci.md](../ci.md)).
 
 Evidence is recorded in the implementing commits and in [docs/parity.md](../parity.md),
-[docs/benchmarks.md](../benchmarks.md) and [docs/structures.md](../structures.md). This story is
+[docs/benchmarks.md](../benchmarks.md) and [docs/structures/spec.md](../structures/spec.md). This story is
 not updated with results. It stays the contract they are judged against.

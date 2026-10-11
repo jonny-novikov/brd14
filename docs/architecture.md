@@ -1,4 +1,31 @@
+---
+id: "KAN0R9YJSz0Bmc"
+slug: "DOCS-ARCHITECTURE"
+type: "guide"
+version: "1.3"
+path: "docs/architecture.md"
+title: "Architecture"
+summary: "How the repository is laid out, the pure, speed and memory variants, and how the pieces depend on each other."
+tags: ["layout", "variants"]
+group: "architecture"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Architecture
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [One contract, many independent implementations](#one-contract-many-independent)
+- [The variant taxonomy](#variant-taxonomy)
+- [Zero allocation](#zero-allocation)
+- [Directory ownership](#directory-ownership)
+
+<a id="one-contract-many-independent"></a>
 
 ## One contract, many independent implementations
 
@@ -25,6 +52,8 @@ The implementations share **no code**. They agree because three things hold:
 3. The differential parity run sends hundreds of thousands of fresh inputs, valid and hostile, to
    every implementation and compares every byte of every answer against the oracle.
 
+<a id="variant-taxonomy"></a>
+
 ## The variant taxonomy
 
 | Variant | Goal | Where | Technique |
@@ -43,6 +72,8 @@ carries none of it.
 Both tiers export the **same C ABI**, so a consumer switches with a build flag and the parity run
 holds both to identical bytes.
 
+<a id="zero-allocation"></a>
+
 ## Zero allocation
 
 | Tree | Hot-path allocation | Proven by |
@@ -53,6 +84,8 @@ holds both to identical bytes.
 | wasm | 0: no allocator in the module, static IO region | The module has no imports and its memory is fixed |
 | Python | The result object only (`str`/`int`/tuple) | Documented in [python.md](python.md) |
 | TS pure | The result only. Parts and bytes APIs allocate no BigInt | Documented in [typescript.md](typescript.md) |
+
+<a id="directory-ownership"></a>
 
 ## Directory ownership
 

@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSzHmui"
+slug: "DOCS-GO"
+type: "guide"
+version: "1.3"
+path: "docs/go.md"
+title: "Go — the reference implementation"
+summary: "The Go reference implementation: API, typed errors, zero-allocation guarantees and how they are proven."
+tags: ["go", "reference", "zero-alloc"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Go — the reference implementation
 
 [`go/`](../go/) is the module `github.com/jonny-novikov/brd14/go`, package `brd14`: standard
@@ -31,6 +45,25 @@ errors.Is(err, brd14.ErrRange)                 // true: which rule refused
 - [Migrating from v0.1.0](#migrating-from-v010)
 - [Layout](#layout)
 
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [API](#api)
+- [Errors: typed causes and precedence](#errors-typed-causes-precedence)
+- [Zero allocation, and how it is proven](#zero-allocation-proven)
+- [Two range guards, chosen by measurement](#two-range-guards-chosen)
+- [Tests, parity, hardening](#tests-parity-hardening)
+- [Benchmarks](#benchmarks)
+- [Toolchains: the 1.22 floor and the 1.26 dev toolchain](#toolchains-1-22-floor)
+- [Runtime notes](#runtime-notes)
+- [Migrating from v0.1.0](#migrating-v0-1-0)
+- [Layout](#layout)
+
+<a id="api"></a>
+
 ## API
 
 "Allocs" is the exact count `alloc_test.go` asserts. It holds on success **and** on every refusal.
@@ -59,6 +92,8 @@ A "—" marks a call that is off the hot path and whose count is not asserted.
 | `AllowAll`, `DenyAll`, `ErrRefused` | the explicit open and closed gates | — | `ErrRefused` is **not** an `ErrInvalid` |
 
 Constants: `Len = 14`, `EpochMs = 1704067200000`.
+
+<a id="errors-typed-causes-precedence"></a>
 
 ## Errors: typed causes and precedence
 
@@ -101,6 +136,8 @@ range-before-charset mutant fails five of them.
 
 `ErrRefused`, the `DenyAll` gate's error, is deliberately **not** an `ErrInvalid`. A policy refusal
 and a malformed id are different facts. `TestCausesAreDistinctAndInvalid` keeps the two apart.
+
+<a id="zero-allocation-proven"></a>
 
 ## Zero allocation, and how it is proven
 
@@ -179,6 +216,8 @@ heap. Line numbers refer to the commit that adds this page. Rerun the command to
 is the contract's definition verbatim and allocates nothing. `TestNodeFromMatchesHashFNV` holds it to
 `hash/fnv` over random host bytes and the full `int` range of pids, negative ones included.
 
+<a id="two-range-guards-chosen"></a>
+
 ## Two range guards, chosen by measurement
 
 The contract defines two exact forms of "value < 2^63" ([contract](contract.md#the-range-guard-two-equivalent-forms)).
@@ -220,6 +259,8 @@ stores. Callers read it back with a 2-byte and a 1-byte load (`MOVWLZX (SP)`). A
 separate stores cannot be forwarded from the store buffer, and it stalls. Returning `[3]byte(b[:3])`
 makes the callee store 2+1 bytes too. Pinned, the function went from 15.7 to 10.2 ns/op.
 The comment at the return statement records why the conversion must stay.
+
+<a id="tests-parity-hardening"></a>
 
 ## Tests, parity, hardening
 
@@ -263,6 +304,8 @@ the shared state); the whole suite under `GOTOOLCHAIN=go1.22.12`; then each nati
 restatement of the contract with per-rule byte checks and `math/big` values, the way
 `tools/oracle.py` works. They do not just check that two halves of the codec agree. Latest run:
 `FuzzParse` 823,505 execs, `FuzzAppendEncode` 674,321 execs, no failures.
+
+<a id="benchmarks"></a>
 
 ## Benchmarks
 
@@ -315,6 +358,8 @@ How to read it:
 
 The JSON is `bench/results/go-reference-go1.26.9.json`. It is generated, not committed.
 
+<a id="toolchains-1-22-floor"></a>
+
 ## Toolchains: the 1.22 floor and the 1.26 dev toolchain
 
 The module's `go` line stays at **1.22.0**. A dependency's `go` line is a promise to its consumers,
@@ -332,6 +377,8 @@ therefore avoids every 1.23+ API, even in tests:
 | range-over-func iterators, `maps.Keys`, `slices.Collect` | 1.23 | plain loops |
 | `strings.SplitSeq`, `strings.Lines`, `bytes.Lines` | 1.24 | `strings.Split` |
 | `T.Context`, `T.Chdir` | 1.24 | not needed |
+
+<a id="runtime-notes"></a>
 
 ## Runtime notes
 
@@ -357,6 +404,8 @@ therefore avoids every 1.23+ API, even in tests:
   skip there, and every other test runs.
 - **`Time` returns local time.** `time.UnixMilli` attaches `time.Local`. Call `.UTC()` before
   formatting when the zone matters, as `epoch_test.go` does.
+
+<a id="migrating-v0-1-0"></a>
 
 ## Migrating from v0.1.0
 
@@ -385,6 +434,8 @@ therefore avoids every 1.23+ API, even in tests:
    the typed cause, which is still an `ErrInvalid`.
 5. **New, opt-in.** `AppendEncode`, `ParseBytes`, `DecodeBytes`, `ValidBytes`, `AppendNextBranded`,
    `NodeFrom`, and the four causes.
+
+<a id="layout"></a>
 
 ## Layout
 

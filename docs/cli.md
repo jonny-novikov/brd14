@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSzHmue"
+slug: "DOCS-CLI"
+type: "guide"
+version: "1.3"
+path: "docs/cli.md"
+title: "The shell tools: brd and mint"
+summary: "The shell tools brd and mint, the .brdrc settings file and its precedence, with recipes."
+tags: ["cli", "bash", "brdrc"]
+group: "tools"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # The shell tools: `brd` and `mint`
 
 [`scripts/brd.sh`](../scripts/brd.sh) is a complete brd14 implementation in pure bash (≥ 4.2, no
@@ -5,12 +19,32 @@ dependencies). [`scripts/mint.sh`](../scripts/mint.sh) is its shorthand for mint
 defaults from [`.brdrc`](../.brdrc). The codec is proven byte-identical to the oracle: the parity run
 registers `brd conform` as shim **sh-bash**, which handles 30,651 requests with 0 mismatches.
 
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Install](#install)
+- [Mint](#mint)
+- [Inspect](#inspect)
+- [Convert](#convert)
+- [Time-range scans](#time-range-scans)
+- [Settings: .brdrc](#settings-brdrc)
+- [Exit status](#exit-status)
+- [How it stays exact in bash](#stays-exact-bash)
+- [Tests](#tests)
+
+<a id="install"></a>
+
 ## Install
 
 ```bash
 ln -s "$PWD/scripts/brd.sh"  ~/.local/bin/brd
 ln -s "$PWD/scripts/mint.sh" ~/.local/bin/mint      # mint resolves its symlink to find brd.sh
 ```
+
+<a id="mint"></a>
 
 ## Mint
 
@@ -32,6 +66,8 @@ Across calls, uniqueness rests on the node. With `node = auto` each process deri
 over hostname + pid), with a residual collision of about 1 in 1024 per same-host process pair. Pin
 `node` when several processes mint at once on one host, or when ids must stay attributable.
 
+<a id="inspect"></a>
+
 ## Inspect
 
 ```bash
@@ -45,6 +81,8 @@ brd hash USR0KHTOWnGLuC            # 234878118 (hash32, trie placement)
 brd node                           # this process's derived node; brd node HOST PID computes one
 mint 1000 | brd valid -q -         # every command takes ids on stdin with '-'
 ```
+
+<a id="convert"></a>
 
 ## Convert
 
@@ -66,6 +104,8 @@ brd decode --as hex USR0KHTOWnGLuC # 03cf6c2aaa400000
 | `pretty` | one field per line |
 | `auto` | ids for mint/encode/at; for decode, pretty on a terminal and tsv in a pipe |
 
+<a id="time-range-scans"></a>
+
 ## Time-range scans
 
 Byte order equals time order between milliseconds, so the smallest id of an instant is a cursor:
@@ -74,6 +114,8 @@ Byte order equals time order between milliseconds, so the smallest id of an inst
 brd at 2026-10-01T00:00:00Z ORD    # ORD0QsNVlAaY6a — use as  WHERE id >= 'ORD0QsNVlAaY6a'
 brd at "1 hour ago"                # anything GNU/BSD date understands, @unix-seconds, unix ms, now
 ```
+
+<a id="settings-brdrc"></a>
 
 ## Settings: `.brdrc`
 
@@ -108,6 +150,8 @@ code on your machine; `scripts/test_brd.sh` tries exactly that and asserts nothi
 
 `brd init [NS]` writes a commented `.brdrc` in the current directory.
 
+<a id="exit-status"></a>
+
 ## Exit status
 
 | Code | Meaning |
@@ -116,6 +160,8 @@ code on your machine; `scripts/test_brd.sh` tries exactly that and asserts nothi
 | 1 | an id or namespace was refused by the contract (the class is printed: LENGTH, NAMESPACE, CHARSET, RANGE) |
 | 2 | a usage or configuration error |
 | 3 | refused by the census |
+
+<a id="stays-exact-bash"></a>
 
 ## How it stays exact in bash
 
@@ -128,6 +174,8 @@ code on your machine; `scripts/test_brd.sh` tries exactly that and asserts nothi
 - The parity shim works on byte values parsed from hex, because bash strings cannot hold NUL.
 - The clock is `EPOCHREALTIME` (bash 5, no fork). Older shells fall back to GNU `date`, then
   `python3`, then `perl`.
+
+<a id="tests"></a>
 
 ## Tests
 

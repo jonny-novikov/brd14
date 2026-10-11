@@ -1,7 +1,33 @@
+---
+id: "KAN0R9YJSzZO2j"
+slug: "DOCS-PARITY"
+type: "guide"
+version: "1.3"
+path: "docs/parity.md"
+title: "Parity"
+summary: "How agreement across every implementation is proven by the differential parity run, and the latest matrix."
+tags: ["parity", "differential"]
+group: "contract"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Parity
 
 How agreement across implementations is proven. The request format and the shim protocol are
 normative and live in [contract.md](contract.md#parity-shim-protocol).
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Method](#method)
+- [Matrix (measured, scale 1)](#matrix-measured-scale-1)
+- [Run it](#run)
+
+<a id="method"></a>
 
 ## Method
 
@@ -29,6 +55,8 @@ normative and live in [contract.md](contract.md#parity-shim-protocol).
    swaps two alphabet characters (`q`↔`r`). That is the "pin-evading permutation" class that
    exact-byte vectors alone can miss. It catches the mutant on 1,145 requests.
 
+<a id="matrix-measured-scale-1"></a>
+
 ## Matrix (measured, scale 1)
 
 | Shim | Impl / variant | Ops | Requests | Mismatches | Status |
@@ -55,6 +83,8 @@ normative and live in [contract.md](contract.md#parity-shim-protocol).
   wasm shims declare `DEH`: only encode, decode and hash32 cross the wasm ABI.
 - `python/conform.py` also cross-checks the library against itself (decode, check, is_valid and
   parse over bytes, bytearray and str) and answers `ERR DISAGREE` on any split.
+
+<a id="run"></a>
 
 ## Run it
 

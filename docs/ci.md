@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSz0Bmf"
+slug: "DOCS-CI"
+type: "guide"
+version: "1.3"
+path: "docs/ci.md"
+title: "CI on Fly.io: brd-build"
+summary: "CI on Fly.io: the brd-build app runs scripts/ci.sh once per deploy as its release command; setup, results and limits."
+tags: ["ci", "fly.io", "brd-build"]
+group: "operations"
+language: "en"
+audience: ["Operator", "developer", "agent"]
+---
+
 # CI on Fly.io: `brd-build`
 
 GitHub Actions never assigned a runner to this repository: every run failed before any step ran,
@@ -21,6 +35,21 @@ once per deploy attempt", where "a non-zero exit status from this command will s
 deployment" ([configuration reference](https://docs.fly.io/reference/configuration)). That is
 exactly a run-once CI machine.
 
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [The files](#files)
+- [The jobs](#jobs)
+- [One-time setup (the Operator)](#one-time-setup-operator)
+- [Reading a result](#reading-result)
+- [Run it elsewhere](#run-elsewhere)
+- [Limits](#limits)
+
+<a id="files"></a>
+
 ## The files
 
 | File | Role |
@@ -31,6 +60,8 @@ exactly a run-once CI machine.
 | [`fly/status.sh`](../fly/status.sh) | The app Machine: a page that reports the image's toolchains and jobs. A deploy re-seeds an app scaled to zero, so one Machine is always kept; `auto_stop_machines` stops it when idle. |
 | [`scripts/fly-build.sh`](../scripts/fly-build.sh) | Run it by hand: `setup`, `deploy`, or `run JOB…` on a one-off Machine. |
 | [`.dockerignore`](../.dockerignore) | Keeps build outputs, caches and agent worktrees out of the build context. |
+
+<a id="jobs"></a>
 
 ## The jobs
 
@@ -51,6 +82,8 @@ exactly a run-once CI machine.
 **Pins:** the CI pins are no longer mirrored anywhere. The image reads
 [`scripts/versions.env`](../scripts/versions.env) itself, so the old `PIN_*` drift check has
 nothing left to compare.
+
+<a id="one-time-setup-operator"></a>
 
 ## One-time setup (the Operator)
 
@@ -74,6 +107,8 @@ with flyctl and a deploy token can run the same deploy:
 - export it as `FLY_API_TOKEN`;
 - run `scripts/fly-build.sh`, for example from a cron job or a `post-receive` hook on a mirror.
 
+<a id="reading-result"></a>
+
 ## Reading a result
 
 - **Pass or fail:** the deploy's status, in the dashboard's Deployments view or as the exit code
@@ -81,6 +116,8 @@ with flyctl and a deploy token can run the same deploy:
 - **The log:** `fly logs -a brd-build`. The release Machine prints a `════ ci: <job>` banner per
   job and a summary table at the end.
 - **What the image is:** the app's URL serves the toolchain report from `fly/status.sh`.
+
+<a id="run-elsewhere"></a>
 
 ## Run it elsewhere
 
@@ -95,6 +132,8 @@ with flyctl and a deploy token can run the same deploy:
   `--build-arg HTTPS_PROXY=…` (plus `NO_PROXY`), and add `--network host` to both commands. Pass
   only the HTTPS proxy: such proxies typically refuse plain-HTTP requests, and apt reaches the
   Ubuntu archive directly.
+
+<a id="limits"></a>
 
 ## Limits
 

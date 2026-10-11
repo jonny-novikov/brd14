@@ -1,8 +1,33 @@
+---
+id: "KAN0R9YJSz0Bmb"
+slug: "BENCH-README"
+type: "guide"
+version: "1.3"
+path: "bench/README.md"
+title: "Benchmarks — protocol and result schema"
+summary: "The benchmark protocol every tree follows and the JSON schema of bench/results."
+tags: ["benchmarks", "protocol"]
+group: "measurement"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Benchmarks — protocol and result schema
 
 Every tree's `make bench` measures the same operations over the same corpus and writes one JSON
 file per (implementation, variant, runtime) into `bench/results/`. `tools/benchreport.py` renders
 them into [`docs/benchmarks.md`](../docs/benchmarks.md).
+
+[Index](../docs/index.md#toc) · [Contract](../docs/contract.md#toc) · [Structures](../docs/structures/README.md#toc) · [Parity](../docs/parity.md#toc) · [KAN story](../docs/kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Protocol](#protocol)
+- [Result schema](#result-schema)
+
+<a id="protocol"></a>
 
 ## Protocol
 
@@ -23,6 +48,8 @@ them into [`docs/benchmarks.md`](../docs/benchmarks.md).
   results above 5% as noisy.
 - **Sink:** every result must reach a sink (`black_box`, a volatile, an accumulator that is
   printed), so the compiler or JIT cannot delete the work.
+
+<a id="result-schema"></a>
 
 ## Result schema
 
