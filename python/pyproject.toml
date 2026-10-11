@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "brd14"
+dynamic = ["version"]
+description = "A 14-byte branded identity: time-ordered, coordination-free, carrying its own type. Pure Python, free-threading safe."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Ivan Novikov" }]
+keywords = ["id", "snowflake", "base62", "identifier", "branded-id", "free-threading"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading :: 3 - Stable",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/jonny-novikov/brd14"
+Documentation = "https://github.com/jonny-novikov/brd14/blob/master/docs/python.md"
+Contract = "https://github.com/jonny-novikov/brd14/blob/master/docs/contract.md"
+Source = "https://github.com/jonny-novikov/brd14/tree/master/python"
+
+[tool.hatch.version]
+path = "src/brd14/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/brd14"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/brd14", "tests", "bench", "conform.py", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+filterwarnings = ["error"]
+markers = ["stress: multi-threaded stress tests (run on every interpreter; the point of 3.14t)"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+files = ["src", "tests", "bench", "conform.py"]
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["pyperf", "pyperf.*"]  # the bench harness ships no type information
+ignore_missing_imports = true
