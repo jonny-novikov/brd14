@@ -57,6 +57,7 @@ defmodule EchoData.Graft.PageSet do
   defp deltas([h | t], prev, acc), do: deltas(t, h, [h - prev | acc])
 
   defp undeltas([], _prev, acc), do: Enum.reverse(acc)
+
   defp undeltas([d | t], prev, acc) do
     v = prev + d
     undeltas(t, v, [v | acc])
@@ -67,6 +68,7 @@ defmodule EchoData.Graft.PageSet do
   defp varint(n) when n >= 0x80, do: <<1::1, band(n, 0x7F)::7>> <> varint(bsr(n, 7))
 
   defp unvarint(<<>>, acc), do: Enum.reverse(acc)
+
   defp unvarint(bin, acc) do
     {v, rest} = take_varint(bin, 0, 0)
     unvarint(rest, [v | acc])

@@ -1,6 +1,6 @@
 # bcs2.2 E4 — the figure: mailbox reads vs projection reads, 8 concurrent readers.
 #
-# Run: cd echo/apps/echo_data && TMPDIR=/tmp mix run bench/read_projection_bench.exs
+# Run: cd ex/echo_data && TMPDIR=/tmp mix run bench/read_projection_bench.exs
 #
 # Derivation (before measurement, the house law): the bcs1.1 read path is one
 # serialized GenServer.call round-trip through a single owner mailbox — its

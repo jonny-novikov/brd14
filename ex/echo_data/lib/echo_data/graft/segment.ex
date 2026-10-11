@@ -39,7 +39,11 @@ defmodule EchoData.Graft.Segment do
 
     {frames, directory, _} =
       Enum.reduce(chunks, {[], %{}, 0}, fn chunk, {frames, dir, frame_no} ->
-        body = chunk |> Enum.map(fn {_idx, bin} -> <<byte_size(bin)::32, bin::binary>> end) |> IO.iodata_to_binary()
+        body =
+          chunk
+          |> Enum.map(fn {_idx, bin} -> <<byte_size(bin)::32, bin::binary>> end)
+          |> IO.iodata_to_binary()
+
         dir = Enum.reduce(chunk, dir, fn {idx, _}, d -> Map.put(d, idx, frame_no) end)
         {[:zlib.compress(body) | frames], dir, frame_no + 1}
       end)
@@ -67,7 +71,12 @@ defmodule EchoData.Graft.Segment do
   # frames hold pages in index order; find ours by walking the frame's records
   # against the directory's page indices that map to this frame
   defp scan_frame(body, page_idx, dir, _frames) do
-    idxs = dir |> Enum.filter(fn {_i, f} -> Map.get(dir, page_idx) == f end) |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+    idxs =
+      dir
+      |> Enum.filter(fn {_i, f} -> Map.get(dir, page_idx) == f end)
+      |> Enum.map(&elem(&1, 0))
+      |> Enum.sort()
+
     take_page(body, idxs, page_idx)
   end
 
@@ -81,8 +90,13 @@ defmodule EchoData.Graft.Segment do
   @spec encode(t) :: binary()
   def encode(%__MODULE__{directory: dir, frames: frames}) do
     entries = dir |> Enum.sort_by(&elem(&1, 0))
-    dir_bin = entries |> Enum.map(fn {idx, fno} -> <<idx::32, fno::16>> end) |> IO.iodata_to_binary()
-    frames_bin = frames |> Enum.map(fn f -> <<byte_size(f)::32, f::binary>> end) |> IO.iodata_to_binary()
+
+    dir_bin =
+      entries |> Enum.map(fn {idx, fno} -> <<idx::32, fno::16>> end) |> IO.iodata_to_binary()
+
+    frames_bin =
+      frames |> Enum.map(fn f -> <<byte_size(f)::32, f::binary>> end) |> IO.iodata_to_binary()
+
     <<length(entries)::32, dir_bin::binary, length(frames)::16, frames_bin::binary>>
   end
 
@@ -92,13 +106,23 @@ defmodule EchoData.Graft.Segment do
     {dir, rest} = take_dir(rest, pc, %{})
     <<fc::16, frest::binary>> = rest
     frames = take_frames(frest, fc, [])
-    %__MODULE__{id: id, lsn: lsn, pages: dir |> Map.keys() |> PageSet.from_list(), directory: dir, frames: frames}
+
+    %__MODULE__{
+      id: id,
+      lsn: lsn,
+      pages: dir |> Map.keys() |> PageSet.from_list(),
+      directory: dir,
+      frames: frames
+    }
   end
 
   defp take_dir(rest, 0, acc), do: {acc, rest}
-  defp take_dir(<<idx::32, fno::16, rest::binary>>, n, acc), do: take_dir(rest, n - 1, Map.put(acc, idx, fno))
+
+  defp take_dir(<<idx::32, fno::16, rest::binary>>, n, acc),
+    do: take_dir(rest, n - 1, Map.put(acc, idx, fno))
 
   defp take_frames(_rest, 0, acc), do: Enum.reverse(acc)
+
   defp take_frames(<<len::32, f::binary-size(len), rest::binary>>, n, acc),
     do: take_frames(rest, n - 1, [f | acc])
 end

@@ -29,13 +29,18 @@ defmodule EchoData.Bcs.ArchetypesTest do
       child => %{extends: base, fee: 7, tier: :gold}
     }
 
-    fetch = fn id -> Map.fetch(defs, id) |> case do
-      {:ok, props} -> {:ok, props}
-      :error -> {:error, :missing}
-    end end
+    fetch = fn id ->
+      Map.fetch(defs, id)
+      |> case do
+        {:ok, props} -> {:ok, props}
+        :error -> {:error, :missing}
+      end
+    end
 
     assert Archetypes.resolve(fetch, child) == {:ok, %{venue: :otc, fee: 7, tier: :gold}}
-    assert Archetypes.resolve(fetch, child, %{fee: 1}) == {:ok, %{venue: :otc, fee: 1, tier: :gold}}
+
+    assert Archetypes.resolve(fetch, child, %{fee: 1}) ==
+             {:ok, %{venue: :otc, fee: 1, tier: :gold}}
   end
 
   test "resolve/3 refuses a cycle" do

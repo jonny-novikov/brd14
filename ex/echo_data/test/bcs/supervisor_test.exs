@@ -15,8 +15,7 @@ defmodule EchoData.Bcs.SupervisorTest do
   end
 
   setup do
-    {:ok, sup} =
-      Supervisor.start_link([{:emq0_store_orders, "ORD"}, {:emq0_store_users, "USR"}])
+    {:ok, sup} = Supervisor.start_link([{:emq0_store_orders, "ORD"}, {:emq0_store_users, "USR"}])
 
     # the supervisor traps exits and follows the dying test process down —
     # the stop below races that shutdown, so an already-dead exit is fine
@@ -61,8 +60,12 @@ defmodule EchoData.Bcs.SupervisorTest do
 
   defp wait_until(pred, tries \\ 200) do
     cond do
-      pred.() -> :ok
-      tries == 0 -> flunk("condition never held")
+      pred.() ->
+        :ok
+
+      tries == 0 ->
+        flunk("condition never held")
+
       true ->
         Process.sleep(5)
         wait_until(pred, tries - 1)

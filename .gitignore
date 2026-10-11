@@ -48,3 +48,13 @@ ts/packages/brd14-wasm/src/wasm-bytes.ts
 
 # --- agent worktrees (isolated parallel builds; never committed)
 .claude/worktrees/
+
+# --- elixir (ex/)
+ex/**/_build/
+ex/**/deps/
+ex/**/*.ez
+ex/**/erl_crash.dump
+ex/**/native/**/target/
+# echo_data keeps data files in priv/ (the census vectors); only built NIFs are ignored there
+!ex/echo_data/priv/
+ex/echo_data/priv/*.so
