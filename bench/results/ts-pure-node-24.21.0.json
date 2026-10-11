@@ -1,0 +1,114 @@
+{
+  "impl": "ts",
+  "variant": "pure",
+  "runtime": "node-24.21.0",
+  "machine": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "pinned": true,
+  "corpus": "vectors/valid.tsv rows 1..4096",
+  "results": [
+    {
+      "op": "encode",
+      "ns_per_op": 129.467,
+      "mad_ns": 8.237,
+      "samples": 16,
+      "cv": 0.2345,
+      "ops_per_sample": 794624
+    },
+    {
+      "op": "encode_parts",
+      "ns_per_op": 141.858,
+      "mad_ns": 18.962,
+      "samples": 16,
+      "cv": 0.2352,
+      "ops_per_sample": 626688
+    },
+    {
+      "op": "encode_into",
+      "ns_per_op": 116.203,
+      "mad_ns": 2.446,
+      "samples": 16,
+      "cv": 0.1823,
+      "ops_per_sample": 962560
+    },
+    {
+      "op": "decode",
+      "ns_per_op": 183.995,
+      "mad_ns": 8.426,
+      "samples": 16,
+      "cv": 0.2499,
+      "ops_per_sample": 462848
+    },
+    {
+      "op": "decode_parts",
+      "ns_per_op": 164.618,
+      "mad_ns": 4.269,
+      "samples": 16,
+      "cv": 0.1976,
+      "ops_per_sample": 749568
+    },
+    {
+      "op": "decode_bytes",
+      "ns_per_op": 124.551,
+      "mad_ns": 3.331,
+      "samples": 16,
+      "cv": 0.1863,
+      "ops_per_sample": 823296
+    },
+    {
+      "op": "valid",
+      "ns_per_op": 122.837,
+      "mad_ns": 12.45,
+      "samples": 16,
+      "cv": 0.1889,
+      "ops_per_sample": 978944
+    },
+    {
+      "op": "hash32",
+      "ns_per_op": 15.457,
+      "mad_ns": 0.839,
+      "samples": 16,
+      "cv": 0.2116,
+      "ops_per_sample": 5103616
+    },
+    {
+      "op": "hash32_parts",
+      "ns_per_op": 13.219,
+      "mad_ns": 0.57,
+      "samples": 16,
+      "cv": 0.189,
+      "ops_per_sample": 9355264
+    },
+    {
+      "op": "mint",
+      "ns_per_op": 290.953,
+      "mad_ns": 58.733,
+      "samples": 16,
+      "cv": 0.3078,
+      "ops_per_sample": 299008
+    },
+    {
+      "op": "naive_encode",
+      "ns_per_op": 2215.731,
+      "mad_ns": 125.279,
+      "samples": 16,
+      "cv": 0.1623,
+      "ops_per_sample": 28672
+    },
+    {
+      "op": "naive_decode",
+      "ns_per_op": 2755.363,
+      "mad_ns": 256.994,
+      "samples": 16,
+      "cv": 0.2081,
+      "ops_per_sample": 28672
+    },
+    {
+      "op": "naive_hash32",
+      "ns_per_op": 118.95,
+      "mad_ns": 10.734,
+      "samples": 18,
+      "cv": 0.2928,
+      "ops_per_sample": 413696
+    }
+  ]
+}

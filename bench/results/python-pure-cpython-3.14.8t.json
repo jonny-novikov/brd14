@@ -1,0 +1,61 @@
+{
+  "impl": "python",
+  "variant": "pure",
+  "runtime": "cpython-3.14.8t",
+  "machine": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "pinned": true,
+  "corpus": "vectors/valid.tsv rows 1..4096",
+  "harness": "pyperf 2.10.0",
+  "gil": false,
+  "results": [
+    {
+      "op": "encode",
+      "ns_per_op": 657.26,
+      "mad_ns": 32.18,
+      "samples": 60,
+      "cv": 0.1172
+    },
+    {
+      "op": "decode",
+      "ns_per_op": 834.3,
+      "mad_ns": 20.59,
+      "samples": 60,
+      "cv": 0.1384
+    },
+    {
+      "op": "hash32",
+      "ns_per_op": 331.71,
+      "mad_ns": 20.52,
+      "samples": 60,
+      "cv": 0.1545
+    },
+    {
+      "op": "mint",
+      "ns_per_op": 1231.77,
+      "mad_ns": 31.51,
+      "samples": 60,
+      "cv": 0.0819
+    },
+    {
+      "op": "valid",
+      "ns_per_op": 203.09,
+      "mad_ns": 9.35,
+      "samples": 60,
+      "cv": 0.1664
+    },
+    {
+      "op": "decode_bytes",
+      "ns_per_op": 871.82,
+      "mad_ns": 55.53,
+      "samples": 60,
+      "cv": 0.117
+    },
+    {
+      "op": "next",
+      "ns_per_op": 569.36,
+      "mad_ns": 19.99,
+      "samples": 60,
+      "cv": 0.1062
+    }
+  ]
+}

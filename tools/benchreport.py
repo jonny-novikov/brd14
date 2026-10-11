@@ -71,11 +71,13 @@ def fmt_ns(x: float | None) -> str:
     return f"{x:.1f}"
 
 
-def render(runs: list[dict]) -> str:
+def render(runs: list[dict], note: str = "") -> str:
     runs = sorted(runs, key=order_key)
     base = next((ops_of(r) for r in runs if r["impl"] == "c" and r.get("variant") == "speed"), {})
     machines = sorted({r.get("machine", "?") for r in runs})
     out = [INTRO]
+    if note:
+        out.append(f"> **Status.** {note}\n")
     out.append(f"**Machine:** {', '.join(machines)}. **Runs:** {len(runs)} result files.\n")
 
     out.append("## Headline: ns/op (× C speed)\n")
@@ -116,9 +118,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default=str(ROOT / "bench" / "results"))
     ap.add_argument("--out", default=str(ROOT / "docs" / "benchmarks.md"))
+    ap.add_argument("--note", default="", help="a status paragraph rendered under the intro")
     a = ap.parse_args()
     runs = load(pathlib.Path(a.results))
-    pathlib.Path(a.out).write_text(render(runs), encoding="utf-8")
+    pathlib.Path(a.out).write_text(render(runs, a.note), encoding="utf-8")
     print(f"{a.out}: {len(runs)} result files")
 
 

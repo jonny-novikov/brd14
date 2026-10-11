@@ -1,0 +1,14 @@
+{
+  "impl": "rust",
+  "variant": "speed",
+  "runtime": "rustc-1.99.0",
+  "machine": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "pinned": true,
+  "corpus": "vectors/valid.tsv rows 1..4096",
+  "results": [
+    {"op": "encode", "ns_per_op": 5.679, "mad_ns": 0.413, "cv": 0.2050, "samples": 15, "allocs_per_op": 0, "bytes_per_op": 0},
+    {"op": "decode", "ns_per_op": 8.601, "mad_ns": 0.348, "cv": 0.0673, "samples": 15, "allocs_per_op": 0, "bytes_per_op": 0},
+    {"op": "hash32", "ns_per_op": 0.805, "mad_ns": 0.034, "cv": 0.0714, "samples": 15, "allocs_per_op": 0, "bytes_per_op": 0},
+    {"op": "mint", "ns_per_op": 47.614, "mad_ns": 0.950, "cv": 0.0540, "samples": 15, "allocs_per_op": 0, "bytes_per_op": 0}
+  ]
+}

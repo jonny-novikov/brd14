@@ -1,0 +1,91 @@
+{
+  "impl": "go",
+  "variant": "reference",
+  "runtime": "go1.26.9",
+  "machine": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "pinned": true,
+  "corpus": "vectors/valid.tsv rows 1..4096",
+  "results": [
+    {
+      "op": "encode",
+      "ns_per_op": 35.115,
+      "mad_ns": 1.475,
+      "samples": 10,
+      "cv": 0.0557,
+      "allocs_per_op": 1,
+      "bytes_per_op": 16
+    },
+    {
+      "op": "encode_append",
+      "ns_per_op": 16.09,
+      "mad_ns": 0.37,
+      "samples": 10,
+      "cv": 0.0376,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    {
+      "op": "decode",
+      "ns_per_op": 14.515,
+      "mad_ns": 0.36,
+      "samples": 10,
+      "cv": 0.0396,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    {
+      "op": "decode_bytes",
+      "ns_per_op": 10.995,
+      "mad_ns": 0.285,
+      "samples": 10,
+      "cv": 0.0812,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    {
+      "op": "valid",
+      "ns_per_op": 14.91,
+      "mad_ns": 0.285,
+      "samples": 10,
+      "cv": 0.037,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    {
+      "op": "hash32",
+      "ns_per_op": 1.071,
+      "mad_ns": 0.0545,
+      "samples": 10,
+      "cv": 0.2165,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    {
+      "op": "mint",
+      "ns_per_op": 105.95,
+      "mad_ns": 3.75,
+      "samples": 10,
+      "cv": 0.3828,
+      "allocs_per_op": 1,
+      "bytes_per_op": 16
+    },
+    {
+      "op": "mint_append",
+      "ns_per_op": 88.925,
+      "mad_ns": 1.44,
+      "samples": 10,
+      "cv": 0.0279,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    },
+    {
+      "op": "next",
+      "ns_per_op": 65.625,
+      "mad_ns": 1.66,
+      "samples": 10,
+      "cv": 0.0466,
+      "allocs_per_op": 0,
+      "bytes_per_op": 0
+    }
+  ]
+}

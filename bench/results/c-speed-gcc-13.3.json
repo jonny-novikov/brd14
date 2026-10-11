@@ -1,0 +1,14 @@
+{
+  "impl": "c",
+  "variant": "speed",
+  "runtime": "gcc-13.3",
+  "cflags": "-O2",
+  "machine": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "pinned": true,
+  "corpus": "vectors/valid.tsv rows 1..4096",
+  "results": [
+    {"op": "encode", "ns_per_op": 6.742, "mad_ns": 0.168, "samples": 15, "cv_pct": 7.86, "iters_per_sample": 8388608, "allocs_per_op": 0, "bytes_per_op": 0},
+    {"op": "decode", "ns_per_op": 11.731, "mad_ns": 0.158, "samples": 15, "cv_pct": 14.97, "iters_per_sample": 4194304, "allocs_per_op": 0, "bytes_per_op": 0},
+    {"op": "hash32", "ns_per_op": 1.247, "mad_ns": 0.287, "samples": 15, "cv_pct": 27.03, "iters_per_sample": 67108864, "allocs_per_op": 0, "bytes_per_op": 0}
+  ]
+}
