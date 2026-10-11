@@ -146,6 +146,35 @@ def requests(scale: int) -> list[str]:
         reqs.append(f"N {o.hexs(host)} {pid}")
     for _ in range(1000 * scale):
         reqs.append(f"N {o.hexs(rng.bytes(rng.below(48)))} {rng.below(2**31)}")
+
+    # L, P — layout profiles (extension). Their own stream, so adding them moved no
+    # earlier request. Profiles: every valid split, plus near misses and wide widths.
+    lr = o.SplitMix64(SEED ^ 0x1A70)
+    valid = [(n, s, 22 - n - s) for n in range(23) for s in range(23 - n)]
+    invalid = [(10, 12, 1), (10, 11, 0), (23, 0, 0), (0, 0, 23), (22, 1, 0), (40, 0, 0), (7, 7, 7)]
+    for _ in range(1500 * scale):
+        n, s, m = valid[lr.below(len(valid))]
+        snow = lr.next() >> 1 if lr.below(8) else lr.next()  # ~1/8 out of domain
+        reqs.append(f"L {n} {s} {m} {snow}")
+        ts, low = lr.below(2**41), lr.below(2**22)
+        node, seq, meta = low >> (s + m), (low >> m) & (2**s - 1), low & (2**m - 1)
+        k = lr.below(16)  # mostly in range; sometimes one field one past its width
+        if k == 0:
+            ts = 2**41
+        elif k == 1:
+            node = 2**n
+        elif k == 2:
+            seq = 2**s
+        elif k == 3:
+            meta = 2**m
+        reqs.append(f"P {n} {s} {m} {ts} {node} {seq} {meta}")
+    for n, s, m in invalid:
+        reqs.append(f"L {n} {s} {m} 0")
+        reqs.append(f"L {n} {s} {m} {2**63}")
+        reqs.append(f"P {n} {s} {m} 0 0 0 0")
+    for n, s, m in valid:
+        reqs.append(f"L {n} {s} {m} {o.MAX_SNOW}")
+        reqs.append(f"P {n} {s} {m} {2**41 - 1} {2**n - 1} {2**s - 1} {2**m - 1}")
     return reqs
 
 
@@ -170,12 +199,18 @@ def answer(req: str, mutant: bool = False) -> str:
         return "OK " + " ".join(map(str, o.fields(int(args[0]))))
     if op == "N":
         return f"OK {o.node_from(o.unhex(args[0]), int(args[1]))}"
+    if op == "L":
+        r = o.layout_fields(*map(int, args))
+        return f"ERR {o.CLASS[r]}" if isinstance(r, o.Refused) else "OK " + " ".join(map(str, r))
+    if op == "P":
+        r = o.layout_pack(*map(int, args))
+        return f"ERR {o.CLASS[r]}" if isinstance(r, o.Refused) else f"OK {r}"
     raise ValueError(f"unknown request {req!r}")
 
 
 def serve_oracle(mutant: bool) -> None:
     out = sys.stdout
-    out.write(f"HELLO oracle {'mutant' if mutant else 'python'} EDHUFN\n")
+    out.write(f"HELLO oracle {'mutant' if mutant else 'python'} EDHUFNLP\n")
     for line in sys.stdin:
         line = line.rstrip("\n")
         if line:
