@@ -44,6 +44,8 @@ jobs:
         run: python tools/parity.py --self-test
       - name: vectors are reproducible from the oracle
         run: python tools/vectorgen.py && git diff --exit-code -- vectors/
+      - name: the shell CLI (scripts/brd.sh, scripts/mint.sh, .brdrc)
+        run: make -C scripts test harden
 
   go:
     name: go ${{ matrix.go }}

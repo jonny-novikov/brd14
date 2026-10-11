@@ -8,7 +8,7 @@
 #   make harden    sanitizers, Miri, race detector, floor toolchains
 #   make vectors   regenerate vectors/ and fail if they drifted
 SHELL   := /bin/bash
-TREES   := $(patsubst %/Makefile,%,$(wildcard go/Makefile native/Makefile python/Makefile ts/Makefile))
+TREES   := $(patsubst %/Makefile,%,$(wildcard go/Makefile native/Makefile python/Makefile ts/Makefile scripts/Makefile))
 ENV     := . scripts/env.sh &&
 export BRD14_REQUIRE_VECTORS := 1
 

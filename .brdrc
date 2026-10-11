@@ -1,0 +1,34 @@
+# .brdrc — defaults for scripts/brd.sh and scripts/mint.sh in this repository.
+#
+# Parsed (never sourced) by a key whitelist; an unknown key is a warning, a bad value
+# is an error that names this file and line. Inspect what is in effect, and where each
+# value came from, with:   scripts/brd.sh config
+#
+# Precedence, strongest first:
+#   flags (--ns, --as, ...)  >  BRD_NS, BRD_NODE, BRD_AS, BRD_COUNT, BRD_CENSUS, BRD_TZ
+#   >  the nearest .brdrc walking up from the working directory (this file)
+#   >  ${XDG_CONFIG_HOME:-~/.config}/brd/config  >  built-in defaults
+# BRD_CONFIG=<file> reads that file instead of searching; --no-rc / BRD_NO_RC=1 reads none.
+
+# Default namespace: 3 letters A-Z. The brand IS the type.
+ns = KAN
+
+# Node id 0..1023, or auto: FNV-32a over hostname + pid, derived per process
+# (residual collision ~1/1024 per same-host process pair). Pin it when ids must
+# stay attributable to one minter, or several processes mint at once on one host.
+node = auto
+
+# Output format: auto | id | int | hex | json | tsv | pretty
+#   auto = the id for mint/encode/at; pretty on a terminal and tsv in a pipe for decode.
+as = auto
+
+# How many ids `mint` prints when no count is given.
+count = 1
+
+# The census: namespaces `mint` may use, separated by commas or spaces. Empty means any
+# well-formed namespace. Outside it, mint refuses before minting (exit 3), quoting the
+# namespace -- the shell form of the Go Minter's Gate. encode/decode are not gated.
+census =
+
+# Dates: utc | local
+tz = utc
