@@ -45,9 +45,15 @@ test: typecheck lint-tests
 	$(NPX) vitest run
 	$(BUN) test ./packages
 
+# The container exports BUN_OPTIONS=--smol and NODE_OPTIONS=--max-old-space-size=…; a bench
+# measures the runtime's defaults, so both are cleared for the bench processes only.
+BENCH_ENV := env -u BUN_OPTIONS -u NODE_OPTIONS
+
 bench: deps wasm-bytes
-	$(TASKSET) $(NODE) bench/pure.ts
-	$(TASKSET) $(BUN) bench/pure.ts
+	$(BENCH_ENV) $(TASKSET) $(NODE) bench/pure.ts
+	$(BENCH_ENV) $(TASKSET) $(BUN) bench/pure.ts
+	$(BENCH_ENV) $(TASKSET) $(NODE) bench/wasm.ts
+	$(BENCH_ENV) $(TASKSET) $(BUN) bench/wasm.ts
 
 harden: typecheck lint-tests
 	$(NODE) --frozen-intrinsics --disable-proto=throw conform/pure.ts < conform/smoke.req | diff - conform/smoke.resp
