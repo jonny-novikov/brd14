@@ -147,6 +147,11 @@ request letters the shim supports. Then, per request line:
 | `U <snow>` | `OK <unix_ms>` — `snow` in `[0, 2^63)` |
 | `F <snow>` | `OK <ts> <node> <seq>` — `snow` in `[0, 2^63)` |
 | `N <host_hex> <pid>` | `OK <node>` |
+| `L <n> <s> <m> <snow>` | `OK <ts> <node> <seq> <meta>` or `ERR LAYOUT` / `ERR RANGE` — [extension](#layout-profiles) |
+| `P <n> <s> <m> <ts> <node> <seq> <meta>` | `OK <snow>` or `ERR LAYOUT` / `ERR RANGE` — [extension](#layout-profiles) |
+
+`E D H U F N` are the base: every shim answers them. `L P` belong to an extension: a shim answers
+them only when it advertises them, and `tools/parity.py` sends a shim only the ops it advertises.
 
 Integers are unsigned decimal; `<snow>` in `E` may be any value in `[0, 2^64)`; hex is lowercase
 and `-` means empty. A shim must not print anything else on stdout; diagnostics go to stderr.
@@ -183,6 +188,50 @@ accept a wider id (it refuses with `LENGTH`).
 The payload (11 × base62 over the same snowflake) is identical across the family, so the epoch,
 ordering, and range laws above carry over unchanged. The open design questions for brd16 — where
 the metadata character sits (namespace-adjacent vs suffix), what it may mean, and why it must be
-fixed at mint time — are analysed in
-[`articles/namespaces-and-storage.md`](articles/namespaces-and-storage.md). Nothing in this
+fixed at mint time — remain open (see [roadmap.md](roadmap.md)); metadata *inside* brd14's
+length is the layout profile extension below. Nothing in this
 section is normative for brd15/brd16 beyond the reservation of their names and lengths.
+
+## Extensions
+
+An extension adds operations without changing any base behaviour: every base vector, every base
+parity request and every existing id keeps its answer. Extensions land in the runtimes the
+Operator names; a shim advertises an extension's ops in its `HELLO` line, and the runtimes that do
+not yet implement it are listed as deferred in [roadmap.md](roadmap.md). The branded structures
+are the other extension, specified in [structures.md](structures.md).
+
+### Layout profiles
+
+A **layout profile** `(n, s, m)` re-splits the 22 bits under the timestamp into
+`node(n) | seq(s) | meta(m)`, meta lowest:
+
+```
+bit 63   62 ........ 22   21 ....... s+m   s+m-1 ..... m   m-1 ..... 0
+  0      ts (41 bits)     node (n bits)    seq (s bits)    meta (m bits)
+```
+
+- A profile is valid when `0 ≤ n, s, m ≤ 22` and `n + s + m = 22`. **`(10, 12, 0)` is the base
+  layout**, bit for bit: `node_of`, `seq_of` and the generator are unchanged under it.
+- The id is still a brd14 id: 14 bytes, the same codec, the same order, the same range. A profile
+  is not recorded in the id; a reader must know the namespace's profile to split out `meta`.
+  **A namespace's profile is fixed once ids exist** — bind it where the namespace policy lives
+  (Go `Gate`, Elixir `EchoData.Namespace`, the CLI census).
+
+| Operation | Definition |
+|---|---|
+| `fields(n, s, m, snow)` | `(snow >> 22, (snow >> (s+m)) & (2^n − 1), (snow >> m) & (2^s − 1), snow & (2^m − 1))` for `snow` in `[0, 2^63)` |
+| `pack(n, s, m, ts, node, seq, meta)` | `ts << 22 \| node << (s+m) \| seq << m \| meta`, for `ts < 2^41`, `node < 2^n`, `seq < 2^s`, `meta < 2^m` |
+| generator | the cell is `ts << s \| seq`, advanced to `max(now_part, last + 1)` exactly as in the base; each mint packs `(cell >> s, node, cell & (2^s − 1), meta)` |
+
+**Errors**, in precedence order: `LAYOUT` (code 5) when the profile is invalid, then `RANGE` when
+`snow ≥ 2^63` (`fields`) or a field does not fit its width (`pack`).
+
+**Why meta is lowest:** one generator stays strictly increasing whatever meta each id carries. For
+cells `c₁ < c₂` with equal timestamps, `seq₁ < seq₂`, so `seq₁·2^m + meta₁ < (seq₁ + 1)·2^m ≤
+seq₂·2^m`. Meta placed above the sequence would let an id minted later in the same millisecond sort
+first. The oracle's self-test mints 20 000 ids under `(6, 12, 4)` with random meta and checks it.
+
+**Vectors:** `vectors/layout.tsv` (every valid profile × six snowflakes, both directions) and
+`vectors/layout_invalid.tsv` (refusals, including both precedence orders). **Scope** (Operator
+ruling): Go, Rust and Elixir, whose shims advertise `L P` once they implement it. **Deferred:** C,
+Python, TypeScript, WebAssembly, bash.
