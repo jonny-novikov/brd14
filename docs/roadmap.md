@@ -2,25 +2,20 @@
 
 Where the work stands, and the plan to finish. Each item states the value it delivers.
 
-## Done (on `claude/pensive-gates-b1e7v9`)
+## Done (on `claude/hardening`, on top of `master`)
 
 | Wave | Delivered |
 |---|---|
 | W0 | Go moved to `go/` (`github.com/jonny-novikov/brd14/go`, go 1.22 floor). `native/` split by language and variant. Pinned toolchains via `scripts/setup.sh` and a SessionStart hook: Go 1.26.9, Python 3.14/3.14t, Node 24.21.0 LTS, Bun 1.4.3, Rust 1.99.0. The normative [contract](contract.md). |
 | W1 | The independent [oracle](../tools/oracle.py), deterministic [vectors](../vectors/), the differential [parity](parity.md) driver and its self-test. |
 | W2 | Go reference (typed errors, zero-alloc API, fuzz). C speed and table-free memory cores (gates, sanitizers, libFuzzer). Rust workspace (`no_std` core, FFI drop-in, wasm ABI crate, Miri, cargo-fuzz). Pure Python (3.12–3.14t). Pure TypeScript (Node + Bun). The [namespaces and storage article](articles/namespaces-and-storage.md) with a reproducible [storage probe](../tools/storage_probe/). **Parity: 10 of 12 shims, 0 mismatches.** |
+| W3 | `ts/packages/brd14-wasm`: the Rust core over WebAssembly on Node and Bun, with batch APIs. The wasm shims, the bench and [wasm.md](wasm.md). **Parity: 12 of 12 shims, 0 mismatches.** |
 
 ## Next — implementation
 
-1. **W3: finish `ts/packages/brd14-wasm`.**
-   - Start from branch `worktree-agent-aac67ed67b61286d4` (`0d61f03`).
-   - Add the tests (vectors, differential vs pure, batches at n = 0, 1, 2978, 2979, 10,000), the
-     shim `ts/conform/wasm.ts` (`HELLO ts wasm EDH`), the mitata bench and the full
-     [wasm.md](wasm.md).
-   - *Value:* native-speed batch encode/decode inside Node and Bun, closing the matrix to 12 of 12.
-2. **Fold `native/beam` into `make -C native test`**, so `make test` runs the NIF link check as
+1. **Fold `native/beam` into `make -C native test`**, so `make test` runs the NIF link check as
    well.
-3. **Open decisions for the Operator:**
+2. **Open decisions for the Operator:**
    - **NIF `encode/2` with a namespace that isn't 3 bytes:** it raises `badarg` today, while the
      contract classes this as NAMESPACE (`:error`).
    - **`MinFor` before the epoch:** Go wraps, Rust saturates, Python/TS/oracle go negative. Pick
@@ -28,11 +23,11 @@ Where the work stands, and the plan to finish. Each item states the value it del
    - **brd16 metadata placement:** suffix vs namespace-adjacent, and whether the metadata is
      fixed at mint time. The [article](articles/namespaces-and-storage.md) analyses both and
      recommends suffix with mint-time metadata.
-4. **Door-open formats.** If brd15/brd16 are approved:
+3. **Door-open formats.** If brd15/brd16 are approved:
    - add `vectors/brd16/*.tsv` from the oracle;
    - add a length-dispatching `ParseAny` to each tree;
    - extend parity with `E16`/`D16` requests.
-5. **Accelerations noted, not built:**
+4. **Accelerations noted, not built:**
    - PyO3/maturin binding over `native/rust` for Python;
    - SWAR/AVX2 batch decode for the speed tier (the CPU has AVX2, AVX-512BW and BMI2);
    - batch NIFs for EchoMQ bulk paths.
@@ -65,5 +60,5 @@ Where the work stands, and the plan to finish. Each item states the value it del
 - TS on Node and Bun;
 - parity with `--require`.
 
-Until W3 lands, the parity job requires the 10 implemented shims by name (`--only …`); W3 drops
-that filter so all 12 are required. The first green run is the acceptance gate for this branch.
+The parity job requires all 12 shims (`--require`, no filter). The first green run is the
+acceptance gate for this branch.

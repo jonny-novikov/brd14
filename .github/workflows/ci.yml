@@ -175,12 +175,10 @@ jobs:
         run: rustup toolchain install "$PIN_RUST" --profile minimal -t wasm32-unknown-unknown
       - run: npm ci
         working-directory: ts
-      # The ts-wasm shims join this list when ts/packages/brd14-wasm lands (docs/roadmap.md W3);
-      # then drop --only so every registered shim is required.
       - name: differential parity (a missing shim fails)
         env:
           GOTOOLCHAIN: local
-        run: python3 tools/parity.py --only go,c-,rust-,python,ts-pure --require --json build/parity.json
+        run: python3 tools/parity.py --require --json build/parity.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

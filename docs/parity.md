@@ -43,14 +43,15 @@ normative and live in [contract.md](contract.md#parity-shim-protocol).
 | python-3.12 | python / pure | DEFHNU | 30,651 | 0 | PASS |
 | ts-pure-node | ts / pure on Node 24.21.0 | DEFHNU | 30,651 | 0 | PASS |
 | ts-pure-bun | ts / pure on Bun 1.4.3 | DEFHNU | 30,651 | 0 | PASS |
-| ts-wasm-node | ts / wasm | EDH | — | — | **pending** (W3, see [roadmap](roadmap.md)) |
-| ts-wasm-bun | ts / wasm | EDH | — | — | **pending** |
+| ts-wasm-node | ts / wasm on Node 24.21.0 | DEH | 27,637 | 0 | PASS |
+| ts-wasm-bun | ts / wasm on Bun 1.4.3 | DEH | 27,637 | 0 | PASS |
 
-**10 of 12 shims pass with 0 mismatches.**
+**12 of 12 shims pass with 0 mismatches** (`parity.py --require`, on `claude/hardening`).
 - At `--scale 10` the Go, C and Rust shims were also checked: 154k–175k requests each, 0
   mismatches.
 - Python was also checked at `--scale 4`.
-- The C shims declare `DEHU` because the C ABI has no node derivation or field reader.
+- The C shims declare `DEHU` because the C ABI has no node derivation or field reader. The
+  wasm shims declare `DEH`: only encode, decode and hash32 cross the wasm ABI.
 - `python/conform.py` also cross-checks the library against itself (decode, check, is_valid and
   parse over bytes, bytearray and str) and answers `ERR DISAGREE` on any split.
 
