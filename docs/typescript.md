@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSzqzAn"
+slug: "DOCS-TYPESCRIPT"
+type: "guide"
+version: "1.3"
+path: "docs/typescript.md"
+title: "TypeScript — the pure package"
+summary: "The pure TypeScript package: exact 64-bit arithmetic without BigInt in the hot path, on Node and Bun."
+tags: ["typescript", "node", "bun"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # TypeScript — the pure package
 
 `ts/packages/brd14` (npm name `brd14`) implements [the contract](contract.md) in erasable-only
@@ -21,6 +35,22 @@ ts/
 ├── bench/                  report.ts (protocol-shaped sampling on mitata) · pure.ts
 └── scripts/                publish-manifest.ts (the dist/package.json the published package ships)
 ```
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [API](#api)
+- [Exact arithmetic without BigInt](#exact-arithmetic-without-bigint)
+- [Allocation profile](#allocation-profile)
+- [The generator and the minter](#generator-minter)
+- [Node 24 vs Bun 1.4](#node-24-vs-bun)
+- [How to](#how-to)
+- [For the wasm package](#wasm-package)
+
+<a id="api"></a>
 
 ## API
 
@@ -57,6 +87,8 @@ Everything below is exported from `brd14`; `defaultNode` from `brd14/node`.
 Type misuse (a Number where a bigint is typed, `undefined` for an id) is a programming fault and may
 throw a `TypeError`; totality is a promise over *every string and every byte string*, which the
 fuzz suite checks.
+
+<a id="exact-arithmetic-without-bigint"></a>
 
 ## Exact arithmetic without BigInt
 
@@ -184,6 +216,8 @@ One call with 14 arguments produces a flat one-byte string in a single allocatio
 builds a rope that is flattened later anyway, which is why the table of pair *strings* loses to
 the table of pair *codes* on both engines.
 
+<a id="allocation-profile"></a>
+
 ## Allocation profile
 
 | API | BigInt allocated | Other allocations |
@@ -206,6 +240,8 @@ The package keeps about 8 KB of read-only tables (`DIGIT`, `CODE`, `PAIR_HI`, `P
 8-byte `DataView` and one 6-slot `Int32Array` as scratch. The scratch is module-level and is
 always consumed before a public function returns, so it is safe in the single-threaded realm;
 a Worker gets its own module instance.
+
+<a id="generator-minter"></a>
 
 ## The generator and the minter
 
@@ -233,6 +269,8 @@ identity). Only an admitted namespace reaches the codec, whose shape check still
 absent, `null` or `allowAll` gate is "no policy", never "no validation". `denyAll` throws
 `NamespaceRefusedError`, deliberately not an `InvalidIdError`. `minter.generator` is the ungated
 path, named so every bypass reads as one.
+
+<a id="node-24-vs-bun"></a>
 
 ## Node 24 vs Bun 1.4
 
@@ -343,6 +381,8 @@ What the two engines do differently:
   faster at allocating the small result objects (`decode`: 83 vs 112 ns) and at `Date.now()`-heavy
   minting is slower (`mint`: 281 vs 157 ns, the `encodeParts` cost being 68 vs 149 ns of that).
 
+<a id="how-to"></a>
+
 ## How to
 
 ```bash
@@ -362,6 +402,8 @@ and the generated manifest with `exports` for `.`, `./node` and `./package.json`
 
 Running something ad hoc: `node ts/conform/pure.ts < requests`, or from any file inside `ts/`,
 `import { encode } from "brd14"` — Node or Bun, no build.
+
+<a id="wasm-package"></a>
 
 ## For the wasm package
 

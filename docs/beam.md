@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSz0Bmd"
+slug: "DOCS-BEAM"
+type: "guide"
+version: "1.3"
+path: "docs/beam.md"
+title: "The BEAM NIF"
+summary: "The Erlang NIF over the C ABI: building it against either core and loading it."
+tags: ["erlang", "nif", "c-abi"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # The BEAM NIF
 
 [`native/beam/echo_native.c`](../native/beam/echo_native.c) is the Erlang NIF behind
@@ -13,6 +27,21 @@ runs over any brd14 core that exports the C ABI in
 
 The NIF source is identical for every core. The parity run holds every core to the same oracle,
 so the choice changes footprint and speed, not answers.
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [The NIF functions](#nif-functions)
+- [Building](#building)
+- [Using it from Elixir](#using-elixir)
+- [Scheduler notes](#scheduler-notes)
+- [Future: batch NIFs](#future-batch-nifs)
+- [Troubleshooting](#troubleshooting)
+
+<a id="nif-functions"></a>
 
 ## The NIF functions
 
@@ -46,6 +75,8 @@ before the call, and this NIF happens to report it as an argument error. An Elix
 wants contract-exact classes should guard `byte_size(ns) == 3` itself and return its own error.
 A caller that needs the class itself should use the pure Elixir implementation, or a future
 `decode_detailed/1` returning `{:error, :length | :namespace | :charset | :range}`.
+
+<a id="building"></a>
 
 ## Building
 
@@ -131,6 +162,8 @@ ok   beam: NIF links against c-memory (9 enif_* left for ERTS)
 skip beam: rust link check (../rust/target/release/libbrd14_ffi.so not built)
 ```
 
+<a id="using-elixir"></a>
+
 ## Using it from Elixir
 
 The NIF is optional, and the app runs without it (pure Elixir fallback). This is the module shape
@@ -174,6 +207,8 @@ iex> EchoData.Native.encode("US", 0)              # not a 3-byte namespace
 no copy. Results are heap binaries (3 or 14 bytes, well under the 64-byte refc threshold) built
 directly on the calling process's heap.
 
+<a id="scheduler-notes"></a>
+
 ## Scheduler notes
 
 - **Normal schedulers are right.** A NIF should return within about 1 ms. Each of these calls
@@ -186,11 +221,13 @@ directly on the calling process's heap.
 - **No resources, no reload state.** `priv_data` is unused, and the NIF needs no `upgrade` or
   `unload` callbacks.
 
+<a id="future-batch-nifs"></a>
+
 ## Future: batch NIFs
 
 For bulk work, such as decoding a page of ids from a database row set or encoding a batch of
 minted snowflakes, a per-id NIF call is dominated by call overhead. The natural extension mirrors
-the wasm ABI's batch exports ([contract](contract.md#the-webassembly-abi-nativerustcratesbrd14-wasm)):
+the wasm ABI's batch exports ([contract](contract.md#webassembly-abi-native-rust)):
 
 | Proposed NIF | Input | Output |
 |---|---|---|
@@ -204,6 +241,8 @@ Two design rules carry over from the scalar NIFs:
   Past that, a batch should report progress with `enif_consume_timeslice` and reschedule itself
   with `enif_schedule_nif`, or it should be registered as `ERL_NIF_DIRTY_JOB_CPU_BOUND`. For large
   batches, the memory core's lack of tables leaves the cache lines to the data being decoded.
+
+<a id="troubleshooting"></a>
 
 ## Troubleshooting
 

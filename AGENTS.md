@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSyiaeY"
+slug: "AGENTS"
+type: "instructions"
+version: "1.3"
+path: "AGENTS.md"
+title: "AGENTS.md — where to go, what to read, how to search"
+summary: "Where agents go and search: sources of truth, the repository map, where to start by task, commands and search recipes."
+tags: ["agents", "map", "search"]
+group: "methodology"
+language: "en"
+audience: ["agent", "developer"]
+---
+
 # AGENTS.md — where to go, what to read, how to search
 
 This file is the map. **How** to work is in [CLAUDE.md](CLAUDE.md). Both apply to every agent,
@@ -7,6 +21,22 @@ brd14 is one contract: a 14-byte branded id, `3×[A-Z]` namespace + 11 base62 ch
 `ts41|node10|seq12` snowflake. It is implemented independently in Go, C, Rust, Python, TypeScript,
 TypeScript-over-WebAssembly and bash. The implementations share no code. They share the contract,
 the vectors, and a differential parity run that proves them byte-identical.
+
+[Documentation](docs/index.md#toc) · [CLAUDE](CLAUDE.md#toc) · [Contract](docs/contract.md#toc) · [KAN story](docs/kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Sources of truth (read these, never guess)](#sources-truth-read-these)
+- [The map](#map)
+- [Start here, by task](#start-here-task)
+- [Commands](#commands)
+- [Search recipes](#search-recipes)
+- [Where results, artifacts and backups go](#where-results-artifacts-backups)
+- [Branches](#branches)
+
+<a id="sources-truth-read-these"></a>
 
 ## Sources of truth (read these, never guess)
 
@@ -22,7 +52,9 @@ the vectors, and a differential parity run that proves them byte-identical.
 | What's done, what's next, open decisions | [`docs/roadmap.md`](docs/roadmap.md) |
 | Every documentation page | [`docs/index.md`](docs/index.md) |
 | The current delivery story (scope, decisions, rungs) | [`docs/kan/brd14-pragmatic-guide.md`](docs/kan/brd14-pragmatic-guide.md) |
-| What the branded structures must do, and the champ's exact shape | [`docs/structures.md`](docs/structures.md) (normative) |
+| What the branded structures must do, and the champ's exact shape | [`docs/structures/spec.md`](docs/structures/spec.md) (normative) |
+
+<a id="map"></a>
 
 ## The map
 
@@ -48,9 +80,11 @@ scripts/                    brd.sh · mint.sh (the shell CLI) · setup.sh · env
 .claude/                    settings.json + hooks/session-start.sh (toolchains for cloud sessions)
 scripts/ci.sh               the CI suite: oracle · go · native · harden · python · ts · ex · parity
 fly.toml · fly/             CI on Fly.io: app brd-build runs scripts/ci.sh once per deploy (docs/ci.md)
-docs/                       per-language pages, runtimes, parity, benchmarks, hardening, structures.md
+docs/                       per-language pages, runtimes, parity, benchmarks, hardening, structures/ (the branded structures)
 docs/kan/                   KAN stories (AUS): the delivery contract for the current program
 ```
+
+<a id="start-here-task"></a>
 
 ## Start here, by task
 
@@ -67,10 +101,12 @@ docs/kan/                   KAN stories (AUS): the delivery contract for the cur
 | TypeScript | `docs/typescript.md`, `docs/wasm.md` | `ts/` | `make -C ts test` (vitest on Node + bun test) |
 | the shell CLI | `scripts/brd.sh --help`, `.brdrc` | `scripts/` | `make -C scripts test`, `--only sh-` |
 | Elixir / echo_data | `docs/elixir.md` | `ex/echo_data/` | `make -C ex test harden`, `--only ex-` |
-| structures (champ, tree, buckets) | `docs/structures.md`, the KAN story | `go/brdata`, `native/rust/crates/brd14-data`, `ex/echo_data` | `make vectors`, each tree's tests replay `vectors/champ.tsv` |
-| docs or an article | `docs/index.md`, the sibling article's style | `docs/` | every number traces to a results file or is labelled cited |
+| structures (champ, tree, buckets) | `docs/structures/spec.md`, the KAN story | `go/brdata`, `native/rust/crates/brd14-data`, `ex/echo_data` | `make vectors`, each tree's tests replay `vectors/champ.tsv` |
+| docs or an article | `docs/index.md`, the KAN rules in `CLAUDE.md` | `docs/` | `python3 tools/doclint.py`; every number traces to a results file or is labelled cited |
 | toolchains / setup | `docs/environment.md` | `scripts/versions.env`, `scripts/setup.sh` | `scripts/setup.sh`, CI pin check |
 | CI | `docs/ci.md`, `scripts/ci.sh --list` | `scripts/ci.sh`, `fly.toml`, `fly/` | `scripts/ci.sh <job>` locally; the image: `docker build -f fly/Dockerfile .` |
+
+<a id="commands"></a>
 
 ## Commands
 
@@ -84,10 +120,14 @@ make bench                     # every bench → bench/results/ (slow; pin with 
 make harden                    # sanitizers, Miri, fuzz, race, floor toolchains (slow)
 python3 tools/parity.py --only go,c-,rust-,python,ts-,sh-,ex-   # by shim-name prefix
 scripts/brd.sh help            # mint / encode / decode / date / at / valid / hash / node / config
+scripts/ci.sh [JOB...]         # the CI suite (oracle docs go native harden python ts ex parity); --list
+python3 tools/doclint.py       # the KAN documentation contract: frontmatter, #toc, anchors, links
 ```
 
 Every tree's `Makefile` implements `test bench harden clean`; the trees with shims also implement
 `conform`.
+
+<a id="search-recipes"></a>
 
 ## Search recipes
 
@@ -104,6 +144,8 @@ rg -n 'BRD_[A-Z_]+' scripts/                   # CLI settings
 rg --files -g '*conform*'                      # shim entry points
 ```
 
+<a id="where-results-artifacts-backups"></a>
+
 ## Where results, artifacts and backups go
 
 | What | Where | Committed? |
@@ -114,6 +156,8 @@ rg --files -g '*conform*'                      # shim entry points
 | generated wasm bytes | `ts/packages/brd14-wasm/src/wasm-bytes.ts` | no (built by `make -C ts wasm-bytes`) |
 | agent worktrees | `.claude/worktrees/` | no (gitignored) |
 | scratch files | the session scratchpad, uniquely named (parallel agents share it) | no |
+
+<a id="branches"></a>
 
 ## Branches
 

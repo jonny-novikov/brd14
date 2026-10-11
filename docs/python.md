@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSzZO2k"
+slug: "DOCS-PYTHON"
+type: "guide"
+version: "1.3"
+path: "docs/python.md"
+title: "brd14 — Python"
+summary: "The pure-Python package on CPython 3.12 to 3.14t, with the free-threaded specifics."
+tags: ["python", "cpython", "free-threaded"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # brd14 — Python
 
 The pure-Python implementation of the [contract](contract.md): standard library only, no native
@@ -27,6 +41,23 @@ python/
 ├── conform.py          the parity shim
 └── Makefile            venv · test · bench · harden · threads · parity · conform · clean
 ```
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [API](#api)
+- [Error model](#error-model)
+- [How pure Python gets fast](#pure-python-gets-fast)
+- [Allocation profile](#allocation-profile)
+- [CPython 3.14 vs 3.14t](#cpython-3-14-vs)
+- [Benchmarks](#benchmarks)
+- [Tests, parity, hardening](#tests-parity-hardening)
+- [Future work: a native accelerator over native/rust](#future-work-native-accelerator)
+
+<a id="api"></a>
 
 ## API
 
@@ -95,6 +126,8 @@ g.next_branded("USR")                        # mint and brand in one call
 | copying a generator | possible | `TypeError` from `copy`, `deepcopy` and `pickle` | two copies of one cell mint duplicates |
 | `MinFor` before the epoch | wraps (uint64) | negative, as the oracle has it | a negative lower bound is still a correct lower bound |
 
+<a id="error-model"></a>
+
 ## Error model
 
 ```
@@ -124,6 +157,8 @@ TypeError                                                  ← wrong argument ty
   never reads the clock. `deny_all`'s `NamespaceRefusedError` is deliberately neither an
   `InvalidIdError` nor a `ValueError`, so `except ValueError` cannot mistake a policy refusal for
   a malformed id.
+
+<a id="pure-python-gets-fast"></a>
 
 ## How pure Python gets fast
 
@@ -172,6 +207,8 @@ rounds in ns/op (2026-10-11, one machine, indicative):
 | | slices for ns and payload | 247 | 286 | |
 | hash32 | mask to u64 first (total, matches the oracle) | 199 | 332 | chosen, 4–9% over no mask |
 
+<a id="allocation-profile"></a>
+
 ## Allocation profile
 
 The contract's zero-allocation rule is a Go and native concern. In Python, every call allocates
@@ -200,6 +237,8 @@ strings it is about 196 KB on 3.14 and 258 KB on 3.14t. The byte → digit table
 speed tier carries 7.7 KB for the same job, because a Python `str` costs 43–59 bytes for two
 characters. That trade buys the 2.6× encode speed-up above. `ALPHABET` and the one-character
 digits are interpreter-cached and cost nothing extra.
+
+<a id="cpython-3-14-vs"></a>
 
 ## CPython 3.14 vs 3.14t
 
@@ -319,6 +358,8 @@ install time, so this is the normal case. GIL builds are unaffected.
   `-X gil=0` to pyperf's worker processes, and pyperf passes `PYTHON_GIL` through, so a 3.14t
   number cannot silently be a GIL number.
 
+<a id="benchmarks"></a>
+
 ## Benchmarks
 
 `make bench` runs `bench/bench.py` under pyperf on 3.14 and 3.14t (and 3.12 with
@@ -349,6 +390,8 @@ window, and it did not reproduce. The times include the benchmark loop's own ite
 on 3.14 and 10–17 ns on 3.14t. `decode_bytes` and `next` are variant-specific extras. For the
 3.14 vs 3.14t comparison, prefer the alternating table above.
 
+<a id="tests-parity-hardening"></a>
+
 ## Tests, parity, hardening
 
 | Command | What it proves |
@@ -372,6 +415,8 @@ on 3.14 and 10–17 ns on 3.14t. `decode_bytes` and `next` are variant-specific 
   (when the bytes are valid UTF-8 under `surrogatepass`) on a str, whose fast path is separate
   code. Any disagreement answers `ERR DISAGREE`, which cannot match the oracle. So parity covers
   every public path, not just one.
+
+<a id="future-work-native-accelerator"></a>
 
 ## Future work: a native accelerator over `native/rust`
 

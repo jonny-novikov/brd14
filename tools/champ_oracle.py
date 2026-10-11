@@ -1,6 +1,6 @@
-"""champ_oracle.py — the branded champ (docs/structures.md) as an executable specification.
+"""champ_oracle.py — the branded champ (docs/structures/spec.md) as an executable specification.
 
-Written from docs/structures.md alone, never from an implementation, so agreement with it is
+Written from docs/structures/spec.md alone, never from an implementation, so agreement with it is
 evidence. Obviously correct over fast: plain Python lists, a full copy of every node on the
 write path, the masks recomputed from scratch in the invariant check.
 
@@ -209,7 +209,7 @@ class Champ:
 
 # ── programs: explicit and SplitMix64 streams ───────────────────────────────
 def stream_program(seed: int, ops: int, keys: int) -> tuple[list[int], list[tuple[str, int]]]:
-    """The pool and the program for a `stream` row, per docs/structures.md."""
+    """The pool and the program for a `stream` row, per docs/structures/spec.md."""
     rng = o.SplitMix64(seed ^ 0xD1B54A32D192ED03)
     pool = [rng.next() >> 1 for _ in range(keys)]
     rng = o.SplitMix64(seed)

@@ -18,6 +18,43 @@ HEADLINE_OPS = ["encode", "decode", "hash32", "mint"]
 IMPL_ORDER = ["c", "rust", "go", "ts-wasm", "ts", "python"]
 VARIANT_ORDER = ["speed", "memory", "reference", "wasm", "pure"]
 
+# KAN document identity of the generated page: minted once (scripts/mint.sh KAN), never
+# regenerated; tools/doclint.py checks the page like every other.
+FRONTMATTER = """\
+---
+id: "KAN0R9YJSyiaeW"
+slug: "DOCS-BENCHMARKS"
+type: "guide"
+version: "1.3"
+path: "docs/benchmarks.md"
+title: "Benchmarks"
+summary: "Measured codec costs per implementation and runtime, generated from bench/results by tools/benchreport.py, with the protocol and how to reproduce."
+tags: ["benchmarks", "measurement"]
+group: "measurement"
+language: "en"
+audience: ["developer", "agent"]
+---
+
+"""
+
+# The status paragraph of the committed results (it used to be passed with --note).
+STATUS = (
+    "These are the **W2 baseline**: one run per tree, each measured by the agent that built it, in different windows, on a shared 4-vCPU Xeon (@ 2.10 GHz per lscpu at run time) while other agents were compiling. CV was 7–17% on several runs, above the protocol's 5% threshold. Read the **ratios** (speed vs memory, wasm vs pure, 3.14 vs 3.14t), not the absolute values. Bun ran with the container's default `BUN_OPTIONS=--smol`. The consolidated same-session run is planned in [roadmap.md](roadmap.md)."
+)
+
+NAV = ("[Index](index.md#toc) · [Protocol](../bench/README.md#toc) · [Runtimes](runtimes.md#toc) · "
+       "[Hardening](hardening.md#toc) · [Structures](structures/README.md#toc)\n")
+
+TOC = """\
+<a id="toc"></a>
+
+## In this document
+
+- [Headline: ns/op (× C speed)](#headline)
+- [Every operation, with allocation](#operations)
+- [Reproduce](#reproduce)
+"""
+
 INTRO = """\
 # Benchmarks
 
@@ -75,11 +112,14 @@ def render(runs: list[dict], note: str = "") -> str:
     runs = sorted(runs, key=order_key)
     base = next((ops_of(r) for r in runs if r["impl"] == "c" and r.get("variant") == "speed"), {})
     machines = sorted({r.get("machine", "?") for r in runs})
-    out = [INTRO]
+    out = [FRONTMATTER + INTRO]
     if note:
         out.append(f"> **Status.** {note}\n")
     out.append(f"**Machine:** {', '.join(machines)}. **Runs:** {len(runs)} result files.\n")
+    out.append(NAV)
+    out.append(TOC)
 
+    out.append('<a id="headline"></a>\n')
     out.append("## Headline: ns/op (× C speed)\n")
     out.append("| Implementation | Variant | Runtime | " + " | ".join(HEADLINE_OPS) + " |")
     out.append("|---|---|---|" + "---:|" * len(HEADLINE_OPS))
@@ -94,6 +134,7 @@ def render(runs: list[dict], note: str = "") -> str:
         out.append(f"| {r['impl']} | {r.get('variant', '')} | {r.get('runtime', '')} | " + " | ".join(cells) + " |")
     out.append("")
 
+    out.append('<a id="operations"></a>\n')
     out.append("## Every operation, with allocation where the runtime reports it\n")
     for r in runs:
         out.append(f"### {r['impl']} · {r.get('variant', '')} · {r.get('runtime', '')}\n")
@@ -108,6 +149,7 @@ def render(runs: list[dict], note: str = "") -> str:
                        f"{x.get('allocs_per_op', '—')} | {x.get('bytes_per_op', '—')} |")
         out.append("")
 
+    out.append('<a id="reproduce"></a>\n')
     out.append("## Reproduce\n")
     out.append("```bash\n. scripts/env.sh\nmake bench                    # every tree writes bench/results/*.json\n"
                "python3 tools/benchreport.py  # renders this page\n```\n")
@@ -118,7 +160,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default=str(ROOT / "bench" / "results"))
     ap.add_argument("--out", default=str(ROOT / "docs" / "benchmarks.md"))
-    ap.add_argument("--note", default="", help="a status paragraph rendered under the intro")
+    ap.add_argument("--note", default=STATUS, help="the status paragraph rendered under the intro")
     a = ap.parse_args()
     runs = load(pathlib.Path(a.results))
     pathlib.Path(a.out).write_text(render(runs, a.note), encoding="utf-8")

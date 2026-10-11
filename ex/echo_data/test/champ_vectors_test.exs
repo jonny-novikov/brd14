@@ -2,7 +2,7 @@ defmodule EchoData.ChampVectorsTest do
   @moduledoc """
   Shape parity: `EchoData.BrandedChamp` (over `ChampNode`) replays every row of
   `vectors/champ.tsv` and must reproduce its size, its shape digest and the value of every key.
-  The vectors come from `tools/champ_oracle.py`, written from docs/structures.md alone.
+  The vectors come from `tools/champ_oracle.py`, written from docs/structures/spec.md alone.
   """
   use ExUnit.Case, async: true
 

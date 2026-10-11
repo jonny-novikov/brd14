@@ -1,7 +1,34 @@
+---
+id: "KAN0R9YJSzZO2i"
+slug: "DOCS-HARDENING"
+type: "guide"
+version: "1.3"
+path: "docs/hardening.md"
+title: "Hardening"
+summary: "Hardening across trees: sanitizers, Miri, fuzzing, race detection and floor toolchains."
+tags: ["hardening", "sanitizers", "miri", "fuzzing"]
+group: "measurement"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Hardening
 
 What each tree does beyond its unit tests. Every result below is from a run during the build-out;
 `make harden` re-runs all of them.
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [By tree](#tree)
+- [Re-running the checks](#re-running-checks)
+
+<a id="tree"></a>
+
+## By tree
 
 | Tree | Check | Result |
 |---|---|---|
@@ -18,3 +45,14 @@ What each tree does beyond its unit tests. Every result below is from a run duri
 | Python | 3.14t with the GIL disabled: full suite under `-X dev -W error`, then the 8 threads × 50k shared-generator stress test, 5 rounds; `mypy --strict` | clean. An *unlocked* generator produced 187k–260k duplicates per 400k mints on 3.14t, which is why the lock exists |
 | TS | strict typecheck (TS 7.0.2); grep gate (no `vi.`); `node --frozen-intrinsics --disable-proto=throw` smoke; same suite on vitest (Node) and `bun test` (Bun) | clean: 72/72 on both runtimes |
 | BEAM | `make -C native/beam check`: compiles against a stub `erl_nif.h` (no ERTS here) and link-checks the NIF against c-speed, c-memory and the Rust `libbrd14_ffi.so` | the NIF exports `nif_init` alone and leaves only 9 `enif_*` symbols to ERTS |
+
+<a id="re-running-checks"></a>
+
+## Re-running the checks
+
+- `make harden` runs every tree's `harden` target. Then `make -C native/c gates` and
+  `make -C native/rust alloc-check miri` cover the allocation and Miri gates.
+- `scripts/ci.sh native harden` runs them as CI does. On Fly the `brd-build` release machine runs
+  them on every deploy ([ci.md](ci.md)).
+- The structures add their own proofs: model properties and planted mutants
+  ([structures/proof.md](structures/proof.md)).

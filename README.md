@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSyiaeX"
+slug: "README"
+type: "index"
+version: "1.3"
+path: "README.md"
+title: "brd14. Branded Identity."
+summary: "What brd14 is — a 14-byte branded, time-ordered identity — its implementations, shell tools, and where to read on."
+tags: ["brd14", "overview"]
+group: "navigation"
+language: "en"
+audience: ["Operator", "developer", "agent"]
+---
+
 # brd14. Branded Identity.
 
 A 14-byte branded identity: **time-ordered**, **coordination-free**, and carrying its own type —
@@ -9,6 +23,21 @@ USR0KHTOWnGLuC
  │       └─ 11 chars of Base62 over a ts(41)|node(10)|seq(12) snowflake, epoch 2024-01-01Z
  └───────── a 3-letter uppercase namespace — the brand IS the type
 ```
+
+[Documentation](docs/index.md#toc) · [AGENTS](AGENTS.md#toc) · [CLAUDE](CLAUDE.md#toc) · [Contract](docs/contract.md#toc) · [KAN story](docs/kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Implementations](#implementations)
+- [Quick start](#quick-start)
+- [Shell tools](#shell-tools)
+- [For agents](#agents)
+- [Documentation](#documentation)
+- [License](#license)
+
+<a id="implementations"></a>
 
 ## Implementations
 
@@ -28,6 +57,8 @@ They share **no code**. They share [the contract](docs/contract.md), the frozen
 [parity run](docs/parity.md) that feeds every implementation the same inputs and compares the
 outputs byte for byte.
 
+<a id="quick-start"></a>
+
 ## Quick start
 
 ```bash
@@ -37,6 +68,8 @@ make test               # every suite, against vectors/
 make parity             # every implementation vs the oracle
 make bench              # every benchmark → docs/benchmarks.md
 ```
+
+<a id="shell-tools"></a>
 
 ## Shell tools
 
@@ -52,18 +85,24 @@ scripts/brd.sh config                    # effective settings and where each cam
 Pure bash, no dependencies, proven byte-identical to the oracle by the parity run. Defaults come from
 [`.brdrc`](.brdrc) (parsed, never sourced); see `scripts/brd.sh --help`.
 
+<a id="agents"></a>
+
 ## For agents
 
 [`AGENTS.md`](AGENTS.md) is the map: where things live, what to read first, how to search.
 [`CLAUDE.md`](CLAUDE.md) is how to work here: phases, sizing, the repository's laws, changesets.
 
+<a id="documentation"></a>
+
 ## Documentation
 
 Start at [`docs/index.md`](docs/index.md): the contract, the architecture and variant taxonomy,
 one page per language, runtime specifics (Node vs Bun, CPython 3.14 vs 3.14t, Go), parity,
-benchmarks, hardening, the [branded structures](docs/structures.md), the
+benchmarks, hardening, the [branded structures](docs/structures/spec.md), the
 [Elixir home](docs/elixir.md), and the pragmatic programmer's guide written as a
 [KAN story](docs/kan/brd14-pragmatic-guide.md).
+
+<a id="license"></a>
 
 ## License
 

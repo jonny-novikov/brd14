@@ -1,9 +1,36 @@
+---
+id: "KAN0R9YJSzZO2m"
+slug: "DOCS-RUNTIMES"
+type: "guide"
+version: "1.3"
+path: "docs/runtimes.md"
+title: "Runtimes"
+summary: "Runtime specifics side by side: Node 24 and Bun 1.4, CPython 3.14 and 3.14t, Go 1.26."
+tags: ["runtimes", "node", "bun", "cpython"]
+group: "environment"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Runtimes
 
 Runtime specifics side by side. The per-language pages go deeper: [go.md](go.md),
 [python.md](python.md), [typescript.md](typescript.md), [c.md](c.md), [rust.md](rust.md).
 Numbers are the W2 baseline in [benchmarks.md](benchmarks.md): single runs on a shared machine,
 so read the ratios.
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Side by side](#side-side)
+- [Reading the numbers](#reading-numbers)
+
+<a id="side-side"></a>
+
+## Side by side
 
 | Runtime | What matters for brd14 | Measured |
 |---|---|---|
@@ -15,3 +42,12 @@ so read the ratios.
 | **Node 24.21 (V8)** | Runs `.ts` unbuilt through type stripping, but not under `node_modules`; workspace symlinks resolve to realpaths, so it works. Exact 64-bit arithmetic on Numbers (intermediates stay below 2⁵³). | encode 129 ns, decode 184 ns. **19×** faster than naive BigInt for encode |
 | **Bun 1.4.3 (JSC)** | Runs `.ts` natively. `bun test` maps `import … from "vitest"` onto `bun:test`, so one test source serves both runtimes. The container exports `BUN_OPTIONS=--smol` (a low-memory GC); clear it for benchmarks. | encode 231 ns, decode 216 ns (baseline under `--smol`). Fastest parity shim: about 295k req/s |
 | **BEAM (NIF)** | The NIF is sub-microsecond, so normal schedulers are fine. Every error class collapses to `:error`. A namespace that isn't 3 bytes raises `badarg` (open decision, see [roadmap](roadmap.md)). | not measured here (no ERTS in this container) |
+
+<a id="reading-numbers"></a>
+
+## Reading the numbers
+
+These are the W2 baseline, single runs on a shared machine. Compare ratios within one runtime, not
+absolute nanoseconds across machines. The protocol, and how to re-run it pinned to a core, is in
+[bench/README.md](../bench/README.md); the consolidated run is a roadmap item
+([roadmap.md](roadmap.md)).

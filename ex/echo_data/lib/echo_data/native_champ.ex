@@ -100,7 +100,7 @@ defmodule EchoData.NativeChamp do
   @doc "Namespaces in ascending byte order."
   def namespaces(%__MODULE__{ref: ref}), do: Native.champ_namespaces(ref)
 
-  @doc "The shape digest of one namespace's trie (docs/structures.md)."
+  @doc "The shape digest of one namespace's trie (docs/structures/spec.md)."
   @spec shape_digest(t(), binary()) :: non_neg_integer()
   def shape_digest(%__MODULE__{ref: ref}, ns), do: Native.champ_digest(ref, ns)
 

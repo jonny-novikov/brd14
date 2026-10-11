@@ -1,3 +1,17 @@
+---
+id: "KAN0R9YJSz0Bme"
+slug: "DOCS-C"
+type: "guide"
+version: "1.3"
+path: "docs/c.md"
+title: "The C cores"
+summary: "The C cores — speed and memory variants — their footprint, ABI, tests, benches and fuzzing."
+tags: ["c", "speed", "memory"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # The C cores
 
 Two C11 implementations of the brd14 contract sit behind one header,
@@ -12,6 +26,24 @@ Both cores are libc-only (the memory core does not call libc at all). They alloc
 mutable state, and take caller-owned buffers. A consumer switches cores by linking a different object.
 The header, the call sites and the observable behaviour stay the same, and the parity run holds both
 cores to the oracle byte for byte.
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Layout](#layout)
+- [The ABI](#abi)
+- [The speed core](#speed-core)
+- [The memory core](#memory-core)
+- [Footprint](#footprint)
+- [Tests, gates, fuzzing, sanitizers](#tests-gates-fuzzing-sanitizers)
+- [Benchmarks](#benchmarks)
+- [Vendoring](#vendoring)
+- [Make targets](#make-targets)
+
+<a id="layout"></a>
 
 ## Layout
 
@@ -28,6 +60,8 @@ cores to the oracle byte for byte.
 | `native/c/bench/bench.c` | Micro-benchmarks, following the [bench protocol](../bench/README.md) |
 | `native/c/gates.sh` | Object-code gates: no `div`, no allocator, footprint |
 | `native/c/fuzz/` | libFuzzer targets, the dictionary, and the coverage replay |
+
+<a id="abi"></a>
 
 ## The ABI
 
@@ -75,6 +109,8 @@ Further guarantees, all tested:
 - **Reentrancy.** There are no globals, no locks and no allocation, so every function is thread-safe.
 - **No NUL.** `out` receives exactly 14 bytes and no terminator.
 
+<a id="speed-core"></a>
+
 ## The speed core
 
 **encode.** The naive encoder runs eleven u64 divmods by 62 in one serial dependency chain. The
@@ -99,6 +135,8 @@ branch. The range check uses the format itself: a fixed-width base62 payload ove
 alphabet sorts lexicographically. So `value < 2^63` is `memcmp(payload, "AzL8n0Y58m7") <= 0`. The
 sortability property doubles as the overflow guard, and after it the accumulation (the same two
 chains, recombined as `hi·62^6 + lo`) cannot wrap.
+
+<a id="memory-core"></a>
 
 ## The memory core
 
@@ -170,6 +208,8 @@ and was barely faster: decode 26.0 vs 29.0 ns, encode 17.0 vs 17.6 ns in the sam
 lies in the one-digit-per-step chains and the per-byte classification, not in `-Os` call overhead.
 So `-Os` is the right default for the footprint tier.
 
+<a id="footprint"></a>
+
 ## Footprint
 
 From `make gates` (`size -A` on the shipped objects, gcc 13.3, x86-64):
@@ -183,6 +223,8 @@ The speed core's `.rodata` holds `PAIRS` (7,689 B including the literal's NUL), 
 alphabet (63 B) and `MAX_PAYLOAD` (11 B): 8,019 B plus alignment. In the speed core these tables
 are touched on every call. That costs nothing on a server and real cache lines in a hot loop
 shared with other work. The memory core has none of it.
+
+<a id="tests-gates-fuzzing-sanitizers"></a>
 
 ## Tests, gates, fuzzing, sanitizers
 
@@ -328,6 +370,8 @@ both.
 The sanitizer, fortify and clang stages each run the full 10M-round-trip property suite. The
 whole target takes about 15 s.
 
+<a id="benchmarks"></a>
+
 ## Benchmarks
 
 `make bench` follows [bench/README.md](../bench/README.md). It runs the first 4,096 rows of
@@ -351,6 +395,8 @@ are **indicative only**.
 So the trade is about 2.5× on the codec in exchange for zero table bytes. Both cores are far
 below the cost of anything that would call them (a NIF call, a hash-map probe, a syscall).
 
+<a id="vendoring"></a>
+
 ## Vendoring
 
 A core is two files and no build system:
@@ -373,6 +419,8 @@ cc -std=c11 -Os -I native/include -c native/c/memory/branded_id.c -o branded_id.
 - To switch cores, link the other object. The header and every call site stay the same. The Rust
   `brd14-ffi` crate exports the same ABI as a third drop-in.
 - For the Erlang NIF over either core, see [beam.md](beam.md).
+
+<a id="make-targets"></a>
 
 ## Make targets
 

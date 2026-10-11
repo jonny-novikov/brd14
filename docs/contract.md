@@ -1,10 +1,41 @@
+---
+id: "KAN0R9YJSzHmuf"
+slug: "DOCS-CONTRACT"
+type: "guide"
+version: "1.3"
+path: "docs/contract.md"
+title: "The brd14 contract"
+summary: "Normative: the brd14 format, operations, error precedence, vectors, parity protocol, WASM ABI, format family and extensions."
+tags: ["contract", "normative", "parity"]
+group: "contract"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # The brd14 contract
 
 This page is **normative**. Every implementation in this repository — Go, C (speed, memory),
-Rust (speed, memory, ffi, wasm), Python, TypeScript (pure, wasm) — and the Elixir reference
-outside it implement exactly what is written here. Where a page under `docs/` disagrees with
+Rust (speed, memory, ffi, wasm), Python, TypeScript (pure, wasm), bash and Elixir
+(`ex/echo_data`) — implements exactly what is written here. Where a page under `docs/` disagrees with
 this one, this one wins. The executable form of this page is [`tools/oracle.py`](../tools/oracle.py);
 the frozen form is [`vectors/`](../vectors/).
+
+[Index](index.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [The shape](#shape)
+- [Operations](#operations)
+- [Errors and precedence](#errors-precedence)
+- [Vectors](#vectors)
+- [Parity shim protocol](#parity-shim-protocol)
+- [The WebAssembly ABI (native/rust/crates/brd14-wasm)](#webassembly-abi-native-rust)
+- [The format family](#format-family)
+- [Extensions](#extensions)
+
+<a id="shape"></a>
 
 ## The shape
 
@@ -38,6 +69,8 @@ numeric order* (vector T-4). So "value < 2^63" can be checked either way:
 Both are exact and either is conforming (the "used by" lists above are informative, not
 normative); the vectors pin the boundary from both sides (`AzL8n0Y58m7` accepted, `AzL8n0Y58m8` refused).
 
+<a id="operations"></a>
+
 ## Operations
 
 | Operation | Definition |
@@ -69,6 +102,8 @@ properties in its own suite.
 the caller **unchanged**. Only an admitted namespace reaches `encode`, whose shape check still
 applies. A nil/absent gate means "no policy", never "no validation".
 
+<a id="errors-precedence"></a>
+
 ## Errors and precedence
 
 Typed implementations use these classes (the C ABI's `branded_status` values):
@@ -96,6 +131,8 @@ so `errors.Is(err, ErrInvalid)` keeps holding and a refusal allocates nothing. P
 
 String-typed APIs (Python `str`, JS `string`) classify on the **UTF-8 bytes** of the input, so a
 14-character string with a non-ASCII character is a `LENGTH` refusal, exactly as the byte APIs see it.
+
+<a id="vectors"></a>
 
 ## Vectors
 
@@ -130,6 +167,8 @@ written `-`; arbitrary bytes are written as lowercase hex.
 Suites that read `vectors/` **skip** when the directory is absent (published module/sdist/tarball)
 and **fail** when it is absent but `BRD14_REQUIRE_VECTORS=1` is set (root Makefile, CI).
 
+<a id="parity-shim-protocol"></a>
+
 ## Parity shim protocol
 
 Every implementation ships a *shim*: a program that reads requests on stdin and writes one
@@ -156,6 +195,8 @@ them only when it advertises them, and `tools/parity.py` sends a shim only the o
 Integers are unsigned decimal; `<snow>` in `E` may be any value in `[0, 2^64)`; hex is lowercase
 and `-` means empty. A shim must not print anything else on stdout; diagnostics go to stderr.
 
+<a id="webassembly-abi-native-rust"></a>
+
 ## The WebAssembly ABI (`native/rust/crates/brd14-wasm`)
 
 No imports, no allocator, fixed memory (never grows, so JS views never detach). A static 64 KiB
@@ -172,6 +213,8 @@ IO region is exposed by `io_ptr()`.
 
 Batch calls clamp `n` to `[0, 2978]` — the most that fits the 64 KiB IO region (`22n ≤ 65536`
 plus alignment) — so a loader chunks larger batches.
+
+<a id="format-family"></a>
 
 ## The format family
 
@@ -192,13 +235,15 @@ fixed at mint time — remain open (see [roadmap.md](roadmap.md)); metadata *ins
 length is the layout profile extension below. Nothing in this
 section is normative for brd15/brd16 beyond the reservation of their names and lengths.
 
+<a id="extensions"></a>
+
 ## Extensions
 
 An extension adds operations without changing any base behaviour: every base vector, every base
 parity request and every existing id keeps its answer. Extensions land in the runtimes the
 Operator names; a shim advertises an extension's ops in its `HELLO` line, and the runtimes that do
 not yet implement it are listed as deferred in [roadmap.md](roadmap.md). The branded structures
-are the other extension, specified in [structures.md](structures.md).
+are the other extension, specified in [structures/spec.md](structures/spec.md).
 
 ### Layout profiles
 

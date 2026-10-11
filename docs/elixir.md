@@ -1,6 +1,20 @@
+---
+id: "KAN0R9YJSzHmug"
+slug: "DOCS-ELIXIR"
+type: "guide"
+version: "1.3"
+path: "docs/elixir.md"
+title: "Elixir: ex/echo_data"
+summary: "ex/echo_data, the BEAM implementation: standalone on Elixir 1.14, what changed from the umbrella, and how it agrees with the contract."
+tags: ["elixir", "echo_data", "beam"]
+group: "implementations"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Elixir: `ex/echo_data`
 
-`echo_data` is the BEAM implementation of brd14 and of the [branded structures](structures.md). It
+`echo_data` is the BEAM implementation of brd14 and of the [branded structures](structures/spec.md). It
 was imported verbatim from the fiberfx `echo` umbrella (branch `kan`, commit `24a4083`, path
 `echo/apps/echo_data`), where it is the pure base of the BCS data-layer stack. Here it stands alone
 and is held to the same proof as every other tree.
@@ -11,6 +25,18 @@ and is held to the same proof as every other tree.
 | Runtime dependencies | none; `stream_data` for tests only |
 | Native code | optional; `EchoData.Native` loads `priv/` NIF when present and falls back to pure Elixir |
 | Proof | its own suite (doctests, properties, `vectors/*.tsv` replayed) and the parity shim `ex-pure` (`ex-nif` once the NIF ships) |
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [Build and test](#build-test)
+- [What changed from the umbrella copy](#changed-umbrella-copy)
+- [Where it agrees with the contract, and where it does not (yet)](#where-agrees-contract-where)
+
+<a id="build-test"></a>
 
 ## Build and test
 
@@ -23,6 +49,8 @@ make -C ex bench       # the structures bench -> bench/results/
 Run `mix` with `TMPDIR=/tmp` (the targets do), as the umbrella guide advises: a small tmp overlay
 otherwise surfaces as spurious mid-suite I/O failures.
 
+<a id="changed-umbrella-copy"></a>
+
 ## What changed from the umbrella copy
 
 The import commit is byte-for-byte; every later change is its own reviewable commit.
@@ -33,6 +61,8 @@ The import commit is byte-for-byte; every later change is its own reviewable com
 | `native/` (a C shim over a vendored copy of a Rust core) removed | one source of truth for the cores; replaced by one Rustler NIF built from this repository's crates |
 | `priv/census.vectors` tracked | the root `.gitignore` ignored `priv/`, so a fresh checkout failed the census drift gate |
 | six files run through `mix format` | they exceeded the formatter's line limit upstream |
+
+<a id="where-agrees-contract-where"></a>
 
 ## Where it agrees with the contract, and where it does not (yet)
 

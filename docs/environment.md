@@ -1,4 +1,30 @@
+---
+id: "KAN0R9YJSzHmuh"
+slug: "DOCS-ENVIRONMENT"
+type: "guide"
+version: "1.3"
+path: "docs/environment.md"
+title: "Environment"
+summary: "The pinned toolchains, how scripts/setup.sh installs them, and the SessionStart hook."
+tags: ["toolchains", "pins", "setup"]
+group: "environment"
+language: "en"
+audience: ["developer", "agent"]
+---
+
 # Environment
+
+[Index](index.md#toc) · [Contract](contract.md#toc) · [Structures](structures/README.md#toc) · [Parity](parity.md#toc) · [KAN story](kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [The pinned set](#pinned-set)
+- [Installing](#installing)
+- [Claude Code cloud sessions](#claude-code-cloud-sessions)
+
+<a id="pinned-set"></a>
 
 ## The pinned set
 
@@ -15,6 +41,8 @@ setup script, the env file, the Rust toolchain pin and the CI image (`fly/Docker
 | Erlang/OTP + Elixir | OTP 25.3 + Elixir 1.14.0 (Ubuntu packages) | The floor `ex/echo_data` is held to; the echo umbrella itself runs Elixir 1.18.4 / OTP 28, which CI also exercises. Hex comes from `repo.hex.pm`. |
 | C | gcc 13.3, clang 18 (system) | Matches the pinned EchoMQ bench (Ubuntu 24.04 / gcc 13.3). clang supplies libFuzzer through `libclang-rt-18-dev`. |
 | PostgreSQL | 16 | Used only by the storage probe (`tools/storage_probe/`). |
+
+<a id="installing"></a>
 
 ## Installing
 
@@ -40,6 +68,8 @@ The install sources are the ones the Claude Code cloud egress proxy allows:
 
 GitHub release downloads are blocked there. That is why the script installs neither
 `uv python install` (python-build-standalone) nor `bun.sh/install`.
+
+<a id="claude-code-cloud-sessions"></a>
 
 ## Claude Code cloud sessions
 

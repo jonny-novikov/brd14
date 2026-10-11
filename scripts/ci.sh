@@ -5,7 +5,7 @@
 # fly.toml makes it the deploy's release_command, run once on a temporary Machine from the new
 # image, a non-zero exit stopping the deploy (docs/ci.md).
 #
-#   scripts/ci.sh                  every job, in order
+#   scripts/ci.sh                  every job, in order (oracle docs go native harden python ts ex parity)
 #   scripts/ci.sh go ex parity     only these jobs, in this order
 #   scripts/ci.sh --list           the jobs and what each runs
 #   scripts/ci.sh --versions       the toolchains this environment provides
@@ -18,9 +18,10 @@ set -uo pipefail
 export LC_ALL=C.UTF-8
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
-JOBS=(oracle go native harden python ts ex parity)
+JOBS=(oracle docs go native harden python ts ex parity)
 declare -A WHAT=(
   [oracle]="oracle + champ oracle self-tests, parity harness self-test, vectors reproducible, the shell CLI"
+  [docs]="the KAN documentation contract: frontmatter, ids, #toc, explicit anchors, navigation, every link (tools/doclint.py)"
   [go]="vet, tests, race, fuzz smoke (pinned Go), then vet + tests on the floor toolchain"
   [native]="C cores (tests, gates, sanitizers), Rust workspace (tests, clippy, alloc-check), the NIF link check"
   [harden]="Miri (core, ffi, wasm ABI) and libFuzzer (differential speed vs memory, 20 s per target)"
@@ -44,6 +45,8 @@ job_oracle() {
   rm -rf "$out"
   make -C scripts test harden
 }
+
+job_docs() { python3 tools/doclint.py; }
 
 job_go() {
   cd go

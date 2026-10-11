@@ -1,6 +1,6 @@
 defmodule EchoData.Test.ChampVectors do
   @moduledoc """
-  Replays `vectors/champ.tsv` (docs/structures.md): the SplitMix64 programs, and the shape
+  Replays `vectors/champ.tsv` (docs/structures/spec.md): the SplitMix64 programs, and the shape
   digest — FNV-1a-64 over the preorder serialization of a `ChampNode` trie.
   """
   import Bitwise

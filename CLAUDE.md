@@ -1,13 +1,46 @@
+---
+id: "KAN0R9YJSz0Bma"
+slug: "CLAUDE"
+type: "instructions"
+version: "1.3"
+path: "CLAUDE.md"
+title: "CLAUDE.md — how agents work in this repository"
+summary: "How agents work here: phased execution with value, sizing, the repository's laws, KAN delivery, changesets and environment."
+tags: ["agents", "PTE", "KAN", "laws"]
+group: "methodology"
+language: "en"
+audience: ["agent", "developer", "Operator"]
+---
+
 # CLAUDE.md — how agents work in this repository
 
 **Where** to go and search is in @AGENTS.md. This file is **how** to work. It is the reference,
 not a workflow script: it applies to every task, every agent and every sub-agent.
+
+[Documentation](docs/index.md#toc) · [AGENTS](AGENTS.md#toc) · [Contract](docs/contract.md#toc) · [KAN story](docs/kan/brd14-pragmatic-guide.md#toc)
+
+<a id="toc"></a>
+
+## In this document
+
+- [The principle](#principle)
+- [Phases](#phases)
+- [Sizing (FIB): done before loading any context](#sizing-fib-done-before)
+- [Laws of this repository](#laws-this-repository)
+- [Delivery: KAN](#delivery-kan)
+- [How changes are made](#changes-are-made)
+- [Naming and audience](#naming-audience)
+- [Environment](#environment)
+
+<a id="principle"></a>
 
 ## The principle
 
 Build the context you need and execute in phases (**PTE**, Phased Task Execution). Every phase
 answers one question: **what is the value?** The answer names what the person who uses the result
 gets. When no value can be named, no work starts.
+
+<a id="phases"></a>
 
 ## Phases
 
@@ -43,6 +76,8 @@ open to).
 Steward's view: the long-run cost to whoever maintains and operates the result (migrations,
 debugging, onboarding, failure modes). Finally decide, and say what value the decision buys.
 
+<a id="sizing-fib-done-before"></a>
+
 ## Sizing (FIB): done before loading any context
 
 Size by **unknowns**, not by page count. A bounded read-and-report over many files is a 3; one
@@ -76,6 +111,8 @@ different task rather than a bigger one:
 
 **Models:** sub-agents run `opus`; `fable` is allowed at FIB ≥ 8.
 
+<a id="laws-this-repository"></a>
+
 ## Laws of this repository
 
 1. **The contract is normative.** `docs/contract.md` defines behaviour and `tools/oracle.py`
@@ -91,7 +128,7 @@ different task rather than a bigger one:
 4. **Behaviour changes land in every implementation or in none.** A change to the contract is one
    branch that touches the oracle, the vectors, every tree and the docs, and ends with every shim
    passing parity. **Extensions are additive** (the contract's Extensions section: layout
-   profiles; [docs/structures.md](docs/structures.md)): they change no existing behaviour, land in
+   profiles; [docs/structures/spec.md](docs/structures/spec.md)): they change no existing behaviour, land in
    the runtimes the Operator names, are advertised per shim (`HELLO … <ops>`), and the runtimes
    that lack them are listed as deferred in `docs/roadmap.md`, never as passing.
 5. **Proof before push.** For the trees you changed, run `make -C <tree> test`, then
@@ -106,6 +143,8 @@ different task rather than a bigger one:
 8. **Never source untrusted config.** `.brdrc` is parsed against a key whitelist. Keep it that
    way.
 
+<a id="delivery-kan"></a>
+
 ## Delivery: KAN
 
 Work is delivered as **KAN**: one Agentic User Story (AUS) per program, in `docs/kan/`, delivered in
@@ -118,6 +157,13 @@ rungs. The current story is [docs/kan/brd14-pragmatic-guide.md](docs/kan/brd14-p
   `version`, `path`, `title`, `summary`, `tags`, `group`, `language`, `audience`. The `id` is a
   brd14 id in the `KAN` namespace, minted **once** (`scripts/mint.sh KAN`), validated, never
   regenerated on an edit or a move.
+- **Every documentation page is a KAN document** (docs/**, the root README, AGENTS, CLAUDE,
+  bench/README): the frontmatter above, a navigation line back to `docs/index.md#toc`,
+  `<a id="toc"></a>` with an "In this document" list, and an explicit `<a id>` before every `##`
+  section, listed in that order. A new section gets an anchor and a contents entry; never rename
+  an anchor without fixing its incoming links. `python3 tools/doclint.py` (CI job `docs`) checks
+  it all, every link and fragment included. Package READMEs rendered by registries (go/, python/,
+  ts/packages/*, ex/echo_data/) stay plain Markdown.
 - **A rung ends with evidence**, not with activity: the falsifying check from the story ran and
   the observed result is recorded in the implementing commit.
 - **Blue refinement.** After a rung is green, spend what is left of its timebox on remediation,
@@ -127,6 +173,8 @@ rungs. The current story is [docs/kan/brd14-pragmatic-guide.md](docs/kan/brd14-p
   ruling exactly when one decided it. Keep intended and observed verification apart.
 - **A commit is not acceptance.** Present the value, the evidence and the limits; the Operator
   accepts.
+
+<a id="changes-are-made"></a>
 
 ## How changes are made
 
@@ -146,6 +194,8 @@ rungs. The current story is [docs/kan/brd14-pragmatic-guide.md](docs/kan/brd14-p
 - **Attribution.** End commits with the attribution lines the session specifies. Put no model
   identifiers anywhere else: not in code, docs or file names.
 
+<a id="naming-audience"></a>
+
 ## Naming and audience
 
 - The product name is **msh** (msh-server), the successor of cclin. Do not write cclin in new
@@ -153,6 +203,8 @@ rungs. The current story is [docs/kan/brd14-pragmatic-guide.md](docs/kan/brd14-p
 - The Operator works across Elixir/Phoenix (EchoMQ, EchoCache, ETS, Valkey 9), Go runtimes and the
   Branded Component System (id-centric `{ns}{base62}`). They prefer pure functions and OTP
   patterns. Examples and articles speak to that stack.
+
+<a id="environment"></a>
 
 ## Environment
 
