@@ -20,7 +20,7 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC \
 RUN apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends \
       ca-certificates curl git make gcc g++ libc6-dev pkg-config xz-utils gnupg \
-      golang-go python3 python3-venv clang-18 \
+      golang-go python3 python3-venv clang \
  && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=secret,id=proxy_ca,required=false \
