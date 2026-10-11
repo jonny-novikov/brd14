@@ -14,6 +14,7 @@ defmodule EchoData.MixProject do
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: Mix.compilers() ++ [:echo_data_nif],
       deps: deps(),
       description: description(),
       package: package(),
@@ -53,7 +54,77 @@ defmodule EchoData.MixProject do
     [
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url},
-      files: ~w(lib priv/census.vectors mix.exs README.md LICENSE .formatter.exs)
+      files: ~w(lib priv/census.vectors native/echo_data_nif/src native/echo_data_nif/Cargo.toml
+                native/vendor mix.exs README.md LICENSE .formatter.exs)
     ]
+  end
+end
+
+defmodule Mix.Tasks.Compile.EchoDataNif do
+  @moduledoc """
+  Builds the optional NIF (native/echo_data_nif, Rustler) into priv/echo_data_nif.so.
+
+  `ECHO_DATA_NIF=0` skips it; `ECHO_DATA_NIF=1` makes a missing cargo or a failed build an
+  error. Otherwise (the default) the build is best effort: without cargo, or when it fails,
+  the library compiles and runs on its pure Elixir fallback, and says so.
+  """
+  use Mix.Task.Compiler
+
+  @crate Path.expand("native/echo_data_nif", __DIR__)
+  @priv Path.expand("priv", __DIR__)
+
+  @impl true
+  def run(_args) do
+    mode = System.get_env("ECHO_DATA_NIF")
+
+    cond do
+      mode == "0" or not File.exists?(Path.join(@crate, "Cargo.toml")) ->
+        {:noop, []}
+
+      System.find_executable("cargo") == nil ->
+        fail(mode, "cargo not found")
+
+      true ->
+        build(mode)
+    end
+  end
+
+  defp build(mode) do
+    args = ["build", "--release", "--quiet", "--manifest-path", Path.join(@crate, "Cargo.toml")]
+
+    case System.cmd("cargo", args, stderr_to_stdout: true) do
+      {_, 0} ->
+        install(Path.join([@crate, "target", "release", lib_name()]))
+
+      {out, status} ->
+        fail(mode, "cargo build exited #{status}:\n" <> out)
+    end
+  end
+
+  defp install(built) do
+    target = Path.join(@priv, "echo_data_nif.so")
+    File.mkdir_p!(@priv)
+
+    if File.exists?(target) and File.read!(target) == File.read!(built) do
+      {:noop, []}
+    else
+      File.cp!(built, target)
+      {:ok, []}
+    end
+  end
+
+  defp lib_name do
+    case :os.type() do
+      {:unix, :darwin} -> "libecho_data_nif.dylib"
+      {:win32, _} -> "echo_data_nif.dll"
+      _ -> "libecho_data_nif.so"
+    end
+  end
+
+  defp fail("1", why), do: Mix.raise("echo_data: the NIF is required (ECHO_DATA_NIF=1) — " <> why)
+
+  defp fail(_mode, why) do
+    Mix.shell().info("echo_data: NIF not built (" <> why <> "); using the pure Elixir fallback")
+    {:noop, []}
   end
 end
