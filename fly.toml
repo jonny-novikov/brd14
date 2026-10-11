@@ -5,7 +5,7 @@
 # Deploys come from Fly's GitHub integration on push (app → Deployments → auto-deploy), or by
 # hand: scripts/fly-build.sh.
 app = "brd-build"
-primary_region = "iad"
+primary_region = "fra"
 
 [build]
   dockerfile = "fly/Dockerfile"

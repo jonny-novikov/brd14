@@ -141,7 +141,7 @@ with flyctl and a deploy token can run the same deploy:
 |---|---|
 | **Root filesystem about 8 GB, slow to write.** Reported by the community ([thread](https://community.fly.io/t/is-it-possible-to-extend-the-root-volume-beyond-8gb/21055)); not in Fly's own docs. | `scripts/ci.sh` copies the tree into a RAM disk (`BRD_CI_TMPFS=20g`) before building. The release Machine therefore has 32 GB. |
 | **Image at most 8 GB uncompressed** ([thread](https://community.fly.io/t/docker-image-size-limit-raised-from-2gb-to-8gb/14749)). | Measured: 6.04 GB uncompressed, 1.6 GB compressed (local `docker build`, Docker 29.8.2). That leaves about 25% headroom, so nothing goes in that the suite does not run; the `ci` tier leaves out PostgreSQL. |
-| **Jobs run in sequence on one Machine**, where Actions ran them in parallel. | Wall time is the sum of the jobs. |
+| **Jobs run in sequence on one Machine**, where Actions ran them in parallel. | Wall time is the sum of the jobs. Measured once in local Docker (4 vCPUs, a 10 GB RAM disk, image at `940d391`), all green: oracle 12 s, go 89 s, native 44 s, harden 328 s, python 21 s, ts 20 s, ex 60 s, parity 40 s — 614 s in all. A performance-8x Machine has twice the CPUs; its time is not yet measured. |
 | **The integration watches one branch.** | Other branches are run with `scripts/fly-build.sh`. |
 | **The integration's maturity is not verified here.** This session has no Fly credentials. | The release-command semantics are documented; the push trigger is the Operator's step 3. |
 | **Cost.** | Billed per second while the release Machine and the builder run. The status Machine is stopped when idle. |
