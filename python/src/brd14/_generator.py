@@ -21,6 +21,7 @@ from time import time_ns as _time_ns
 from typing import NoReturn
 
 from ._codec import EPOCH_MS, encode
+from ._errors import ErrorCode, InvalidIdError
 
 __all__ = ["NODE_MAX", "Generator", "default_node", "node_from"]
 
@@ -113,6 +114,48 @@ class Generator:
                 last = now
             self._last = last
         return (last >> 12 << 22) | self._node_bits | (last & 4095)
+
+    def observe(self, snow: int, max_ahead_ms: int) -> bool:
+        """The virtual clock's receive rule (docs/contract.md, Extensions).
+
+        Having received a message that carries ``snow``, every id this
+        generator mints afterwards sorts after ``snow``, whichever nodes minted
+        them. The cell moves to the last slot of ``snow``'s millisecond, so the
+        next mint lands in a later millisecond: matching ``snow``'s cell is not
+        enough, because a snowflake orders by ts|node|seq and a lower node in
+        the same millisecond would sort first.
+
+        An id more than ``max_ahead_ms`` ahead of this generator's physical
+        clock is refused (``False``, the cell unchanged): one far-future id
+        would otherwise drag the clock forward for good. A value outside
+        ``[0, 2**63)`` raises :class:`~brd14.InvalidIdError` (RANGE).
+        """
+        snow = _index(snow)
+        if not 0 <= snow < 1 << 63:
+            raise InvalidIdError(ErrorCode.RANGE, f"cannot observe {snow}: outside [0, 2**63)")
+        ts = snow >> 22
+        clock = self._clock
+        now_ms = (_time_ns() // 1_000_000 if clock is None else clock()) - EPOCH_MS
+        if ts - now_ms > max_ahead_ms:
+            return False
+        floor = ((ts + 1) << 12) - 1
+        with self._lock:
+            if floor > self._last:
+                self._last = floor
+        return True
+
+    @property
+    def virtual_ms(self) -> int:
+        """The generator's virtual time in Unix milliseconds.
+
+        It is the millisecond of the last id minted, or of the last id observed
+        if that is later. An observe parks the cell on the observed
+        millisecond's last slot, so the next mint lands in the millisecond
+        after. It is never behind the physical clock reading of the last mint,
+        and runs ahead of it after a burst past 4096 ids/ms or an observe of a
+        later id.
+        """
+        return (self._last >> 12) + EPOCH_MS
 
     def next_branded(self, ns: str) -> str:
         """Mint the next snowflake and brand it under ``ns`` in one call.

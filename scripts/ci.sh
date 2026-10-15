@@ -105,6 +105,8 @@ fi
 cd "$root"
 . scripts/env.sh
 export BRD14_REQUIRE_VECTORS=1
+# The Python suite's mixed Python + Go fleet needs Go: in CI a missing toolchain fails, never skips.
+export BRD14_REQUIRE_CROSS=1
 
 case ${1:-} in
   --list) for j in "${JOBS[@]}"; do printf '%-8s %s\n' "$j" "${WHAT[$j]}"; done; exit 0 ;;
