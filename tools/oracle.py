@@ -170,6 +170,45 @@ def layout_mint(s: int, cell: int, now_ms: int) -> int:
     return max((now_ms - EPOCH_MS) * 2**s, cell + 1)
 
 
+# ── extension: the virtual clock (docs/contract.md § Extensions) ───────────
+# A generator's cell `ts << 12 | seq` is a hybrid logical clock for local events:
+# each mint advances it to max(physical, last + 1). `observe` is the receive rule.
+# A snowflake orders by ts | node | seq but the cell by ts | seq, so matching the
+# observed cell is NOT enough: a lower node in the same millisecond would sort
+# first. The rule therefore moves the cell to the end of the observed id's
+# millisecond, and the next mint lands in a later millisecond than the observed id.
+
+
+def vclock_run(node: int, start_ms: int, program: list[tuple]) -> tuple[list[int], list[bool], int]:
+    """Replays a generator under a virtual clock.
+
+    program: ("t", unix_ms) sets the clock; ("m", k) mints k ids; ("o", snow, max_ahead_ms)
+    observes a snowflake, refused (cell unchanged) when its ms is more than max_ahead_ms ahead
+    of the physical clock. Returns (minted snowflakes, observe verdicts, final virtual unix ms).
+    """
+    now = start_ms
+    cell = (now - EPOCH_MS) * 2**12
+    ids: list[int] = []
+    verdicts: list[bool] = []
+    for ev in program:
+        if ev[0] == "t":
+            now = ev[1]
+        elif ev[0] == "m":
+            for _ in range(ev[1]):
+                cell = max((now - EPOCH_MS) * 2**12, cell + 1)
+                ids.append((cell // 2**12) * 2**22 + node * 2**12 + cell % 2**12)
+        elif ev[0] == "o":
+            snow, max_ahead = ev[1], ev[2]
+            assert 0 <= snow <= MAX_SNOW
+            ts = snow // 2**22
+            if ts - (now - EPOCH_MS) > max_ahead:
+                verdicts.append(False)
+            else:
+                verdicts.append(True)
+                cell = max(cell, (ts + 1) * 2**12 - 1)
+    return ids, verdicts, cell // 2**12 + EPOCH_MS
+
+
 def hexs(b: bytes) -> str:
     """Hex as the vectors and the parity protocol write it: '-' for empty."""
     return b.hex() if b else "-"
@@ -221,6 +260,16 @@ def self_test() -> None:
     assert isinstance(layout_pack(6, 12, 4, 0, 64, 0, 0), Refused)
     assert layout_pack(6, 12, 4, 0, 64, 0, 0) == RANGE and layout_pack(6, 12, 4, 2**41, 0, 0, 0) == RANGE
     assert layout_pack(6, 12, 4, 0, 0, 0, 16) == RANGE and layout_pack(6, 12, 4, 0, 0, 4096, 0) == RANGE
+    # The virtual clock: the receive rule orders a reply after the message across nodes,
+    # where matching the cell alone (the textbook HLC rule) would not.
+    a, _, _ = vclock_run(900, EPOCH_MS + 100, [("m", 1)])
+    b, ok, _ = vclock_run(5, EPOCH_MS + 100, [("o", a[0], 1000), ("m", 1)])
+    assert ok == [True] and b[0] > a[0] and b[0] // 2**22 == a[0] // 2**22 + 1
+    naive = (a[0] // 2**22) * 2**22 + 5 * 2**12 + (a[0] % 2**12) + 1  # cell matched, node 5
+    assert naive < a[0]
+    far = (100 + 5000) * 2**22  # an id 5 s ahead of the physical clock
+    _, ok, v = vclock_run(5, EPOCH_MS + 100, [("o", far, 1000), ("m", 1)])
+    assert ok == [False] and v == EPOCH_MS + 100
     # Meta lowest keeps one generator strictly increasing whatever meta each id carries.
     rng, cell, last = SplitMix64(7), 0, -1
     for i in range(20000):
@@ -232,4 +281,4 @@ def self_test() -> None:
 
 if __name__ == "__main__":
     self_test()
-    print("oracle: self-test ok (V-1..V-7, E-1, E-2, N-1, precedence, QA/RB, layout profiles)")
+    print("oracle: self-test ok (V-1..V-7, E-1, E-2, N-1, precedence, QA/RB, layout profiles, virtual clock)")

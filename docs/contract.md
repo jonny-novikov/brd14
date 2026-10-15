@@ -93,8 +93,9 @@ CAS), and returns `ts << 22 | node << 12 | seq`. Consequences every implementati
 - a burst past 4096 ids/ms borrows into the timestamp (no blocking, no sleeping);
 - a backward clock step keeps minting off the logical clock (no duplicates).
 
-Generators are *not* differential-tested (they read the clock); each language proves these
-properties in its own suite.
+A generator reads the clock, so the base vectors cannot pin what it mints: each language proves
+these properties in its own suite. Driven by an injected clock, a generator is differential-tested
+too; that is the [virtual clock](#virtual-clock-experimental) extension.
 
 ### The minter (policy seam)
 
@@ -163,6 +164,7 @@ written `-`; arbitrary bytes are written as lowercase hex.
 | `invalid.tsv` | `id_hex  class` — decode refusals |
 | `encode_invalid.tsv` | `ns_hex  snow  class` — encode refusals (`snow` may be ≥ 2^63) |
 | `node.tsv` | `host_hex  pid  node` |
+| `clock.tsv` | `case  node  start_ms  program  count  first  last  digest  verdicts  virtual_ms` — [extension](#virtual-clock-experimental) |
 
 Suites that read `vectors/` **skip** when the directory is absent (published module/sdist/tarball)
 and **fail** when it is absent but `BRD14_REQUIRE_VECTORS=1` is set (root Makefile, CI).
@@ -242,8 +244,9 @@ section is normative for brd15/brd16 beyond the reservation of their names and l
 An extension adds operations without changing any base behaviour: every base vector, every base
 parity request and every existing id keeps its answer. Extensions land in the runtimes the
 Operator names; a shim advertises an extension's ops in its `HELLO` line, and the runtimes that do
-not yet implement it are listed as deferred in [roadmap.md](roadmap.md). The branded structures
-are the other extension, specified in [structures/spec.md](structures/spec.md).
+not yet implement it are listed as deferred in [roadmap.md](roadmap.md). Two are specified here,
+layout profiles and the virtual clock; the third, the branded structures, is specified in
+[structures/spec.md](structures/spec.md).
 
 ### Layout profiles
 
@@ -280,3 +283,49 @@ first. The oracle's self-test mints 20 000 ids under `(6, 12, 4)` with random me
 `vectors/layout_invalid.tsv` (refusals, including both precedence orders). **Scope** (Operator
 ruling): Go, Rust and Elixir, whose shims advertise `L P` once they implement it. **Deferred:** C,
 Python, TypeScript, WebAssembly, bash.
+
+### Virtual clock (experimental)
+
+A generator's cell `ts << 12 | seq` is a hybrid logical clock for the events it mints: each mint
+advances it to `max(now_part, last + 1)`, the local rule of a hybrid logical clock (*cited*:
+Kulkarni et al., 2014). This extension makes the clock injectable and adds the rule for received
+ids. Once a generator has observed an id, every id it mints sorts after that id, whichever node
+minted it.
+
+| Operation | Definition |
+|---|---|
+| clock injection | A generator may be built over a clock that returns Unix ms. Without one it reads the wall clock. `now_part = (clock() − 1704067200000) << 12`; minting is unchanged. |
+| `observe(snow, max_ahead_ms) → bool` | Let `ts = snow >> 22` and `now = clock() − 1704067200000`. If `ts − now > max_ahead_ms`, refuse: return false and leave the cell unchanged. Otherwise set `cell ← max(cell, ((ts + 1) << 12) − 1)` atomically and return true. |
+| `virtual_ms` | `(cell >> 12) + 1704067200000`: the generator's virtual time, in Unix ms. |
+
+**Errors:** `RANGE` when `snow ≥ 2^63`. That is the only error. A refusal is a policy verdict,
+like a gate's, and not an error.
+
+**Why the cell is parked at the end of the millisecond.** A snowflake orders by `ts | node | seq`;
+the cell orders by `ts | seq`. The textbook receive rule raises the cell to the observed id's cell
+`ts << 12 | seq`. Under that rule a generator on a lower node mints `(ts, seq + 1)` next, and that
+id sorts *before* the id it observed. Parking the cell on the last slot of the observed millisecond
+puts the next mint in a later millisecond, so the order holds for every pair of nodes. The
+oracle's self-test carries the counterexample.
+
+**What it keeps.** The base generator's three properties hold under every program. A refused
+observe leaves the cell unchanged, so one id from the far future cannot pull a generator more than
+`max_ahead_ms` ahead of its own clock.
+
+**Vectors:** `vectors/clock.tsv`. Each row is a program, replayed on a generator for `node` whose
+clock starts at `start_ms`:
+- `t<unix_ms>` sets the clock;
+- `m<k>` mints `k` ids;
+- `o<snow>~<max_ahead_ms>` observes an id.
+
+The columns record what the replay must produce:
+- the number of ids minted, and the first and last of them (`-` when there are none);
+- `digest`: FNV-1a-64 over the minted ids, written in decimal and joined by commas, as 16
+  lowercase hex digits;
+- the observe verdicts, `1` applied and `0` refused (`-` when there are none);
+- the final `virtual_ms`.
+
+Programs keep every clock value in `[epoch, epoch + 2^41)` and every observed id below `2^63`.
+
+**Scope** (Operator ruling: "The first evidence: python and go integration tests"): Go and Python.
+**Deferred:** C, Rust, TypeScript, WebAssembly, Elixir, bash.
