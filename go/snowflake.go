@@ -37,7 +37,8 @@ func NewGenerator(node uint64) *Generator {
 // Unix milliseconds, instead of the wall clock: a virtual clock for simulation,
 // replay and tests (Python's Generator(node, clock=...)). The generator's
 // guarantees are the same under any clock, including one that stalls or steps
-// backward.
+// backward. Next and Observe call clock without a lock, so it must be safe for
+// concurrent use when the generator is shared.
 func NewGeneratorWithClock(node uint64, clock func() int64) *Generator {
 	g := &Generator{node: node & nodeMask, clock: clock}
 	g.cell.Store(g.now())

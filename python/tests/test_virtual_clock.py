@@ -16,8 +16,9 @@ boundary to Go:
   (go/internal/vclocknode), keeps the same order, and the two runtimes mint identical ids for
   identical programs.
 
-The cross-process tests need the Go toolchain: they skip without it, and fail without it when
-``BRD14_REQUIRE_CROSS=1`` (scripts/ci.sh sets it).
+The cross-process tests need the Go toolchain and the repository's go/ tree: they skip without
+either (an sdist ships no go/), and fail instead when ``BRD14_REQUIRE_CROSS=1`` (scripts/ci.sh
+sets it).
 """
 
 from __future__ import annotations
@@ -208,10 +209,16 @@ def test_a_far_future_id_cannot_drag_the_clock() -> None:
 @pytest.fixture(scope="module")
 def go_node_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
     go = shutil.which("go")
+    missing = ""
     if go is None:
+        missing = "the Go toolchain is not on PATH"
+    elif not (REPO / "go" / "internal" / "vclocknode").is_dir():
+        missing = "go/internal/vclocknode is not here (an sdist, not the repository)"
+    if missing:
         if os.environ.get("BRD14_REQUIRE_CROSS") == "1":
-            pytest.fail("BRD14_REQUIRE_CROSS=1 but the Go toolchain is not on PATH")
-        pytest.skip("Go toolchain not on PATH: the cross-runtime tests need go/internal/vclocknode")
+            pytest.fail(f"BRD14_REQUIRE_CROSS=1 but {missing}")
+        pytest.skip(f"{missing}: the cross-runtime tests need it")
+    assert go is not None
     out = tmp_path_factory.mktemp("vclocknode") / "vclocknode"
     subprocess.run([go, "build", "-o", str(out), "./internal/vclocknode"], cwd=REPO / "go", check=True)
     return out

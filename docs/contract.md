@@ -296,7 +296,7 @@ minted it.
 
 | Operation | Definition |
 |---|---|
-| clock injection | A generator may be built over a clock that returns Unix ms. Without one it reads the wall clock. `now_part = (clock() − 1704067200000) << 12`; minting is unchanged. |
+| clock injection | A generator may be built over a clock that returns Unix ms. Without one it reads the wall clock. `now_part = (clock() − 1704067200000) << 12`; minting is unchanged. The clock is called outside any lock, so it must be safe to call from every thread that mints. |
 | `observe(snow, max_ahead_ms) → bool` | Let `ts = snow >> 22` and `now = clock() − 1704067200000`. If `ts − now > max_ahead_ms`, refuse: return false and leave the cell unchanged. Otherwise set `cell ← max(cell, ((ts + 1) << 12) − 1)` atomically and return true. |
 | `virtual_ms` | `(cell >> 12) + 1704067200000`: the generator's virtual time, in Unix ms. |
 
@@ -311,8 +311,13 @@ puts the next mint in a later millisecond, so the order holds for every pair of 
 oracle's self-test carries the counterexample.
 
 **What it keeps.** The base generator's three properties hold under every program. A refused
-observe leaves the cell unchanged, so one id from the far future cannot pull a generator more than
-`max_ahead_ms` ahead of its own clock.
+observe leaves the cell unchanged, so one id from the far future cannot pull a generator's virtual
+time more than `max_ahead_ms + 1` ahead of its own clock: `max_ahead_ms` for the observed
+millisecond, plus one for the next mint.
+
+**What an observed id covers.** It orders later mints after that id's own mint, not after what
+its sender did after minting it. For a message to carry the sender's whole past, it must carry an
+id minted when it is sent.
 
 **Vectors:** `vectors/clock.tsv`. Each row is a program, replayed on a generator for `node` whose
 clock starts at `start_ms`:
@@ -327,7 +332,9 @@ The columns record what the replay must produce:
 - the observe verdicts, `1` applied and `0` refused (`-` when there are none);
 - the final `virtual_ms`.
 
-Programs keep every clock value in `[epoch, epoch + 2^41)` and every observed id below `2^63`.
+Programs keep `node` in `[0, 1023]`, every clock value in `[epoch, epoch + 2^41)` and every
+observed id below `2^63`. This is the domain in which every implementation must agree. Go masks
+a wider node and Python refuses it; outside the domain, answers are implementation-defined.
 
 **Parity:** op `G` replays a program and answers with the row's result columns. Its requests are
 every `clock.tsv` program, plus short random programs whose bursts cross 4096 ids per millisecond.

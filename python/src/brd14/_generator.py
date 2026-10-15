@@ -73,7 +73,9 @@ class Generator:
     step keeps minting off the logical clock (no duplicates).
 
     ``clock`` replaces the wall clock with any callable returning Unix
-    milliseconds; it exists for tests. ``node`` must be in ``[0, 1023]``
+    milliseconds: tests, simulation, the virtual clock. It is called outside the
+    lock, so a generator shared across threads needs a thread-safe ``clock``.
+    ``node`` must be in ``[0, 1023]``
     (ValueError otherwise; Go masks instead, which silently aliases nodes).
 
     A Generator is also an infinite iterator of snowflakes. It refuses to be

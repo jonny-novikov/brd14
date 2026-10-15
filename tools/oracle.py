@@ -186,6 +186,8 @@ def vclock_run(node: int, start_ms: int, program: list[tuple]) -> tuple[list[int
     observes a snowflake, refused (cell unchanged) when its ms is more than max_ahead_ms ahead
     of the physical clock. Returns (minted snowflakes, observe verdicts, final virtual unix ms).
     """
+    assert 0 <= node <= 1023, node  # the domain (docs/contract.md, Virtual clock)
+    assert EPOCH_MS <= start_ms < EPOCH_MS + 2**41, start_ms
     now = start_ms
     cell = (now - EPOCH_MS) * 2**12
     ids: list[int] = []
@@ -193,6 +195,7 @@ def vclock_run(node: int, start_ms: int, program: list[tuple]) -> tuple[list[int
     for ev in program:
         if ev[0] == "t":
             now = ev[1]
+            assert EPOCH_MS <= now < EPOCH_MS + 2**41, now
         elif ev[0] == "m":
             for _ in range(ev[1]):
                 cell = max((now - EPOCH_MS) * 2**12, cell + 1)

@@ -103,7 +103,7 @@ docs/research/              research with evidence: the virtual clock (an id's t
 | the shell CLI | `scripts/brd.sh --help`, `.brdrc` | `scripts/` | `make -C scripts test`, `--only sh-` |
 | Elixir / echo_data | `docs/elixir.md` | `ex/echo_data/` | `make -C ex test harden`, `--only ex-` |
 | structures (champ, tree, buckets) | `docs/structures/spec.md`, the KAN story | `go/brdata`, `native/rust/crates/brd14-data`, `ex/echo_data` | `make vectors`, each tree's tests replay `vectors/champ.tsv` |
-| the virtual clock (observe, virtual time) | `docs/contract.md` § Virtual clock, `docs/research/virtual-clock.md` | `go/snowflake.go`, `python/src/brd14/_generator.py` | `go test -run 'Virtual\|Observe'`, `pytest tests/test_virtual_clock.py`, `--only go,python` (op `G`) |
+| the virtual clock (observe, virtual time) | `docs/contract.md` § Virtual clock, `docs/research/virtual-clock.md` | `go/snowflake.go`, `python/src/brd14/_generator.py` | `go test -run 'Virtual\|Observe\|Textbook'`, `pytest tests/test_virtual_clock.py`, `--only go,python` (op `G`) |
 | docs or an article | `docs/index.md`, the KAN rules in `CLAUDE.md` | `docs/` | `python3 tools/doclint.py`; every number traces to a results file or is labelled cited |
 | toolchains / setup | `docs/environment.md` | `scripts/versions.env`, `scripts/setup.sh` | `scripts/setup.sh`, CI pin check |
 | CI | `docs/ci.md`, `scripts/ci.sh --list` | `scripts/ci.sh`, `fly.toml`, `fly/` | `scripts/ci.sh <job>` locally; the image: `docker build -f fly/Dockerfile .` |

@@ -54,20 +54,22 @@ cell ← max(cell, ((ts(m) + 1) << 12) − 1)        unless ts(m) is more than m
 With that rule:
 
 - **Causal order.** Every id minted after observing `m` sorts after `m`, whichever node minted
-  it.
+  it. For a message to carry the sender's whole past, it must carry an id minted when it was sent
+  (P2).
   - Go fleet: 0 of 199 978 replies sort before the message they answer.
   - The textbook HLC rule on the same fleet: 22 757 of them (11.4%) do.
 - **Bounded drift.** When messages take at least 1 ms, a node's virtual time leads its own clock
-  by at most **2ε**, where ε bounds clock skew. The bound is tight: measured 10 ms at ε = 5 ms.
+  by at most **2ε**, where ε bounds clock skew. The bound is tight: `TestVirtualDriftBound` reaches
+  10 ms at ε = 5 ms.
 - **A guard.** An id more than `max_ahead_ms` in the future is refused, and the clock does not
   move.
 - **Determinism.** A generator over an injected clock is a pure function of its program, so
   generators are differential-tested for the first time: by `vectors/clock.tsv`, and in the
   parity matrix (op `G`). Go and Python mint identical ids for identical programs.
 
-**Nothing on the wire changes.** The id *is* the clock value. Every message that already carries
-a brd14 id carries a timestamp the receiver can observe, with no extra header and no wider id.
-That is the leverage.
+**Nothing on the wire changes.** The id *is* the clock value. A message that carries an id minted
+when it was sent carries the sender's clock, with no extra header and no wider id. That is the
+leverage.
 
 <a id="six-w"></a>
 
@@ -90,7 +92,7 @@ That is the leverage.
 |---|---|
 | **Known knowns** | The cell follows the HLC local rule. The ms-bump receive rule preserves id order: proved below, and tested on fleets of 8 and 16 nodes. Drift is at most 2ε when delays are ≥ 1 ms. A far-future id is refused. Go and Python agree on every program tried: 23 vector programs, 40 parity programs, and 20 random programs of 400 operations each. |
 | **Known unknowns** | <br>- Real-world ε on the fleet: chrony or NTP offsets on the Fly Machines are not measured here. <br>- The right `max_ahead_ms` per deployment. <br>- The cost of `Observe` under contention: one CAS in Go, not benchmarked yet. <br>- How often bursts past 4096 ids/ms happen in production; a burst also moves virtual time ahead. |
-| **Unknown knowns** | <br>- The base generator already tolerates backward clock steps without duplicates, and that same property makes an upward bump safe. <br>- Wherever a message already carries a brd14 id (a job id, an entity id), the receiver has the sender's clock value for free. |
+| **Unknown knowns** | <br>- The base generator already tolerates backward clock steps without duplicates, and that same property makes an upward bump safe. <br>- Wherever a message already carries a brd14 id (a job id, an entity id), the receiver has a clock value for free: the moment that id was minted. That orders the receiver after the mint, not after what the sender did since. To carry the sender's whole past, mint an id when the message is sent (P2). |
 | **Unknown unknowns** | <br>- How the rule meets layout profiles: the cell becomes `ts << s \| seq`, and the rule generalises to `((ts + 1) << s) − 1`, which is not yet specified. <br>- Restarts (see [Limits](#limits)). <br>- Long partitions with persistent skew. <br>- Hostile ids that stay inside `max_ahead_ms`. |
 
 <a id="prior-art"></a>
@@ -106,7 +108,8 @@ Every entry here is *cited*. None of it is reproduced or measured in this reposi
 | J. C. Corbett et al., "Spanner: Google's Globally-Distributed Database", *OSDI* 2012 | TrueTime makes clock uncertainty an explicit interval, and commit-wait turns it into external consistency. brd14 virtual time does **not** provide that (see [Limits](#limits)). |
 | R. Taft et al., "CockroachDB: The Resilient Geo-Distributed SQL Database", *SIGMOD* 2020 | A production HLC with a configured maximum clock offset: a node whose clock strays too far from the others shuts itself down. The same idea as `max_ahead_ms`, enforced at a different place. |
 | K. Davis, B. Peabody, P. Leach, "Universally Unique IDentifiers (UUIDs)", RFC 9562, 2024, §6.2 | Counter methods that keep time-ordered UUIDv7 monotonic within a millisecond, and how to handle counter rollover. brd14's 12-bit `seq`, which borrows into the timestamp, is a dedicated-counter design of that kind. |
-| T. Akidau et al., "The Dataflow Model", *PVLDB* 8(12), 2015 | Event-time watermarks: a low watermark is the minimum over inputs of how far each has progressed. A node's virtual time gives such a bound for the ids it will mint ([below](#using)). |
+| T. Akidau et al., "MillWheel: Fault-Tolerant Stream Processing at Internet Scale", *PVLDB* 6(11), 2013 | The low watermark: the oldest pending work, computed as a minimum over a computation's pending work and its upstream watermarks. A node's virtual time gives such a bound for the ids it will mint ([below](#using)). |
+| T. Akidau et al., "The Dataflow Model", *PVLDB* 8(12), 2015 | Event-time windows and triggers built on watermarks: where a bound on future ids is used. |
 
 <a id="model"></a>
 
@@ -129,12 +132,18 @@ with it.
 
 - **P1, monotone.** One generator is strictly increasing under every program. Minting is the base
   contract, and `observe` only ever raises the cell.
-- **P2, causal.** If `observe(m)` returned true before a mint `x`, on any generator, then
-  `x > m`.
+- **P2, causal.** If `observe(m)` returned true on a generator before that generator mints `x`,
+  then `x > m`, whichever node minted `m`.
   - *Proof.* After the observe, `c ≥ ((ts_m + 1) << 12) − 1`. The mint makes `c′ ≥ (ts_m + 1) << 12`,
     so `ts_x ≥ ts_m + 1`, and a snowflake orders by `ts` first. ∎
-  - By induction along any chain of mints and observes: *if `a` happened before `b`, then
+  - **What an observed id covers.** `x` sorts after `m`, and after everything that happened
+    before `m` was minted. It does not sort after what the sender did after minting `m`.
+  - So let each message carry an id minted when it is sent: a message id, or the sender's latest
+    mint. Then, by induction along any chain of messages, *if `a` happened before `b`, then
     `id(a) < id(b)`*. This is Lamport's clock condition, read on the ids themselves.
+  - **Counterexample** when the message carries an older id. The producer (node 900) mints a job
+    at `T`, then a child at `(T + 1, 900, ·)`, then sends the job's id. The consumer (node 5)
+    observes it and mints `(T + 1, 5, 0)`, which sorts before the child.
 - **P3, bounded drift.** Virtual time leads the node's clock by at most 2ε ([derivation](#drift-bound)).
 - **P4, guarded.** A refused observe leaves `c` unchanged. An accepted one can put `V` at most
   `max_ahead_ms + 1` ahead of the physical clock at the moment it was accepted. That lead shrinks
@@ -166,9 +175,14 @@ reply before the message. On a 16-node fleet spread over the whole 10-bit node r
 **11.4%** of replies, in Go and in Python alike.
 
 **The cost of the fix.** Each hop can skip the rest of a millisecond's 4096 slots and move
-virtual time forward by 1 ms. That is why message delay matters to the bound below. A rule that
-compared full snowflakes `(ts, node, seq)` would still need the same bump whenever the sender's
-node is higher, so no cheaper correct rule exists that leaves the layout unchanged.
+virtual time forward by 1 ms. That is why message delay matters to the bound below.
+
+**A node-aware rule** is also correct. When the receiver's node is higher than `node(m)`, it can
+raise the cell only to the end of the *previous* millisecond, `(ts_m << 12) − 1`. Its next mint is
+then `(ts_m, node_self, 0) > m`, with no bump. Otherwise it bumps as above. That saves the 1 ms
+for about half of all pairs, but the worst case is the same. It also makes the clock's behaviour
+depend on how nodes are numbered, and it puts the node into the rule. The ms-bump was chosen for
+simplicity: one rule, whatever the nodes.
 
 <a id="drift-bound"></a>
 
@@ -176,19 +190,32 @@ node is higher, so no cheaper correct rule exists that leaves the layout unchang
 
 *Formula.* **Setup:**
 - true time `t` is in whole milliseconds;
-- node `n`'s clock reads `p_n(t) = t + o_n`, with `|o_n| ≤ ε`;
-- every message is delivered at least 1 ms of true time after it was minted;
-- no node mints 4096 ids within one millisecond.
+- node `n`'s clock reads `p_n(t) = t + o_n(t)`, with `|o_n(t)| ≤ ε`. The offset may vary, and the
+  clock may step back;
+- every message is delivered at least 1 ms of true time after the id it carries was minted;
+- no node mints 4096 ids within one true millisecond.
 
 **Claim.** Every id minted at true time `t` carries `ts ≤ t + ε` (in Unix ms).
 
-**Proof,** by induction over events in true-time order. A mint sets `c ← max(p_n(t) << 12,
-c + 1)`. The first term gives `ts ≤ t + ε`. For `c + 1`, look at what last set `c`:
-1. **A mint at `t′ ≤ t`.** Its `ts ≤ t′ + ε ≤ t + ε`, by induction. With no burst, its `seq <
-   4095`, so `c + 1` stays in the same millisecond.
-2. **An observe of `m`, minted at `t_m ≤ t − 1`.** Then `c = (ts_m, 4095)`, and `c + 1` lands in
-   `ts_m + 1 ≤ t_m + ε + 1 ≤ t + ε`.
-3. **Construction at `t₀ ≤ t`.** `ts = p_n(t₀) ≤ t + ε`. ∎
+**Proof,** by induction over mints in true-time order. A mint at `t` sets `c ← max(p_n(t) << 12,
+c + 1)`. If the first term wins, `ts = p_n(t) ≤ t + ε`. Otherwise, let `V` be the millisecond of
+`c`. Whatever last set `c`, `V ≤ t + ε`:
+- construction at `t₀ ≤ t` gives `V = p_n(t₀) ≤ t + ε`;
+- a mint at `t′ ≤ t` gives `V ≤ t′ + ε`, by induction;
+- an observe of `m`, minted at `t_m ≤ t − 1`, gives `V = ts_m ≤ t − 1 + ε`.
+
+If `c + 1` stays in `V`, the claim holds. If it carries into `V + 1`, then either `V ≤ t − 1 + ε`,
+and the claim holds; or `V = t + ε`. In that case:
+1. No observe can have moved the cell within `V`, because an id received by time `t` was minted by
+   `t − 1`, so its `ts ≤ t − 1 + ε < V`.
+2. So the cell reached `seq` 4095 one mint at a time, which leaves at least 4095 ids in
+   millisecond `V`.
+3. By the claim, each of those ids was minted at a true time `≥ V − ε = t`, that is, inside true
+   millisecond `t`.
+4. With this mint, that makes 4096 mints in one millisecond, which the setup excludes. ∎
+
+The proof never uses a constant offset. So the bound holds for clocks that drift or step back, as
+long as each stays within ±ε of true time. The fleet tests use constant offsets.
 
 After a reply at true time `t`, the receiver's virtual time is that reply's millisecond, so at
 most `t + ε`. Its own clock reads at least `t − ε`. So:
@@ -200,6 +227,10 @@ drift = V − p_receiver ≤ 2ε
 **The bound is tight.** Take a sender at `+ε` that mints at `t − 1`, so `ts = t − 1 + ε`, and a
 receiver at `−ε`. The reply lands at `t + ε`, which is a drift of exactly 2ε. The ε = 5 ms fleet
 reached it: 10 ms.
+
+**Compared with HLC.** HLC states its bound `l − pt ≤ ε` with ε as the largest difference between
+any two clocks (*cited*: Kulkarni et al.). In this page's ±ε notation that difference is 2ε, so
+brd14's bound is HLC's. The 1 ms bump per hop costs nothing, because the 1 ms delay absorbs it.
 
 **What breaks it:**
 - **Zero-delay hops.** A chain of `k` hops inside one millisecond adds up to `k` ms. The ordering
@@ -243,27 +274,35 @@ outputs are recorded in the R7 commits.
 
 ## Using it in the stack
 
-**1. Causal ids across EchoMQ hops.** A consumer observes the job's id before minting anything
-for it. Its result ids then sort after the job, and after everything the producer minted before
-sending it. A feed ordered by id, such as a `BrandedTree` cursor or a Valkey sorted set scored by
-snowflake, never shows a reply before its question.
+**1. Causal ids across EchoMQ hops.**
+- The producer mints a message id when it sends.
+- The consumer observes that id before minting anything for the message.
+- Its result ids then sort after the message, and after everything the producer minted before
+  sending it.
+- A feed ordered by id, such as a `BrandedTree` cursor or a Valkey sorted set scored by
+  snowflake, never shows a reply before its question.
+
+Observing only the job's own id is weaker. It orders the results after the job was created, not
+after what the producer did later ([P2](#model)).
 
 ```go
 // Go: one generator per process, built once.
-ok, err := gen.Observe(job.Snow, 2_000) // accept up to 2 s of sender lead
+msg.Snow = gen.Next() // producer: the send event's id travels with the message
+
+ok, err := gen.Observe(msg.Snow, 2_000) // consumer: accept up to 2 s of sender lead
 switch {
 case err != nil: // not an id (≥ 2^63): reject the message
 case !ok:        // more than 2 s ahead: count it, quarantine or reject — the clock did not move
 default:
-	result := gen.Next() // sorts after job.Snow, whichever node minted it
+	result := gen.Next() // sorts after msg.Snow and the producer's earlier ids, whatever the nodes
 	_ = result
 }
 ```
 
 ```python
-# Python
-if gen.observe(job_snow, 2_000):
-    result = gen.next()  # > job_snow
+# Python, the consumer
+if gen.observe(msg_snow, 2_000):
+    result = gen.next()  # > msg_snow
 ```
 
 The Elixir runtime is deferred. The rule it would implement is one pure function over the cell,
@@ -284,10 +323,15 @@ as in Go.
 
 **2. Read-your-writes tokens for EchoCache and Valkey replicas.**
 - A client keeps the highest id it has written or read: its *causal token*.
-- A replica that has applied everything up to id `W` serves the read when `W ≥ token`. Otherwise
-  it waits or forwards the read to the primary.
-- Because ids are minted under the receive rule, "applied up to" is a single 64-bit comparison.
-- What brd14 does not supply: the replica's applied-up-to id comes from the replication stream.
+- A replica serves the read when its frontier `W ≥ token`. Otherwise it waits or forwards the
+  read to the primary.
+- **`W` must be a frontier, not a maximum:** every write with an id `≤ W` has been applied. The
+  highest id applied is not enough. Streams from different nodes interleave, so a replica can
+  hold id 200 while id 100 is still in flight.
+- **One way to build it.** Each generator's ids increase (P1). So a replica fed one in-order
+  stream per source can take `W` as the minimum, over sources, of the last id applied from each.
+  An idle source moves its part forward by heartbeating its virtual time.
+- What brd14 does not supply: per-source ordering comes from the replication transport.
 
 **3. Watermarks for windows and expiry.**
 - A cell never decreases, so every id that node `n` mints from now on has `unix_ms(id) ≥ V_n`.
