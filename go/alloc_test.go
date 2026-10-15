@@ -34,6 +34,8 @@ var (
 	allocHost    = "brd14-prod-01"
 	allocBadNS   = "usr"
 	allocBigSnow = uint64(1) << 63
+	// allocVirtualNow is the virtual clock of the alloc cases: the V-1 instant.
+	allocVirtualNow = int64(EpochMs + 65_459_497_641)
 
 	// One decode refusal per class, each a single-fault input.
 	allocRefusals = []struct {
@@ -78,6 +80,7 @@ func validErr(ok bool) error {
 
 func allocCases() []allocCase {
 	g := NewGenerator(7)
+	vg := NewGeneratorWithClock(8, func() int64 { return allocVirtualNow })
 	m := NewMinter(g, AllowAll)
 	buf := make([]byte, 0, 64) // cap-sufficient: AppendEncode must not grow it
 
@@ -99,6 +102,11 @@ func allocCases() []allocCase {
 		{"NodeFrom", 0, func() error { sinkU64 = NodeFrom(allocHost, 2147483647); return nil }, nil},
 		{"Next", 0, func() error { sinkU64 = g.Next(); return nil }, nil},
 		{"AppendNextBranded", 0, func() (err error) { sinkBytes, err = g.AppendNextBranded(buf[:0], allocNS); return }, nil},
+		{"Next/virtual-clock", 0, func() error { sinkU64 = vg.Next(); return nil }, nil},
+		{"Observe", 0, func() (err error) { sinkBool, err = vg.Observe(allocSnow, 1<<40); return }, nil},
+		{"Observe/refused-ahead", 0, func() (err error) { sinkBool, err = vg.Observe(allocSnow, -1<<40); return }, nil},
+		{"Observe/RANGE", 0, func() (err error) { sinkBool, err = vg.Observe(allocBigSnow, 1<<40); return }, ErrRange},
+		{"VirtualUnixMs", 0, func() error { sinkI64 = vg.VirtualUnixMs(); return nil }, nil},
 
 		// Encode's two refusals, through every encode entry point.
 		{"AppendEncode/NAMESPACE", 0, func() (err error) { sinkBytes, err = AppendEncode(buf[:0], allocBadNS, allocSnow); return }, ErrNamespace},

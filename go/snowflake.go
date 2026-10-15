@@ -21,14 +21,26 @@ const (
 // logical clock keeps minting). Layout on the wire: ts(41)<<22 | node(10)<<12 |
 // seq(12), epoch 2024-01-01Z.
 type Generator struct {
-	cell atomic.Int64
-	node uint64
+	cell  atomic.Int64
+	node  uint64
+	clock func() int64 // Unix ms; nil reads the wall clock
 }
 
 // NewGenerator builds a minter for the given node id (masked to 0..1023).
 func NewGenerator(node uint64) *Generator {
 	g := &Generator{node: node & nodeMask}
 	g.cell.Store(nowPart())
+	return g
+}
+
+// NewGeneratorWithClock is NewGenerator reading time from clock, which returns
+// Unix milliseconds, instead of the wall clock: a virtual clock for simulation,
+// replay and tests (Python's Generator(node, clock=...)). The generator's
+// guarantees are the same under any clock, including one that stalls or steps
+// backward.
+func NewGeneratorWithClock(node uint64, clock func() int64) *Generator {
+	g := &Generator{node: node & nodeMask, clock: clock}
+	g.cell.Store(g.now())
 	return g
 }
 
@@ -76,7 +88,7 @@ func DefaultNode() uint64 {
 
 // Next mints the next monotonic snowflake.
 func (g *Generator) Next() uint64 {
-	v := uint64(g.advance(nowPart()))
+	v := uint64(g.advance(g.now()))
 	ts := v >> seqBits
 	seq := v & seqMask
 	return ts<<22 | g.node<<seqBits | seq
@@ -110,6 +122,50 @@ func (g *Generator) advance(cand int64) int64 {
 			return next
 		}
 	}
+}
+
+// Observe is the virtual clock's receive rule (docs/contract.md § Extensions):
+// having received a message that carries snow, every id this generator mints
+// afterwards sorts after snow, whichever nodes minted them. The cell moves to the
+// last slot of snow's millisecond, so the next mint lands in a later millisecond:
+// matching snow's cell is not enough, because a snowflake orders by ts|node|seq
+// and a lower node in the same millisecond would sort first.
+//
+// An id more than maxAheadMs ahead of this generator's physical clock is refused
+// (false, the cell unchanged): one far-future id would otherwise drag the clock
+// forward for good. A snowflake outside [0, 2^63) is ErrRange.
+func (g *Generator) Observe(snow uint64, maxAheadMs int64) (bool, error) {
+	if snow > 1<<63-1 {
+		return false, ErrRange
+	}
+	ts := int64(snow >> 22)
+	if ts-g.now()>>seqBits > maxAheadMs {
+		return false, nil
+	}
+	floor := (ts+1)<<seqBits - 1
+	for {
+		last := g.cell.Load()
+		if last >= floor || g.cell.CompareAndSwap(last, floor) {
+			return true, nil
+		}
+	}
+}
+
+// VirtualUnixMs is the generator's virtual time in Unix milliseconds: the
+// millisecond of its last id, or of the last id it observed if that is later
+// (an Observe parks the cell on the observed millisecond's last slot, so the
+// next mint lands in the millisecond after). It is never behind the physical
+// clock reading of the last mint, and runs ahead of the physical clock after a
+// burst past 4096 ids/ms or an Observe of a later id.
+func (g *Generator) VirtualUnixMs() int64 {
+	return g.cell.Load()>>seqBits + EpochMs
+}
+
+func (g *Generator) now() int64 {
+	if g.clock != nil {
+		return (g.clock() - EpochMs) << seqBits
+	}
+	return nowPart()
 }
 
 func nowPart() int64 {
