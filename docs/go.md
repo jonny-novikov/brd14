@@ -85,6 +85,9 @@ A "—" marks a call that is off the hot path and whose count is not asserted.
 | `NodeFrom(host string, pid int) uint64` | the contract's `node_from`: FNV-32a over host ++ decimal pid, `& 1023` | 0 | — |
 | `DefaultNode() uint64` | `NodeFrom(os.Hostname(), os.Getpid())` | — | — |
 | `NewGenerator(node uint64) *Generator` | a lock-free minter on `node & 1023`, allocated once | — | — |
+| `NewGeneratorWithClock(node uint64, clock func() int64) *Generator` | the same minter, reading the given clock (Unix ms); `nil` reads the wall clock. The [virtual clock](contract.md#virtual-clock-experimental) | — | — |
+| `(*Generator).Observe(snow uint64, maxAheadMs int64) (bool, error)` | the receive rule: every later `Next` sorts after `snow`. `false` (the clock unchanged) when `snow` is more than `maxAheadMs` ahead | 0 | `ErrRange` (`snow ≥ 2^63`) |
+| `(*Generator).VirtualUnixMs() int64` | the generator's virtual time, `(cell >> 12) + EpochMs` | 0 | — |
 | `(*Generator).Next() uint64` | the next snowflake: strictly increasing, never blocking | 0 | — |
 | `(*Generator).NextBranded(ns) (string, error)` | `Encode(ns, Next())` | 1 | `ErrNamespace` |
 | `(*Generator).AppendNextBranded(dst, ns) ([]byte, error)` | `AppendEncode(dst, ns, Next())` | 0 with `Len` bytes spare | `ErrNamespace` |

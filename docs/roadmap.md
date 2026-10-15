@@ -56,7 +56,12 @@ Where the work stands, and the plan to finish. Each item states the value it del
    - add `vectors/brd16/*.tsv` from the oracle;
    - add a length-dispatching `ParseAny` to each tree;
    - extend parity with `E16`/`D16` requests.
-4. **Accelerations noted, not built:**
+4. **The virtual clock in the deferred runtimes** ([contract](contract.md#virtual-clock-experimental),
+   [research](research/virtual-clock.md#toc)). Go and Python implement it and advertise `G`.
+   **Deferred:** C, Rust, TypeScript, WebAssembly, Elixir, bash. Each one replays
+   `vectors/clock.tsv` and then advertises `G`. Still open: a persisted high-water mark for
+   restarts, and the rule under layout profiles.
+5. **Accelerations noted, not built:**
    - PyO3/maturin binding over `native/rust` for Python;
    - SWAR/AVX2 batch decode for the speed tier (the CPU has AVX2, AVX-512BW and BMI2);
    - batch NIFs for EchoMQ bulk paths.

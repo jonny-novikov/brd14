@@ -29,6 +29,7 @@ the current program is the [KAN story](kan/brd14-pragmatic-guide.md#toc).
 - [The contract and its proof](#contract)
 - [Implementations](#implementations)
 - [Branded structures](#structures)
+- [Research](#research)
 - [Runtimes, environment, measurement](#measurement)
 - [Delivery and operations](#delivery)
 
@@ -49,7 +50,7 @@ the current program is the [KAN story](kan/brd14-pragmatic-guide.md#toc).
 
 | Page | What you get from it |
 |---|---|
-| [contract.md](contract.md#toc) | **Normative.** The format, operations, error precedence, vectors, the parity protocol, the WASM ABI, the format family, and the extensions (layout profiles). |
+| [contract.md](contract.md#toc) | **Normative.** The format, operations, error precedence, vectors, the parity protocol, the WASM ABI, the format family, and the extensions (layout profiles, the virtual clock). |
 | [parity.md](parity.md#toc) | How agreement across implementations is proven, and the latest matrix. |
 | [structures/spec.md](structures/spec.md#toc) | **Normative** for the structures extension: the champ's exact shape and digest, Tree and Buckets behaviour, the vectors. |
 
@@ -81,6 +82,14 @@ the current program is the [KAN story](kan/brd14-pragmatic-guide.md#toc).
 | [structures/buckets.md](structures/buckets.md#toc) | Generational expiry: bucket arithmetic, what expiry keeps, the namespace caveat. |
 | [structures/layout-profiles.md](structures/layout-profiles.md#toc) | Metadata inside the id: the bits, why meta is lowest, binding a profile to a namespace. |
 | [structures/proof.md](structures/proof.md#toc) | How equivalence across runtimes is proven, and how to debug a digest mismatch. |
+
+<a id="research"></a>
+
+## Research
+
+| Page | What you get from it |
+|---|---|
+| [research/virtual-clock.md](research/virtual-clock.md#toc) | The timestamp inside an id as virtual time across nodes: the receive rule, why the textbook HLC rule breaks id order, the 2ε drift bound, the Go and Python evidence, uses in an EchoMQ/EchoCache stack. |
 
 <a id="measurement"></a>
 

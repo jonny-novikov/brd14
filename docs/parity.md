@@ -61,21 +61,25 @@ normative and live in [contract.md](contract.md#parity-shim-protocol).
 
 | Shim | Impl / variant | Ops | Requests | Mismatches | Status |
 |---|---|---|---:|---:|---|
-| go | go / reference | DEFHNU | 30,651 | 0 | PASS |
+| go | go / reference | DEFGHNU | 30,714 | 0 | PASS |
 | c-speed | c / speed | DEHU | 28,642 | 0 | PASS |
 | c-memory | c / memory | DEHU | 28,642 | 0 | PASS |
 | rust-speed | rust / speed | DEFHNU | 30,651 | 0 | PASS |
 | rust-memory | rust / memory | DEFHNU | 30,651 | 0 | PASS |
-| python-3.14 | python / pure | DEFHNU | 30,651 | 0 | PASS |
-| python-3.14t | python / pure (free-threaded, GIL off) | DEFHNU | 30,651 | 0 | PASS |
-| python-3.12 | python / pure | DEFHNU | 30,651 | 0 | PASS |
+| python-3.14 | python / pure | DEFGHNU | 30,714 | 0 | PASS |
+| python-3.14t | python / pure (free-threaded, GIL off) | DEFGHNU | 30,714 | 0 | PASS |
+| python-3.12 | python / pure | DEFGHNU | 30,714 | 0 | PASS |
 | ts-pure-node | ts / pure on Node 24.21.0 | DEFHNU | 30,651 | 0 | PASS |
 | ts-pure-bun | ts / pure on Bun 1.4.3 | DEFHNU | 30,651 | 0 | PASS |
 | ts-wasm-node | ts / wasm on Node 24.21.0 | DEH | 27,637 | 0 | PASS |
 | ts-wasm-bun | ts / wasm on Bun 1.4.3 | DEH | 27,637 | 0 | PASS |
 | sh-bash | sh / bash ([`scripts/brd.sh`](../scripts/brd.sh)) | DEFHNU | 30,651 | 0 | PASS |
+| ex-pure | ex / pure ([`ex/echo_data`](../ex/echo_data/README.md)) | DEFHLNPU | 34,224 | 0 | PASS |
 
-**13 of 13 shims pass with 0 mismatches** (`parity.py --require`, on `claude/workflow`).
+**14 of 14 shims pass with 0 mismatches** (`parity.py --require`, on `claude/virtual-clock`).
+- `G` is the [virtual clock](contract.md#virtual-clock-experimental) extension: 63 requests,
+  answered by Go and Python. Each replays a generator program on an injected clock, so generators
+  are differential-tested. `L P` are layout profiles, answered by `ex-pure`.
 - At `--scale 10` the Go, C and Rust shims were also checked: 154k–175k requests each, 0
   mismatches.
 - Python was also checked at `--scale 4`.

@@ -360,6 +360,7 @@ contract's derivation is opt-in. Confidence 85%.
 | R5 | 5 | 90 min | Rustler NIF (codec + champ), `NativeChamp`, shim `ex-nif`, `make package` | unpacked tarball fails to build alone |
 | R6 | 3 | 60 min | Benchmarks vs baselines, docs, acceptance package | any number without a results file |
 | R6a | 5 | 90 min | CI on Fly: app `brd-build` replaces GitHub Actions (SDMR card 7) | the image fails to build from bare Ubuntu, or a failing job exits 0 |
+| R7 | 5 | 2 h | The virtual clock ([research](../research/virtual-clock.md#toc)): contract extension, oracle, `vectors/clock.tsv`, Go and Python, a mixed fleet, parity op `G` | `Observe` mutated to the textbook HLC rule passes, or a missing Go toolchain skips in CI |
 
 **Ownership:**
 - the coordinating agent owns the contract, the oracles, the vectors, `ex/` and the shared files;

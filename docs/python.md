@@ -95,7 +95,7 @@ g.next_branded("USR")                        # mint and brand in one call
 | `min_for` | `(t: datetime \| int) -> int` | `(t_ms − EPOCH_MS) << 22`. Aware datetime or Unix ms. A naive datetime is a `ValueError`; sub-ms parts are floored |
 | `node_from` | `(host: bytes \| str, pid: int) -> int` | FNV-32a over `host ++ str(pid)`, `& 1023`; a str host is hashed as UTF-8 |
 | `default_node` | `() -> int` | `node_from(os.fsencode(socket.gethostname()), os.getpid())`, recomputed on each call |
-| `Generator` | `(node: int, *, clock=None)` | `.next()`, `.next_branded(ns)`, `.node`, and the iterator protocol. `clock` returns Unix ms (for tests) |
+| `Generator` | `(node: int, *, clock=None)` | `.next()`, `.next_branded(ns)`, `.node`, and the iterator protocol. `clock` returns Unix ms (tests, simulation). [Virtual clock](contract.md#virtual-clock-experimental): `.observe(snow, max_ahead_ms) -> bool`, the receive rule (`False` and no change when `snow` is too far ahead; `InvalidIdError` RANGE when `snow ≥ 2**63`); `.virtual_ms` |
 | `Minter` | `(generator, gate: Gate \| None)` | `.mint(ns)`, `.mint_snowflake(ns) -> (id, snow)`, `.generator` |
 | `Gate` | `Callable[[str], None]` | return `None` to admit, raise to refuse |
 | `allow_all`, `deny_all` | gates | `deny_all` raises `NamespaceRefusedError` |
