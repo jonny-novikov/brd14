@@ -1,7 +1,7 @@
 """conform.py: the parity shim for the pure-Python package.
 
 Protocol: docs/contract.md, "Parity shim protocol". The first stdout line is
-``HELLO python pure EDHUFN``; then one response line per request line. All of
+``HELLO python pure EDHUFNG``; then one response line per request line. All of
 stdin is read at once and all responses are written in a single write.
 Interpreter details go to stderr only.
 
@@ -12,6 +12,9 @@ just one. A ``D`` request is decoded through ``decode``, ``check``,
 are representable as a str, i.e. UTF-8 with ``surrogatepass``) on the str,
 whose fast path is separate code. Any disagreement replaces the response with
 ``ERR DISAGREE``, which can never match the oracle, and is described on stderr.
+A ``G`` request (the virtual clock extension) replays its program on a
+``Generator`` over an injected clock and checks that the ids strictly increase
+and that ``virtual_ms`` never trails the last id minted.
 
 Run from the repository root: ``python3.14 python/conform.py < requests``.
 """
@@ -102,6 +105,37 @@ def answer_node(host: bytes, pid: int) -> str:
     return f"OK {node}"
 
 
+def fnv1a64(data: bytes) -> int:
+    h = 0xCBF29CE484222325
+    for b in data:
+        h = ((h ^ b) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return h
+
+
+def answer_clock(node: int, start: int, program: str) -> str:
+    now = [start]
+    g = brd14.Generator(node, clock=lambda: now[0])
+    ids: list[int] = []
+    verdicts: list[str] = []
+    for tok in program.split(","):
+        if tok[0] == "t":
+            now[0] = int(tok[1:])
+        elif tok[0] == "m":
+            ids.extend(g.next() for _ in range(int(tok[1:])))
+        elif tok[0] == "o":
+            snow, ahead = tok[1:].split("~")
+            verdicts.append("1" if g.observe(int(snow), int(ahead)) else "0")
+        else:
+            return complain(f"unknown clock program token {tok!r}")
+        if ids and g.virtual_ms < brd14.unix_ms(ids[-1]):
+            return complain(f"virtual_ms {g.virtual_ms} trails the last id minted, {ids[-1]}")
+    if any(a >= b for a, b in zip(ids, ids[1:])):
+        return complain(f"G {node} {start}: the ids do not strictly increase")
+    first, last = (str(ids[0]), str(ids[-1])) if ids else ("-", "-")
+    digest = fnv1a64(",".join(map(str, ids)).encode("ascii"))
+    return f"OK {len(ids)} {first} {last} {digest:016x} {''.join(verdicts) or '-'} {g.virtual_ms}"
+
+
 def answer(line: str) -> str:
     op, *args = line.split(" ")
     if op == "E":
@@ -116,6 +150,8 @@ def answer(line: str) -> str:
         return answer_fields(int(args[0]))
     if op == "N":
         return answer_node(unhex(args[0]), int(args[1]))
+    if op == "G":
+        return answer_clock(int(args[0]), int(args[1]), args[2])
     return complain(f"unsupported request {line!r}")
 
 
@@ -126,7 +162,7 @@ def main() -> int:
         f"conform: brd14 {brd14.__version__} on {sys.implementation.name} "
         f"{sys.version.split()[0]}{'t' if free else ''} (GIL {'enabled' if gil else 'disabled'})\n"
     )
-    out = ["HELLO python pure EDHUFN"]
+    out = ["HELLO python pure EDHUFNG"]
     for line in sys.stdin.buffer.read().decode("ascii").splitlines():
         if line:
             out.append(answer(line))

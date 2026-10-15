@@ -252,8 +252,36 @@ def clock_program_text(program: list[tuple]) -> str:
     return ",".join(out)
 
 
+def clock_program_parse(text: str) -> list[tuple]:
+    """The inverse of clock_program_text: the program of a clock.tsv row or a parity G request."""
+    out: list[tuple] = []
+    for tok in text.split(","):
+        if tok[0] == "t":
+            out.append(("t", int(tok[1:])))
+        elif tok[0] == "m":
+            out.append(("m", int(tok[1:])))
+        elif tok[0] == "o":
+            snow, ahead = tok[1:].split("~")
+            out.append(("o", int(snow), int(ahead)))
+        else:
+            raise ValueError(f"unknown clock program token {tok!r}")
+    return out
+
+
 def clock_digest(ids: list[int]) -> str:
     return f"{co.fnv1a64(','.join(map(str, ids)).encode('ascii')):016x}"
+
+
+def clock_result(node: int, start: int, program: list[tuple]) -> tuple[str, str, str, str, str, str]:
+    """What a replay must produce: count, first, last, digest, verdicts, virtual_ms.
+
+    These are the result columns of clock.tsv and the fields of a parity G answer."""
+    ids, verdicts, virtual = o.vclock_run(node, start, program)
+    assert all(a < b for a, b in zip(ids, ids[1:])), (node, start)  # strictly increasing
+    first = str(ids[0]) if ids else "-"
+    last = str(ids[-1]) if ids else "-"
+    v = "".join("1" if x else "0" for x in verdicts) or "-"
+    return str(len(ids)), first, last, clock_digest(ids), v, str(virtual)
 
 
 def clock_cases() -> list[tuple[str, int, int, list[tuple]]]:
@@ -298,13 +326,9 @@ def clock_cases() -> list[tuple[str, int, int, list[tuple]]]:
 def clock_rows() -> list[str]:
     out = []
     for name, node, start, program in clock_cases():
-        ids, verdicts, virtual = o.vclock_run(node, start, program)
-        assert all(a < b for a, b in zip(ids, ids[1:])), name  # strictly increasing
-        first = ids[0] if ids else "-"
-        last = ids[-1] if ids else "-"
-        v = "".join("1" if x else "0" for x in verdicts) or "-"
-        out.append(f"{name}\t{node}\t{start}\t{clock_program_text(program)}\t{len(ids)}\t{first}\t{last}"
-                   f"\t{clock_digest(ids)}\t{v}\t{virtual}")
+        text = clock_program_text(program)
+        assert clock_program_parse(text) == program, name
+        out.append("\t".join((name, str(node), str(start), text, *clock_result(node, start, program))))
     return out
 
 

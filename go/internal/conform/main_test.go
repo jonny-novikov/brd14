@@ -40,10 +40,13 @@ func TestServeAnswers(t *testing.T) {
 		"F 274557032793636864",
 		"N 686f737461 100", // N-1
 		"N - 101",
+		"G 613 1769526697641 m1,t1769526697642,m1,t1769526697643,m3", // clock.tsv: steady
+		"G 5 1769526697641 o274557032797323264~1000,m2",              // clock.tsv: observe-same-ms-higher-node
+		"G 5 1769526697641 o274557053765169161~1000,m2",              // clock.tsv: observe-ahead-refused
 		"",
 	}, "\n")
 	want := strings.Join([]string{
-		"HELLO go reference EDHUFN",
+		"HELLO go reference EDHUFNG",
 		"OK USR0KHTOWnGLuC",
 		"ERR NAMESPACE",
 		"ERR RANGE",
@@ -59,6 +62,9 @@ func TestServeAnswers(t *testing.T) {
 		"OK 65459497641 0 0",
 		"OK 585",
 		"OK 559",
+		"OK 5 274557032796147713 274557032804536322 383af2dbf5414555 - 1769526697643",
+		"OK 2 274557032797851648 274557032797851649 3f0682719c8657b0 1 1769526697642",
+		"OK 2 274557032793657345 274557032793657346 33fe19e86709694e 0 1769526697641",
 		"",
 	}, "\n")
 	got, err := run(t, in)
@@ -80,18 +86,25 @@ func TestServeEOF(t *testing.T) {
 
 func TestServeRejectsMalformedRequests(t *testing.T) {
 	for _, bad := range []string{
-		"X 1",                    // unknown op
-		"HX 1",                   // op longer than one byte
-		"H",                      // missing argument
-		"H 1 2",                  // extra argument
-		"E 555352",               // missing argument
-		"H  1",                   // empty argument
-		"H 1 ",                   // trailing space
-		"H -1",                   // not unsigned
-		"H 18446744073709551616", // 2^64
-		"D 5",                    // odd-length hex
-		"D zz",                   // not hex
-		"N 6869 x",               // pid not decimal
+		"X 1",                          // unknown op
+		"HX 1",                         // op longer than one byte
+		"H",                            // missing argument
+		"H 1 2",                        // extra argument
+		"E 555352",                     // missing argument
+		"H  1",                         // empty argument
+		"H 1 ",                         // trailing space
+		"H -1",                         // not unsigned
+		"H 18446744073709551616",       // 2^64
+		"D 5",                          // odd-length hex
+		"D zz",                         // not hex
+		"N 6869 x",                     // pid not decimal
+		"G 5 0",                        // missing program
+		"G 5 0 m1 m1",                  // extra argument
+		"G 5 0 x1",                     // unknown program token
+		"G 5 0 m",                      // token without a value
+		"G 5 0 m1,,m1",                 // empty token
+		"G 5 0 o12",                    // observe without ~ahead
+		"G 5 0 o9223372036854775808~0", // observes an id >= 2^63
 	} {
 		if _, err := run(t, bad+"\n"); err == nil {
 			t.Errorf("request %q was answered, want a protocol error", bad)

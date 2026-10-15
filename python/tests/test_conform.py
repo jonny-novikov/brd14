@@ -28,6 +28,13 @@ REQUESTS = {
     "F 274557032793636864": "OK 65459497641 0 0",
     "N 686f737461 100": "OK 585",
     "N - 101": "OK 559",
+    # clock.tsv rows: steady, observe-same-ms-higher-node, observe-ahead-refused
+    "G 613 1769526697641 m1,t1769526697642,m1,t1769526697643,m3":
+        "OK 5 274557032796147713 274557032804536322 383af2dbf5414555 - 1769526697643",
+    "G 5 1769526697641 o274557032797323264~1000,m2":
+        "OK 2 274557032797851648 274557032797851649 3f0682719c8657b0 1 1769526697642",
+    "G 5 1769526697641 o274557053765169161~1000,m2":
+        "OK 2 274557032793657345 274557032793657346 33fe19e86709694e 0 1769526697641",
 }
 
 
@@ -37,12 +44,12 @@ def run(stdin: bytes) -> subprocess.CompletedProcess[bytes]:
 
 def test_hello_only_on_empty_input() -> None:
     p = run(b"")
-    assert p.stdout == b"HELLO python pure EDHUFN\n"
+    assert p.stdout == b"HELLO python pure EDHUFNG\n"
     assert b"conform:" in p.stderr
 
 
 def test_answers() -> None:
     p = run("".join(r + "\n" for r in REQUESTS).encode())
     lines = p.stdout.decode("ascii").splitlines()
-    assert lines[0] == "HELLO python pure EDHUFN"
+    assert lines[0] == "HELLO python pure EDHUFNG"
     assert lines[1:] == list(REQUESTS.values())

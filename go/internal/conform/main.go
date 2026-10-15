@@ -8,8 +8,10 @@
 // The shim is deliberately thin: each request is answered by exactly one call
 // into the public API a consumer would make — AppendEncode for E (with the
 // namespace bytes passed through raw, however malformed), ParseBytes for D,
-// Hash32, UnixMs, NodeOf/SeqOf and NodeFrom for the rest — and every refusal
-// is named by errors.Is against the typed causes, the way a consumer would ask.
+// Hash32, UnixMs, NodeOf/SeqOf and NodeFrom for the rest, and for G (the virtual
+// clock extension) a generator built by NewGeneratorWithClock, driven by Next and
+// Observe — and every refusal is named by errors.Is against the typed causes, the
+// way a consumer would ask.
 // Nothing here re-implements the contract, so a mismatch in the parity run is a
 // finding about the package, not about the harness.
 //
@@ -24,6 +26,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"os"
 	"strconv"
@@ -32,7 +35,7 @@ import (
 )
 
 // hello is the first output line: implementation, variant, supported ops.
-const hello = "HELLO go reference EDHUFN\n"
+const hello = "HELLO go reference EDHUFNG\n"
 
 func main() {
 	in := bufio.NewReaderSize(os.Stdin, 1<<20)
@@ -88,7 +91,7 @@ func serve(in *bufio.Reader, out *bufio.Writer) error {
 // shim holds the scratch buffers reused across requests.
 type shim struct {
 	resp []byte
-	arg  [2][]byte
+	arg  [3][]byte
 	raw  []byte // the decoded hex argument
 }
 
@@ -180,6 +183,21 @@ func (s *shim) answer(line []byte) ([]byte, error) {
 			return nil, err
 		}
 		r = strconv.AppendUint(r, brd14.NodeFrom(string(host), pid), 10)
+	case 'G': // G <node> <start_ms> <program> (the virtual clock extension)
+		if err := want(args, 3); err != nil {
+			return nil, err
+		}
+		node, err := parseUint(args[0])
+		if err != nil {
+			return nil, err
+		}
+		start, err := strconv.ParseInt(string(args[1]), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		if r, err = replay(r, node, start, args[2]); err != nil {
+			return nil, err
+		}
 	default:
 		return nil, fmt.Errorf("unknown request %q", op)
 	}
@@ -187,8 +205,91 @@ func (s *shim) answer(line []byte) ([]byte, error) {
 	return s.resp, nil
 }
 
-// split cuts "<op> <arg> [<arg>]" on single spaces. The op is one byte; at
-// most two arguments are kept (want rejects a count the op does not take).
+// replay runs a virtual-clock program (docs/contract.md, "Virtual clock") on a
+// generator over an injected clock and appends "<count> <first> <last> <digest>
+// <verdicts> <virtual_ms>": t<ms> sets the clock, m<k> mints k ids, o<snow>~<ahead>
+// observes. The digest is FNV-1a-64 over the decimal ids joined by commas.
+func replay(r []byte, node uint64, start int64, program []byte) ([]byte, error) {
+	now := start
+	g := brd14.NewGeneratorWithClock(node, func() int64 { return now })
+	h := fnv.New64a()
+	var num, verdicts []byte
+	var first, last uint64
+	count := 0
+	for _, tok := range bytes.Split(program, []byte{','}) {
+		if len(tok) < 2 {
+			return nil, fmt.Errorf("program token %q", tok)
+		}
+		switch tok[0] {
+		case 't':
+			ms, err := strconv.ParseInt(string(tok[1:]), 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			now = ms
+		case 'm':
+			k, err := strconv.Atoi(string(tok[1:]))
+			if err != nil || k < 0 {
+				return nil, fmt.Errorf("program token %q", tok)
+			}
+			for i := 0; i < k; i++ {
+				snow := g.Next()
+				if count == 0 {
+					first = snow
+				} else {
+					h.Write([]byte{','})
+				}
+				last = snow
+				count++
+				num = strconv.AppendUint(num[:0], snow, 10)
+				h.Write(num)
+			}
+		case 'o':
+			snowS, aheadS, ok := bytes.Cut(tok[1:], []byte{'~'})
+			if !ok {
+				return nil, fmt.Errorf("program token %q", tok)
+			}
+			snow, err := parseUint(snowS)
+			if err != nil {
+				return nil, err
+			}
+			ahead, err := strconv.ParseInt(string(aheadS), 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			applied, err := g.Observe(snow, ahead)
+			if err != nil { // a program observes ids below 2^63 only: outside the protocol
+				return nil, fmt.Errorf("program token %q: %v", tok, err)
+			}
+			if applied {
+				verdicts = append(verdicts, '1')
+			} else {
+				verdicts = append(verdicts, '0')
+			}
+		default:
+			return nil, fmt.Errorf("program token %q", tok)
+		}
+	}
+	r = strconv.AppendInt(r, int64(count), 10)
+	if count == 0 {
+		r = append(r, " - -"...)
+	} else {
+		r = append(r, ' ')
+		r = strconv.AppendUint(r, first, 10)
+		r = append(r, ' ')
+		r = strconv.AppendUint(r, last, 10)
+	}
+	r = fmt.Appendf(r, " %016x ", h.Sum64())
+	if len(verdicts) == 0 {
+		verdicts = append(verdicts, '-')
+	}
+	r = append(r, verdicts...)
+	r = append(r, ' ')
+	return strconv.AppendInt(r, g.VirtualUnixMs(), 10), nil
+}
+
+// split cuts "<op> <arg> [<arg> [<arg>]]" on single spaces. The op is one byte;
+// at most three arguments are kept (want rejects a count the op does not take).
 func (s *shim) split(line []byte) (op byte, args [][]byte, err error) {
 	if len(line) < 1 || len(line) > 1 && line[1] != ' ' {
 		return 0, nil, errors.New("request is not '<op> <args>'")

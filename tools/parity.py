@@ -32,6 +32,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 import oracle as o  # noqa: E402
+import vectorgen as vg  # noqa: E402
 
 SEED = 0x0B4D14_00FF
 
@@ -175,6 +176,30 @@ def requests(scale: int) -> list[str]:
     for n, s, m in valid:
         reqs.append(f"L {n} {s} {m} {o.MAX_SNOW}")
         reqs.append(f"P {n} {s} {m} {2**41 - 1} {2**n - 1} {2**s - 1} {2**m - 1}")
+
+    # G — the virtual clock (extension): a generator replayed on an injected clock. Every
+    # clock.tsv program, then short random programs from a stream of their own, so adding
+    # them moved no earlier request. Bursts of 4000..4199 cross the 4096-per-ms boundary.
+    for _, node, start, program in vg.clock_cases():
+        reqs.append(f"G {node} {start} {vg.clock_program_text(program)}")
+    gr = o.SplitMix64(SEED ^ 0xC10C)
+    for _ in range(40 * scale):
+        node = gr.below(1024)
+        now = o.EPOCH_MS + (1 << 20) + gr.below((1 << 41) - (1 << 21))
+        start, program = now, []
+        for _ in range(40):
+            r = gr.below(100)
+            if r < 45:
+                program.append(("m", 1 + gr.below(3)))
+            elif r < 70:
+                now += gr.below(101) - 50
+                program.append(("t", now))
+            elif r < 92:
+                snow = ((now - o.EPOCH_MS + gr.below(401) - 200) << 22) | gr.below(1 << 22)
+                program.append(("o", snow, (0, 50, 100, 1000)[gr.below(4)]))
+            else:
+                program.append(("m", 4000 + gr.below(200)))
+        reqs.append(f"G {node} {start} {vg.clock_program_text(program)}")
     return reqs
 
 
@@ -205,12 +230,14 @@ def answer(req: str, mutant: bool = False) -> str:
     if op == "P":
         r = o.layout_pack(*map(int, args))
         return f"ERR {o.CLASS[r]}" if isinstance(r, o.Refused) else f"OK {r}"
+    if op == "G":
+        return "OK " + " ".join(vg.clock_result(int(args[0]), int(args[1]), vg.clock_program_parse(args[2])))
     raise ValueError(f"unknown request {req!r}")
 
 
 def serve_oracle(mutant: bool) -> None:
     out = sys.stdout
-    out.write(f"HELLO oracle {'mutant' if mutant else 'python'} EDHUFNLP\n")
+    out.write(f"HELLO oracle {'mutant' if mutant else 'python'} EDHUFNLPG\n")
     for line in sys.stdin:
         line = line.rstrip("\n")
         if line:
@@ -268,6 +295,8 @@ def describe(req: str) -> str:
         return f"{req}   (ns={o.unhex(args[0])!r})"
     if op == "N":
         return f"{req}   (host={o.unhex(args[0])!r})"
+    if op == "G" and len(req) > 160:  # a program can run to kilobytes: name it by size and its head
+        return f"{req[:120]}…   ({args[2].count(',') + 1} program tokens)"
     return req
 
 

@@ -190,9 +190,11 @@ request letters the shim supports. Then, per request line:
 | `N <host_hex> <pid>` | `OK <node>` |
 | `L <n> <s> <m> <snow>` | `OK <ts> <node> <seq> <meta>` or `ERR LAYOUT` / `ERR RANGE` — [extension](#layout-profiles) |
 | `P <n> <s> <m> <ts> <node> <seq> <meta>` | `OK <snow>` or `ERR LAYOUT` / `ERR RANGE` — [extension](#layout-profiles) |
+| `G <node> <start_ms> <program>` | `OK <count> <first> <last> <digest> <verdicts> <virtual_ms>`: a `clock.tsv` row's program, replayed — [extension](#virtual-clock-experimental) |
 
-`E D H U F N` are the base: every shim answers them. `L P` belong to an extension: a shim answers
-them only when it advertises them, and `tools/parity.py` sends a shim only the ops it advertises.
+`E D H U F N` are the base: every shim answers them. `L P` and `G` belong to extensions: a shim
+answers them only when it advertises them, and `tools/parity.py` sends a shim only the ops it
+advertises.
 
 Integers are unsigned decimal; `<snow>` in `E` may be any value in `[0, 2^64)`; hex is lowercase
 and `-` means empty. A shim must not print anything else on stdout; diagnostics go to stderr.
@@ -327,5 +329,8 @@ The columns record what the replay must produce:
 
 Programs keep every clock value in `[epoch, epoch + 2^41)` and every observed id below `2^63`.
 
-**Scope** (Operator ruling: "The first evidence: python and go integration tests"): Go and Python.
-**Deferred:** C, Rust, TypeScript, WebAssembly, Elixir, bash.
+**Parity:** op `G` replays a program and answers with the row's result columns. Its requests are
+every `clock.tsv` program, plus short random programs whose bursts cross 4096 ids per millisecond.
+
+**Scope** (Operator ruling: "The first evidence: python and go integration tests"): Go and Python,
+whose shims advertise `G`. **Deferred:** C, Rust, TypeScript, WebAssembly, Elixir, bash.
